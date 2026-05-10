@@ -26,6 +26,13 @@ export class LoginModalComponent implements OnDestroy {
   error = signal<string | null>(null);
   showPassword = signal(false);
 
+  get email() {
+    return this.form.controls.email;
+  }
+  get password() {
+    return this.form.controls.password;
+  }
+
   constructor() {
     effect(() => {
       if (this.authModal.isOpen()) {

@@ -1,6 +1,5 @@
-import { Component, inject } from '@angular/core';
+import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { AuthService } from '../../core/auth/auth.service';
 import { IconComponent } from '../../shared/ui/icon/icon';
 
 interface Appointment {
@@ -23,10 +22,6 @@ interface Professional {
   templateUrl: './home.html',
 })
 export class HomeComponent {
-  private auth = inject(AuthService);
-
-  readonly user = this.auth.user;
-
   readonly nextAppointment: Appointment | null = null;
 
   readonly favoriteProfessionals: Professional[] = [
@@ -34,8 +29,4 @@ export class HomeComponent {
     { name: 'Rafael', role: 'Barbeiro', initials: 'RA', rating: 4.8 },
     { name: 'Juliana', role: 'Esteticista', initials: 'JU', rating: 5.0 },
   ];
-
-  get firstName(): string {
-    return this.user()?.firstName ?? 'Cliente';
-  }
 }

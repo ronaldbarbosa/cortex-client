@@ -2,6 +2,8 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { catchError, of, Subscription } from 'rxjs';
 import { IconComponent } from '../../shared/ui/icon/icon';
+import { AuthModalService } from '../../core/auth/auth-modal.service';
+import { AuthService } from '../../core/auth/auth.service';
 import { EstablishmentService } from '../../core/establishment/establishment.service';
 import {
   ProfessionalAvailability,
@@ -23,6 +25,8 @@ interface DateOption {
 })
 export class BookComponent {
   private establishmentService = inject(EstablishmentService);
+  private auth = inject(AuthService);
+  private authModal = inject(AuthModalService);
 
   readonly step = signal<1 | 2 | 3>(1);
   readonly selectedService = signal<PublicServiceItem | null>(null);
@@ -57,7 +61,30 @@ export class BookComponent {
     });
   });
 
+  readonly confirming = signal(false);
+
   private availabilitySub?: Subscription;
+  private loginSuccessSub?: Subscription;
+
+  confirmBooking(): void {
+    if (!this.auth.isAuthenticated()) {
+      this.authModal.open();
+      this.loginSuccessSub?.unsubscribe();
+      this.loginSuccessSub = this.authModal.loginSuccess$.subscribe(() => this.submitAppointment());
+      return;
+    }
+    this.submitAppointment();
+  }
+
+  private submitAppointment(): void {
+    // TODO Fase D: POST /appointments com service, professional, date e slot selecionados
+    console.log('Confirmar:', {
+      service: this.selectedService(),
+      professional: this.selectedProfessional(),
+      date: this.selectedDate(),
+      slot: this.selectedSlot(),
+    });
+  }
 
   selectService(service: PublicServiceItem): void {
     this.selectedService.set(service);

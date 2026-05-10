@@ -34,6 +34,16 @@ export class AuthService {
       );
   }
 
+  loginWithGoogle(idToken: string): Observable<void> {
+    const tenantId = this.tenantContext.tenantId();
+    return this.http
+      .post<ClientAuthResponse>(`${this.base}/login/google`, { idToken, tenantId })
+      .pipe(
+        tap((res) => this.applySession(res)),
+        map(() => void 0),
+      );
+  }
+
   refresh(): Observable<void> {
     const refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY);
     const tenantId = this.tenantContext.tenantId() || localStorage.getItem(TENANT_ID_KEY);

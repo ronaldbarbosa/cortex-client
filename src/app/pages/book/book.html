@@ -311,10 +311,16 @@
         class="fixed bottom-16 left-0 right-0 px-5 py-3 bg-surface/80 backdrop-blur border-t border-border lg:static lg:bottom-auto lg:bg-transparent lg:backdrop-blur-none lg:border-0 lg:mt-6 lg:px-0 lg:py-0"
       >
         <button
-          disabled
-          class="w-full bg-accent/40 text-hero/60 font-semibold text-sm py-3.5 rounded-xl cursor-not-allowed"
+          (click)="confirmBooking()"
+          [disabled]="confirming()"
+          class="w-full bg-accent text-hero font-semibold text-sm py-3.5 rounded-xl flex items-center justify-center gap-2 disabled:opacity-50 transition-opacity cursor-pointer"
         >
-          Confirmar agendamento · Em breve
+          @if (confirming()) {
+            <span
+              class="w-4 h-4 rounded-full border-2 border-hero/30 border-t-hero animate-spin"
+            ></span>
+          }
+          {{ confirming() ? 'Confirmando…' : 'Confirmar agendamento' }}
         </button>
       </div>
     }

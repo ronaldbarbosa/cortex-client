@@ -1,0 +1,121 @@
+@if (authModal.isOpen()) {
+  <!-- Backdrop -->
+  <div
+    class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4"
+    (click)="close()"
+    role="dialog"
+    aria-modal="true"
+    aria-label="Entrar na conta"
+  >
+    <!-- Panel -->
+    <div
+      class="w-full sm:max-w-sm bg-hero-surface border border-hero-border rounded-t-3xl sm:rounded-2xl p-7 shadow-2xl"
+      (click)="$event.stopPropagation()"
+    >
+      <!-- Header -->
+      <div class="flex items-center justify-between mb-6">
+        <div>
+          <div class="font-mono text-[10px] text-hero-ink-2 uppercase tracking-[0.08em] mb-1">
+            acesso do cliente
+          </div>
+          <h2
+            class="font-tight text-[22px] font-semibold text-hero-ink tracking-[-0.02em] leading-none"
+          >
+            Entrar na conta
+          </h2>
+        </div>
+        <button
+          (click)="close()"
+          class="w-8 h-8 rounded-full bg-hero border border-hero-border flex items-center justify-center text-hero-ink-2 hover:text-hero-ink transition-colors"
+          aria-label="Fechar"
+        >
+          <app-icon name="x" [size]="14" [strokeWidth]="2" />
+        </button>
+      </div>
+
+      <!-- Google button -->
+      <div class="flex justify-center mb-4">
+        <div #googleBtn></div>
+      </div>
+
+      <!-- Divider -->
+      <div class="flex items-center gap-3 mb-4">
+        <div class="flex-1 h-px bg-hero-border"></div>
+        <span class="font-mono text-[10px] text-hero-ink-2 uppercase tracking-[0.06em]">ou</span>
+        <div class="flex-1 h-px bg-hero-border"></div>
+      </div>
+
+      <!-- Email/password form -->
+      <form [formGroup]="form" (ngSubmit)="submit()" novalidate class="flex flex-col gap-3">
+        <div class="flex flex-col gap-1.5">
+          <label class="font-mono text-[10px] text-hero-ink-2 uppercase tracking-[0.06em]">
+            E-mail
+          </label>
+          <input
+            type="email"
+            formControlName="email"
+            placeholder="seu@email.com"
+            autocomplete="email"
+            class="w-full bg-hero border border-hero-border rounded-xl px-4 py-3 text-sm text-hero-ink placeholder:text-hero-ink-2 focus:outline-none focus:border-accent transition-colors"
+            [class.border-red-500]="email.invalid && email.touched"
+          />
+          @if (email.invalid && email.touched) {
+            <span class="font-mono text-[10px] text-red-400">E-mail inválido</span>
+          }
+        </div>
+
+        <div class="flex flex-col gap-1.5">
+          <label class="font-mono text-[10px] text-hero-ink-2 uppercase tracking-[0.06em]">
+            Senha
+          </label>
+          <div class="relative">
+            <input
+              [type]="showPassword() ? 'text' : 'password'"
+              formControlName="password"
+              placeholder="••••••••"
+              autocomplete="current-password"
+              class="w-full bg-hero border border-hero-border rounded-xl px-4 py-3 pr-11 text-sm text-hero-ink placeholder:text-hero-ink-2 focus:outline-none focus:border-accent transition-colors"
+              [class.border-red-500]="password.invalid && password.touched"
+            />
+            <button
+              type="button"
+              (click)="showPassword.update((v) => !v)"
+              class="absolute right-3.5 top-1/2 -translate-y-1/2 text-hero-ink-2 hover:text-hero-ink transition-colors"
+              [attr.aria-label]="showPassword() ? 'Ocultar senha' : 'Mostrar senha'"
+            >
+              <app-icon
+                [name]="showPassword() ? 'eyeOff' : 'eye'"
+                [size]="16"
+                [strokeWidth]="1.6"
+              />
+            </button>
+          </div>
+          @if (password.invalid && password.touched) {
+            <span class="font-mono text-[10px] text-red-400">Senha obrigatória</span>
+          }
+        </div>
+
+        @if (error()) {
+          <div
+            class="px-4 py-3 rounded-xl bg-red-950/50 border border-red-800 font-mono text-[11px] text-red-400"
+          >
+            {{ error() }}
+          </div>
+        }
+
+        <button
+          type="submit"
+          [disabled]="loading()"
+          class="w-full bg-accent text-hero rounded-xl py-3.5 text-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-50 transition-opacity cursor-pointer"
+        >
+          @if (loading()) {
+            <span
+              class="w-4 h-4 rounded-full border-2 border-hero/30 border-t-hero animate-spin"
+            ></span>
+          }
+          {{ loading() ? 'Entrando…' : 'Entrar' }}
+        </button>
+      </form>
+    </div>
+  </div>
+}

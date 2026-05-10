@@ -8,22 +8,20 @@ import {
   ViewChild,
 } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
-import { AuthService } from '../../core/auth/auth.service';
-import { TenantContextService } from '../../core/tenant/tenant-context.service';
-import { IconComponent } from '../../shared/ui/icon/icon';
-import { environment } from '../../../environments/environment';
+import { AuthModalService } from '../../../core/auth/auth-modal.service';
+import { AuthService } from '../../../core/auth/auth.service';
+import { IconComponent } from '../icon/icon';
+import { environment } from '../../../../environments/environment';
 
 @Component({
-  selector: 'app-login',
+  selector: 'app-login-modal',
   imports: [ReactiveFormsModule, IconComponent],
-  templateUrl: './login.html',
+  templateUrl: './login-modal.html',
 })
-export class LoginComponent implements AfterViewInit, OnDestroy {
+export class LoginModalComponent implements AfterViewInit, OnDestroy {
   private fb = inject(FormBuilder);
   private auth = inject(AuthService);
-  private router = inject(Router);
-  private tenantContext = inject(TenantContextService);
+  readonly authModal = inject(AuthModalService);
 
   @ViewChild('googleBtn') googleBtnRef!: ElementRef<HTMLDivElement>;
 
@@ -44,20 +42,7 @@ export class LoginComponent implements AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit(): void {
-    if (!window.google?.accounts?.id) return;
-
-    window.google.accounts.id.initialize({
-      client_id: environment.googleClientId,
-      callback: (response) => this.handleGoogleResponse(response),
-    });
-
-    window.google.accounts.id.renderButton(this.googleBtnRef.nativeElement, {
-      theme: 'outline',
-      size: 'large',
-      type: 'standard',
-      text: 'continue_with',
-      width: 320,
-    });
+    this.initGoogleButton();
   }
 
   ngOnDestroy(): void {
@@ -74,17 +59,36 @@ export class LoginComponent implements AfterViewInit, OnDestroy {
     this.error.set(null);
 
     const { email, password } = this.form.getRawValue();
-
     this.auth.login(email, password).subscribe({
       next: () => {
         this.loading.set(false);
-        const slug = this.tenantContext.slug();
-        this.router.navigate(['/s', slug, 'inicio']);
+        this.authModal.notifySuccess();
       },
       error: () => {
         this.loading.set(false);
         this.error.set('E-mail ou senha incorretos.');
       },
+    });
+  }
+
+  close(): void {
+    this.authModal.close();
+  }
+
+  private initGoogleButton(): void {
+    if (!window.google?.accounts?.id) return;
+
+    window.google.accounts.id.initialize({
+      client_id: environment.googleClientId,
+      callback: (response) => this.handleGoogleResponse(response),
+    });
+
+    window.google.accounts.id.renderButton(this.googleBtnRef.nativeElement, {
+      theme: 'outline',
+      size: 'large',
+      type: 'standard',
+      text: 'continue_with',
+      width: 320,
     });
   }
 
@@ -95,8 +99,7 @@ export class LoginComponent implements AfterViewInit, OnDestroy {
     this.auth.loginWithGoogle(response.credential).subscribe({
       next: () => {
         this.loading.set(false);
-        const slug = this.tenantContext.slug();
-        this.router.navigate(['/s', slug, 'inicio']);
+        this.authModal.notifySuccess();
       },
       error: () => {
         this.loading.set(false);

@@ -1,6 +1,7 @@
 import { Component, computed, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { IconComponent } from '../../shared/ui/icon/icon';
+import { LoginModalComponent } from '../../shared/ui/login-modal/login-modal';
 import { TenantContextService } from '../../core/tenant/tenant-context.service';
 
 interface Tab {
@@ -18,7 +19,7 @@ const TAB_DEFS: Tab[] = [
 
 @Component({
   selector: 'app-shell',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, IconComponent],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, IconComponent, LoginModalComponent],
   templateUrl: './shell.html',
 })
 export class ShellComponent {

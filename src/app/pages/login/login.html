@@ -22,6 +22,18 @@
       </h1>
     </div>
 
+    <!-- Google button -->
+    <div class="flex justify-center mb-4">
+      <div #googleBtn></div>
+    </div>
+
+    <!-- Divider -->
+    <div class="flex items-center gap-3 mb-4">
+      <div class="flex-1 h-px bg-hero-border"></div>
+      <span class="font-mono text-[10px] text-hero-ink-2 uppercase tracking-[0.06em]">ou</span>
+      <div class="flex-1 h-px bg-hero-border"></div>
+    </div>
+
     <form [formGroup]="form" (ngSubmit)="submit()" novalidate class="flex flex-col gap-4">
       <!-- Email -->
       <div class="flex flex-col gap-1.5">

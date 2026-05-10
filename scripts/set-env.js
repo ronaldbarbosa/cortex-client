@@ -27,9 +27,10 @@ const get = (key) => {
   return val;
 };
 
-const isProd = process.env.NODE_ENV === 'production';
+// CI é setado automaticamente por Netlify, Railway, Fly.io, GitHub Actions, etc.
+const isCI = !!process.env.CI;
 
-const apiUrl = isProd
+const apiUrl = isCI
   ? (get('API_URL') || 'https://cortex-api-2rvh-g.fly.dev')
   : 'http://localhost:5259';
 
@@ -41,9 +42,9 @@ const content = `export const environment = {
 };
 `;
 
-const target = isProd
+const target = isCI
   ? path.resolve(__dirname, '../src/environments/environment.ts')
   : path.resolve(__dirname, '../src/environments/environment.development.ts');
 
 fs.writeFileSync(target, content);
-console.log(`[set-env] ${path.basename(target)} gerado.`);
+console.log(`[set-env] ${path.basename(target)} gerado (${isCI ? 'CI' : 'local'}).`);

@@ -1,12 +1,4 @@
-import {
-  AfterViewInit,
-  Component,
-  ElementRef,
-  inject,
-  OnDestroy,
-  signal,
-  ViewChild,
-} from '@angular/core';
+import { Component, ElementRef, effect, inject, OnDestroy, signal, ViewChild } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthModalService } from '../../../core/auth/auth-modal.service';
 import { AuthService } from '../../../core/auth/auth.service';
@@ -18,12 +10,12 @@ import { environment } from '../../../../environments/environment';
   imports: [ReactiveFormsModule, IconComponent],
   templateUrl: './login-modal.html',
 })
-export class LoginModalComponent implements AfterViewInit, OnDestroy {
+export class LoginModalComponent implements OnDestroy {
   private fb = inject(FormBuilder);
   private auth = inject(AuthService);
   readonly authModal = inject(AuthModalService);
 
-  @ViewChild('googleBtn') googleBtnRef!: ElementRef<HTMLDivElement>;
+  @ViewChild('googleBtn') googleBtnRef?: ElementRef<HTMLDivElement>;
 
   form = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
@@ -34,15 +26,13 @@ export class LoginModalComponent implements AfterViewInit, OnDestroy {
   error = signal<string | null>(null);
   showPassword = signal(false);
 
-  get email() {
-    return this.form.controls.email;
-  }
-  get password() {
-    return this.form.controls.password;
-  }
-
-  ngAfterViewInit(): void {
-    this.initGoogleButton();
+  constructor() {
+    effect(() => {
+      if (this.authModal.isOpen()) {
+        // aguarda o DOM renderizar o @if antes de acessar o ViewChild
+        setTimeout(() => this.initGoogleButton());
+      }
+    });
   }
 
   ngOnDestroy(): void {
@@ -76,14 +66,14 @@ export class LoginModalComponent implements AfterViewInit, OnDestroy {
   }
 
   private initGoogleButton(): void {
-    if (!window.google?.accounts?.id) return;
+    if (!window.google?.accounts?.id || !this.googleBtnRef) return;
 
     window.google.accounts.id.initialize({
       client_id: environment.googleClientId,
       callback: (response) => this.handleGoogleResponse(response),
     });
 
-    window.google.accounts.id.renderButton(this.googleBtnRef.nativeElement, {
+    window.google.accounts.id.renderButton(this.googleBtnRef!.nativeElement, {
       theme: 'outline',
       size: 'large',
       type: 'standard',

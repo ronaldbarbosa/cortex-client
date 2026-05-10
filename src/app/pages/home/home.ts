@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { IconComponent } from '../../shared/ui/icon/icon';
+import { TenantContextService } from '../../core/tenant/tenant-context.service';
 
 interface Appointment {
   service: string;
@@ -22,6 +23,10 @@ interface Professional {
   templateUrl: './home.html',
 })
 export class HomeComponent {
+  private tenantContext = inject(TenantContextService);
+
+  readonly slug = this.tenantContext.slug;
+
   readonly nextAppointment: Appointment | null = null;
 
   readonly favoriteProfessionals: Professional[] = [

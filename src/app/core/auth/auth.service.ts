@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { catchError, map, Observable, of, tap, throwError } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { TenantContextService } from '../tenant/tenant-context.service';
 import { ClientAuthResponse, ClientUser } from './auth.model';
 
 const REFRESH_TOKEN_KEY = 'cortex.client.refresh_token';
@@ -12,6 +13,7 @@ const TENANT_ID_KEY = 'cortex.client.tenant_id';
 export class AuthService {
   private http = inject(HttpClient);
   private router = inject(Router);
+  private tenantContext = inject(TenantContextService);
 
   private readonly base = `${environment.apiUrl}/auth`;
 
@@ -23,7 +25,7 @@ export class AuthService {
   readonly isAuthenticated = computed(() => !!this._accessToken());
 
   login(email: string, password: string): Observable<void> {
-    const tenantId = environment.tenantId || localStorage.getItem(TENANT_ID_KEY) || '';
+    const tenantId = this.tenantContext.tenantId();
     return this.http
       .post<ClientAuthResponse>(`${this.base}/login`, { email, password, tenantId })
       .pipe(
@@ -34,7 +36,7 @@ export class AuthService {
 
   refresh(): Observable<void> {
     const refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY);
-    const tenantId = localStorage.getItem(TENANT_ID_KEY);
+    const tenantId = this.tenantContext.tenantId() || localStorage.getItem(TENANT_ID_KEY);
 
     if (!refreshToken || !tenantId) {
       return throwError(() => new Error('No session to refresh'));
@@ -53,8 +55,9 @@ export class AuthService {
   }
 
   logout(): void {
+    const slug = this.tenantContext.slug();
     this.clearSession();
-    this.router.navigate(['/login']);
+    this.router.navigate(['/s', slug, 'login']);
   }
 
   restoreSession(): Observable<void> {

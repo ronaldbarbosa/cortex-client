@@ -3,13 +3,12 @@
   <header
     class="hidden lg:flex items-center justify-between px-8 h-14 bg-surface border-b border-border shrink-0 sticky top-0 z-40"
   >
-    <span class="font-tight font-bold text-ink tracking-tight">Cortex Studio</span>
+    <span class="font-tight font-bold text-ink tracking-tight">{{ tenantName() }}</span>
     <nav class="flex items-center gap-1">
-      @for (tab of tabs; track tab.route) {
+      @for (tab of tabs(); track tab.path) {
         <a
           [routerLink]="tab.route"
           routerLinkActive="text-accent bg-accent/10"
-          [routerLinkActiveOptions]="{ exact: true }"
           class="flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-medium text-ink-2 hover:text-ink hover:bg-border/50 transition-colors"
         >
           <app-icon [name]="tab.icon" [size]="15" [strokeWidth]="1.6" />
@@ -27,11 +26,10 @@
   <nav
     class="lg:hidden fixed bottom-0 left-0 right-0 h-16 bg-surface border-t border-border flex items-center z-50"
   >
-    @for (tab of tabs; track tab.route) {
+    @for (tab of tabs(); track tab.path) {
       <a
         [routerLink]="tab.route"
         routerLinkActive="text-accent"
-        [routerLinkActiveOptions]="{ exact: true }"
         class="flex-1 flex flex-col items-center justify-center gap-1 text-ink-3 transition-colors"
       >
         <app-icon [name]="tab.icon" [size]="20" [strokeWidth]="1.6" />

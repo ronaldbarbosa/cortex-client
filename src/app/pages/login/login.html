@@ -1,0 +1,98 @@
+<div class="min-h-screen bg-hero flex flex-col items-center justify-center p-6">
+  <!-- Brand -->
+  <div class="mb-10 flex flex-col items-center gap-3">
+    <div
+      class="w-12 h-12 rounded-2xl bg-accent flex items-center justify-center font-tight font-extrabold text-xl text-hero"
+    >
+      C
+    </div>
+    <span class="font-tight font-bold text-hero-ink text-lg tracking-tight">Cortex Studio</span>
+  </div>
+
+  <!-- Card -->
+  <div class="w-full max-w-sm bg-hero-surface border border-hero-border rounded-2xl p-7">
+    <div class="mb-6">
+      <div class="font-mono text-[10px] text-hero-ink-2 uppercase tracking-[0.08em] mb-2">
+        acesso do cliente
+      </div>
+      <h1
+        class="font-tight text-[26px] font-semibold text-hero-ink tracking-[-0.02em] leading-none"
+      >
+        Bem-vindo de volta
+      </h1>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="submit()" novalidate class="flex flex-col gap-4">
+      <!-- Email -->
+      <div class="flex flex-col gap-1.5">
+        <label class="font-mono text-[10px] text-hero-ink-2 uppercase tracking-[0.06em]">
+          E-mail
+        </label>
+        <input
+          type="email"
+          formControlName="email"
+          placeholder="seu@email.com"
+          autocomplete="email"
+          class="w-full bg-hero border border-hero-border rounded-xl px-4 py-3 text-sm text-hero-ink placeholder:text-hero-ink-2 focus:outline-none focus:border-accent transition-colors"
+          [class.border-red-500]="email.invalid && email.touched"
+        />
+        @if (email.invalid && email.touched) {
+          <span class="font-mono text-[10px] text-red-400">E-mail inválido</span>
+        }
+      </div>
+
+      <!-- Password -->
+      <div class="flex flex-col gap-1.5">
+        <label class="font-mono text-[10px] text-hero-ink-2 uppercase tracking-[0.06em]">
+          Senha
+        </label>
+        <div class="relative">
+          <input
+            [type]="showPassword() ? 'text' : 'password'"
+            formControlName="password"
+            placeholder="••••••••"
+            autocomplete="current-password"
+            class="w-full bg-hero border border-hero-border rounded-xl px-4 py-3 pr-11 text-sm text-hero-ink placeholder:text-hero-ink-2 focus:outline-none focus:border-accent transition-colors"
+            [class.border-red-500]="password.invalid && password.touched"
+          />
+          <button
+            type="button"
+            (click)="showPassword.update((v) => !v)"
+            class="absolute right-3.5 top-1/2 -translate-y-1/2 text-hero-ink-2 hover:text-hero-ink transition-colors"
+            [attr.aria-label]="showPassword() ? 'Ocultar senha' : 'Mostrar senha'"
+          >
+            <app-icon [name]="showPassword() ? 'eyeOff' : 'eye'" [size]="16" [strokeWidth]="1.6" />
+          </button>
+        </div>
+        @if (password.invalid && password.touched) {
+          <span class="font-mono text-[10px] text-red-400">Senha obrigatória</span>
+        }
+      </div>
+
+      @if (error()) {
+        <div
+          class="px-4 py-3 rounded-xl bg-red-950/50 border border-red-800 font-mono text-[11px] text-red-400"
+        >
+          {{ error() }}
+        </div>
+      }
+
+      <button
+        type="submit"
+        [disabled]="loading()"
+        class="mt-2 w-full bg-accent text-hero rounded-xl py-3.5 text-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-50 transition-opacity cursor-pointer"
+      >
+        @if (loading()) {
+          <span
+            class="w-4 h-4 rounded-full border-2 border-hero/30 border-t-hero animate-spin"
+          ></span>
+        }
+        {{ loading() ? 'Entrando…' : 'Entrar' }}
+      </button>
+    </form>
+  </div>
+
+  <p class="mt-8 font-mono text-[10px] text-hero-ink-2 uppercase tracking-[0.06em]">
+    Cortex Studio · agendamento online
+  </p>
+</div>

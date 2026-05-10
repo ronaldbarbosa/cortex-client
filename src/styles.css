@@ -1,3 +1,26 @@
-/* You can add global styles to this file, and also import other style files */
-
 @import 'tailwindcss';
+
+@theme {
+  --font-sans: Inter, system-ui, sans-serif;
+  --font-tight: 'Inter Tight', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  --color-ink: #1a1815;
+  --color-ink-2: #57534e;
+  --color-ink-3: #a8a29e;
+  --color-surface: #ffffff;
+  --color-bg: #f5f4f1;
+  --color-border: #e7e5e0;
+  --color-accent: oklch(0.65 0.13 60);
+  --color-hero: #14110e;
+  --color-hero-ink: #f5f3ee;
+  --color-hero-ink-2: #b8b3a8;
+  --color-hero-surface: #1c1916;
+  --color-hero-border: #2a2622;
+}
+
+html,
+body {
+  height: 100%;
+  @apply antialiased;
+}

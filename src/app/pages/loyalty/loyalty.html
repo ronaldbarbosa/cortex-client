@@ -1,98 +1,111 @@
-<!-- Hero -->
-<div class="bg-hero px-5 pt-10 pb-8">
-  <p class="font-mono text-[10px] text-hero-ink-2 uppercase tracking-[0.06em] mb-1">Programa de</p>
-  <h1 class="font-tight text-2xl font-semibold text-hero-ink tracking-tight mb-6">Fidelidade</h1>
+<!-- Hero (dark) -->
+<div class="bg-hero">
+  <div class="max-w-5xl mx-auto px-5 lg:px-8">
+    <!-- Mobile: stacked -->
+    <div class="pt-10 pb-8 lg:hidden">
+      <p class="font-mono text-[10px] text-hero-ink-2 uppercase tracking-[0.06em] mb-1">
+        Programa de
+      </p>
+      <h1 class="font-tight text-2xl font-semibold text-hero-ink tracking-tight mb-6">
+        Fidelidade
+      </h1>
 
-  <!-- Points card -->
-  <div class="bg-hero-surface border border-hero-border rounded-2xl p-5">
-    <div class="flex items-start justify-between mb-4">
-      <div>
-        <p class="font-mono text-[9px] text-hero-ink-2 uppercase tracking-[0.08em] mb-1">
-          Nível {{ currentTier }}
-        </p>
-        <div class="flex items-end gap-1.5">
-          <span class="font-tight text-4xl font-bold text-accent">{{ points }}</span>
-          <span class="font-mono text-[11px] text-hero-ink-2 mb-1.5">pontos</span>
+      <div class="bg-hero-surface border border-hero-border rounded-2xl p-5">
+        <div class="flex items-start justify-between mb-4">
+          <div>
+            <p class="font-mono text-[9px] text-hero-ink-2 uppercase tracking-[0.08em] mb-1">
+              Nível {{ currentTier }}
+            </p>
+            <div class="flex items-end gap-1.5">
+              <span class="font-tight text-4xl font-bold text-accent">{{ points }}</span>
+              <span class="font-mono text-[11px] text-hero-ink-2 mb-1.5">pontos</span>
+            </div>
+          </div>
+          <div class="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center">
+            <app-icon name="star" [size]="18" color="var(--color-accent)" [strokeWidth]="1.8" />
+          </div>
         </div>
-      </div>
-      <div class="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center">
-        <app-icon name="star" [size]="18" color="var(--color-accent)" [strokeWidth]="1.8" />
+
+        @if (nextTier) {
+          <div>
+            <div class="flex justify-between mb-1.5">
+              <span class="font-mono text-[9px] text-hero-ink-2">{{ currentTier }}</span>
+              <span class="font-mono text-[9px] text-hero-ink-2">{{ nextTier.name }}</span>
+            </div>
+            <div class="h-1.5 bg-hero-border rounded-full overflow-hidden">
+              <div
+                class="h-full bg-accent rounded-full transition-all"
+                [style.width.%]="(points / nextTier.minPoints) * 100"
+              ></div>
+            </div>
+            <p class="font-mono text-[10px] text-hero-ink-2 mt-2">
+              Faltam <span class="text-accent">{{ pointsToNext }} pontos</span> para
+              {{ nextTier.name }}
+            </p>
+          </div>
+        } @else {
+          <p class="font-mono text-[11px] text-accent">Você atingiu o nível máximo!</p>
+        }
       </div>
     </div>
 
-    @if (nextTier) {
-      <div>
-        <div class="flex justify-between mb-1.5">
-          <span class="font-mono text-[9px] text-hero-ink-2">{{ currentTier }}</span>
-          <span class="font-mono text-[9px] text-hero-ink-2">{{ nextTier.name }}</span>
-        </div>
-        <div class="h-1.5 bg-hero-border rounded-full overflow-hidden">
-          <div
-            class="h-full bg-accent rounded-full transition-all"
-            [style.width.%]="(points / nextTier.minPoints) * 100"
-          ></div>
-        </div>
-        <p class="font-mono text-[10px] text-hero-ink-2 mt-2">
-          Faltam <span class="text-accent">{{ pointsToNext }} pontos</span> para {{ nextTier.name }}
+    <!-- Desktop: fixed height, title left / points card right -->
+    <div class="hidden lg:flex lg:h-48 lg:gap-12 lg:items-center">
+      <!-- Title column -->
+      <div class="shrink-0 w-56">
+        <p class="font-mono text-[10px] text-hero-ink-2 uppercase tracking-[0.06em] mb-1">
+          Programa de
         </p>
+        <h1 class="font-tight text-3xl font-semibold text-hero-ink tracking-tight">Fidelidade</h1>
       </div>
-    } @else {
-      <p class="font-mono text-[11px] text-accent">Você atingiu o nível máximo!</p>
-    }
+
+      <!-- Points card column -->
+      <div class="flex-1 bg-hero-surface border border-hero-border rounded-2xl p-5">
+        <div class="flex items-center justify-between mb-3">
+          <div>
+            <p class="font-mono text-[9px] text-hero-ink-2 uppercase tracking-[0.08em] mb-1">
+              Nível {{ currentTier }}
+            </p>
+            <div class="flex items-end gap-1.5">
+              <span class="font-tight text-4xl font-bold text-accent">{{ points }}</span>
+              <span class="font-mono text-[11px] text-hero-ink-2 mb-1.5">pontos</span>
+            </div>
+          </div>
+          <div class="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center">
+            <app-icon name="star" [size]="18" color="var(--color-accent)" [strokeWidth]="1.8" />
+          </div>
+        </div>
+
+        @if (nextTier) {
+          <div>
+            <div class="flex justify-between mb-1.5">
+              <span class="font-mono text-[9px] text-hero-ink-2">{{ currentTier }}</span>
+              <span class="font-mono text-[9px] text-hero-ink-2">{{ nextTier.name }}</span>
+            </div>
+            <div class="h-1.5 bg-hero-border rounded-full overflow-hidden">
+              <div
+                class="h-full bg-accent rounded-full transition-all"
+                [style.width.%]="(points / nextTier.minPoints) * 100"
+              ></div>
+            </div>
+            <p class="font-mono text-[10px] text-hero-ink-2 mt-2">
+              Faltam <span class="text-accent">{{ pointsToNext }} pontos</span> para
+              {{ nextTier.name }}
+            </p>
+          </div>
+        } @else {
+          <p class="font-mono text-[11px] text-accent">Você atingiu o nível máximo!</p>
+        }
+      </div>
+    </div>
   </div>
 </div>
 
-<!-- Tiers -->
-<div class="px-5 py-6 border-b border-border">
-  <p class="font-mono text-[10px] text-ink-3 uppercase tracking-[0.06em] mb-4">Níveis</p>
-  <div class="flex gap-2">
-    @for (tier of tiers; track tier.name) {
-      <div
-        class="flex-1 rounded-xl border px-3 py-2.5 text-center"
-        [class]="tier.name === currentTier ? 'border-accent/50 bg-accent/5' : 'border-border'"
-      >
-        <p
-          class="font-mono text-[9px] uppercase tracking-[0.06em] mb-1"
-          [class]="tier.name === currentTier ? 'text-accent' : 'text-ink-3'"
-        >
-          {{ tier.name }}
-        </p>
-        <p class="font-mono text-[11px] text-ink-2">{{ tier.minPoints }}+ pts</p>
-      </div>
-    }
+<!-- Coming soon -->
+<div class="max-w-5xl mx-auto px-5 lg:px-8 py-16 flex flex-col items-center text-center gap-3">
+  <div class="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center">
+    <app-icon name="star" [size]="22" color="var(--color-accent)" [strokeWidth]="1.6" />
   </div>
-</div>
-
-<!-- Rewards -->
-<div class="px-5 py-6">
-  <p class="font-mono text-[10px] text-ink-3 uppercase tracking-[0.06em] mb-4">Resgatar prêmios</p>
-  <div class="flex flex-col gap-3">
-    @for (reward of rewards; track reward.id) {
-      <div class="bg-surface border border-border rounded-2xl p-4 flex items-center gap-4">
-        <div class="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center shrink-0">
-          <app-icon
-            [name]="reward.icon"
-            [size]="18"
-            color="var(--color-accent)"
-            [strokeWidth]="1.6"
-          />
-        </div>
-        <div class="flex-1 min-w-0">
-          <p class="font-tight text-[14px] font-semibold text-ink">{{ reward.name }}</p>
-          <p class="font-mono text-[11px] text-ink-3">{{ reward.cost }} pontos</p>
-        </div>
-        <button
-          class="shrink-0 font-mono text-[10px] uppercase tracking-[0.06em] px-3 py-2 rounded-xl border transition-colors"
-          [class]="
-            points >= reward.cost
-              ? 'border-accent text-accent hover:bg-accent hover:text-hero'
-              : 'border-border text-ink-3 cursor-not-allowed'
-          "
-          [disabled]="points < reward.cost"
-        >
-          {{ points >= reward.cost ? 'Resgatar' : 'Bloqueado' }}
-        </button>
-      </div>
-    }
-  </div>
+  <p class="font-tight text-[16px] font-semibold text-ink">Programa de fidelidade</p>
+  <p class="font-mono text-[11px] text-ink-3">Em breve</p>
 </div>

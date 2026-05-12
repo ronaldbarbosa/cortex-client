@@ -7,12 +7,13 @@ function loadEnvLocal() {
   const envPath = path.resolve(__dirname, '../.env.local');
   if (!fs.existsSync(envPath)) return {};
   return Object.fromEntries(
-    fs.readFileSync(envPath, 'utf8')
+    fs
+      .readFileSync(envPath, 'utf8')
       .split('\n')
-      .filter(line => line && !line.startsWith('#'))
-      .map(line => line.split('=').map(s => s.trim()))
+      .filter((line) => line && !line.startsWith('#'))
+      .map((line) => line.split('=').map((s) => s.trim()))
       .filter(([k]) => k)
-      .map(([k, ...v]) => [k, v.join('=')])
+      .map(([k, ...v]) => [k, v.join('=')]),
   );
 }
 
@@ -31,7 +32,7 @@ const get = (key) => {
 const isCI = !!process.env.CI;
 
 const apiUrl = isCI
-  ? (get('API_URL') || 'https://cortex-api-2rvh-g.fly.dev')
+  ? get('API_URL') || 'https://cortex-api-2rvh-g.fly.dev'
   : 'http://localhost:5259';
 
 const googleClientId = get('GOOGLE_CLIENT_ID');

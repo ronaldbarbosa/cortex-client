@@ -2,6 +2,7 @@ import { Component, ElementRef, effect, inject, OnDestroy, signal, ViewChild } f
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthModalService } from '../../../core/auth/auth-modal.service';
 import { AuthService } from '../../../core/auth/auth.service';
+import { TenantContextService } from '../../../core/tenant/tenant-context.service';
 import { IconComponent } from '../icon/icon';
 import { environment } from '../../../../environments/environment';
 
@@ -13,30 +14,57 @@ import { environment } from '../../../../environments/environment';
 export class LoginModalComponent implements OnDestroy {
   private fb = inject(FormBuilder);
   private auth = inject(AuthService);
+  private tenantContext = inject(TenantContextService);
   readonly authModal = inject(AuthModalService);
 
   @ViewChild('googleBtn') googleBtnRef?: ElementRef<HTMLDivElement>;
 
-  form = this.fb.nonNullable.group({
+  mode = signal<'login' | 'register'>('login');
+
+  loginForm = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
     password: ['', Validators.required],
+  });
+
+  registerForm = this.fb.nonNullable.group({
+    firstName: ['', Validators.required],
+    lastName: ['', Validators.required],
+    email: ['', [Validators.required, Validators.email]],
+    phone: ['', Validators.required],
+    password: ['', [Validators.required, Validators.minLength(8)]],
   });
 
   loading = signal(false);
   error = signal<string | null>(null);
   showPassword = signal(false);
 
-  get email() {
-    return this.form.controls.email;
+  get loginEmail() {
+    return this.loginForm.controls.email;
   }
-  get password() {
-    return this.form.controls.password;
+  get loginPassword() {
+    return this.loginForm.controls.password;
+  }
+  get regFirstName() {
+    return this.registerForm.controls.firstName;
+  }
+  get regLastName() {
+    return this.registerForm.controls.lastName;
+  }
+  get regEmail() {
+    return this.registerForm.controls.email;
+  }
+  get regPhone() {
+    return this.registerForm.controls.phone;
+  }
+  get regPassword() {
+    return this.registerForm.controls.password;
   }
 
   constructor() {
     effect(() => {
       if (this.authModal.isOpen()) {
-        // aguarda o DOM renderizar o @if antes de acessar o ViewChild
+        this.mode.set('login');
+        this.error.set(null);
         setTimeout(() => this.initGoogleButton());
       }
     });
@@ -46,16 +74,22 @@ export class LoginModalComponent implements OnDestroy {
     window.google?.accounts?.id?.cancel();
   }
 
-  submit(): void {
-    if (this.form.invalid) {
-      this.form.markAllAsTouched();
+  switchMode(m: 'login' | 'register'): void {
+    this.mode.set(m);
+    this.error.set(null);
+    this.showPassword.set(false);
+  }
+
+  submitLogin(): void {
+    if (this.loginForm.invalid) {
+      this.loginForm.markAllAsTouched();
       return;
     }
 
     this.loading.set(true);
     this.error.set(null);
 
-    const { email, password } = this.form.getRawValue();
+    const { email, password } = this.loginForm.getRawValue();
     this.auth.login(email, password).subscribe({
       next: () => {
         this.loading.set(false);
@@ -66,6 +100,38 @@ export class LoginModalComponent implements OnDestroy {
         this.error.set('E-mail ou senha incorretos.');
       },
     });
+  }
+
+  submitRegister(): void {
+    if (this.registerForm.invalid) {
+      this.registerForm.markAllAsTouched();
+      return;
+    }
+
+    this.loading.set(true);
+    this.error.set(null);
+
+    const v = this.registerForm.getRawValue();
+
+    this.auth
+      .register({
+        tenantId: this.tenantContext.tenantId(),
+        firstName: v.firstName,
+        lastName: v.lastName,
+        email: v.email,
+        password: v.password,
+        phone: v.phone,
+      })
+      .subscribe({
+        next: () => {
+          this.loading.set(false);
+          this.authModal.notifySuccess();
+        },
+        error: () => {
+          this.loading.set(false);
+          this.error.set('Não foi possível criar a conta. Verifique os dados e tente novamente.');
+        },
+      });
   }
 
   close(): void {

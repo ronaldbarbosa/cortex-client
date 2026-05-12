@@ -6,6 +6,15 @@ import { environment } from '../../../environments/environment';
 import { TenantContextService } from '../tenant/tenant-context.service';
 import { ClientAuthResponse, ClientUser } from './auth.model';
 
+export interface RegisterClientRequest {
+  tenantId: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+  phone: string;
+}
+
 const REFRESH_TOKEN_KEY = 'cortex.client.refresh_token';
 const TENANT_ID_KEY = 'cortex.client.tenant_id';
 
@@ -23,6 +32,13 @@ export class AuthService {
   readonly accessToken = this._accessToken.asReadonly();
   readonly user = this._user.asReadonly();
   readonly isAuthenticated = computed(() => !!this._accessToken());
+
+  register(req: RegisterClientRequest): Observable<void> {
+    return this.http.post<ClientAuthResponse>(`${this.base}/register/client`, req).pipe(
+      tap((res) => this.applySession(res)),
+      map(() => void 0),
+    );
+  }
 
   login(email: string, password: string): Observable<void> {
     const tenantId = this.tenantContext.tenantId();
@@ -101,6 +117,7 @@ export class AuthService {
         email: claims['email'],
         firstName,
         lastName: rest.join(' '),
+        clientId: claims['client_id'] ?? null,
       };
     } catch {
       return null;

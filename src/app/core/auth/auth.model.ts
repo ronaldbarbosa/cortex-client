@@ -3,6 +3,7 @@ export interface ClientAuthResponse {
   refreshToken: string;
   userId: string;
   tenantId: string;
+  clientId: string | null;
 }
 
 export interface ClientUser {
@@ -10,4 +11,5 @@ export interface ClientUser {
   email: string;
   firstName: string;
   lastName: string;
+  clientId: string | null;
 }

@@ -12,6 +12,7 @@ const PATHS: Record<string, string> = {
   chevronL: '<path d="M15 6l-6 6 6 6"/>',
   plus: '<path d="M12 5v14M5 12h14"/>',
   check: '<path d="M5 12l5 5L20 7"/>',
+  x: '<path d="M18 6L6 18M6 6l12 12"/>',
   arrowR: '<path d="M5 12h14M13 6l6 6-6 6"/>',
   gift: '<rect x="3" y="8" width="18" height="13" rx="1"/><path d="M3 12h18M12 8v13M8 8a3 3 0 010-6c2 0 4 6 4 6s2-6 4-6a3 3 0 110 6"/>',
   sparkle: '<path d="M12 3l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/>',

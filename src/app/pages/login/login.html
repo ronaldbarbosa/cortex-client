@@ -11,97 +11,271 @@
 
   <!-- Card -->
   <div class="w-full max-w-sm bg-hero-surface border border-hero-border rounded-2xl p-7">
-    <div class="mb-6">
-      <div class="font-mono text-[10px] text-hero-ink-2 uppercase tracking-[0.08em] mb-2">
-        acesso do cliente
-      </div>
-      <h1
-        class="font-tight text-[26px] font-semibold text-hero-ink tracking-[-0.02em] leading-none"
-      >
-        Bem-vindo de volta
-      </h1>
-    </div>
-
-    <!-- Google button -->
-    <div class="flex justify-center mb-4">
-      <div #googleBtn></div>
-    </div>
-
-    <!-- Divider -->
-    <div class="flex items-center gap-3 mb-4">
-      <div class="flex-1 h-px bg-hero-border"></div>
-      <span class="font-mono text-[10px] text-hero-ink-2 uppercase tracking-[0.06em]">ou</span>
-      <div class="flex-1 h-px bg-hero-border"></div>
-    </div>
-
-    <form [formGroup]="form" (ngSubmit)="submit()" novalidate class="flex flex-col gap-4">
-      <!-- Email -->
-      <div class="flex flex-col gap-1.5">
-        <label class="font-mono text-[10px] text-hero-ink-2 uppercase tracking-[0.06em]">
-          E-mail
-        </label>
-        <input
-          type="email"
-          formControlName="email"
-          placeholder="seu@email.com"
-          autocomplete="email"
-          class="w-full bg-hero border border-hero-border rounded-xl px-4 py-3 text-sm text-hero-ink placeholder:text-hero-ink-2 focus:outline-none focus:border-accent transition-colors"
-          [class.border-red-500]="email.invalid && email.touched"
-        />
-        @if (email.invalid && email.touched) {
-          <span class="font-mono text-[10px] text-red-400">E-mail inválido</span>
-        }
-      </div>
-
-      <!-- Password -->
-      <div class="flex flex-col gap-1.5">
-        <label class="font-mono text-[10px] text-hero-ink-2 uppercase tracking-[0.06em]">
-          Senha
-        </label>
-        <div class="relative">
-          <input
-            [type]="showPassword() ? 'text' : 'password'"
-            formControlName="password"
-            placeholder="••••••••"
-            autocomplete="current-password"
-            class="w-full bg-hero border border-hero-border rounded-xl px-4 py-3 pr-11 text-sm text-hero-ink placeholder:text-hero-ink-2 focus:outline-none focus:border-accent transition-colors"
-            [class.border-red-500]="password.invalid && password.touched"
-          />
-          <button
-            type="button"
-            (click)="showPassword.update((v) => !v)"
-            class="absolute right-3.5 top-1/2 -translate-y-1/2 text-hero-ink-2 hover:text-hero-ink transition-colors"
-            [attr.aria-label]="showPassword() ? 'Ocultar senha' : 'Mostrar senha'"
-          >
-            <app-icon [name]="showPassword() ? 'eyeOff' : 'eye'" [size]="16" [strokeWidth]="1.6" />
-          </button>
-        </div>
-        @if (password.invalid && password.touched) {
-          <span class="font-mono text-[10px] text-red-400">Senha obrigatória</span>
-        }
-      </div>
-
-      @if (error()) {
-        <div
-          class="px-4 py-3 rounded-xl bg-red-950/50 border border-red-800 font-mono text-[11px] text-red-400"
-        >
-          {{ error() }}
-        </div>
-      }
-
+    <!-- Mode toggle -->
+    <div class="flex gap-1 p-1 bg-hero rounded-xl mb-6">
       <button
-        type="submit"
-        [disabled]="loading()"
-        class="mt-2 w-full bg-accent text-hero rounded-xl py-3.5 text-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-50 transition-opacity cursor-pointer"
+        (click)="switchMode('login')"
+        class="flex-1 py-2 rounded-lg font-mono text-[11px] uppercase tracking-[0.06em] transition-colors cursor-pointer"
+        [class]="
+          mode() === 'login'
+            ? 'bg-hero-surface text-hero-ink'
+            : 'text-hero-ink-2 hover:text-hero-ink'
+        "
       >
-        @if (loading()) {
-          <span
-            class="w-4 h-4 rounded-full border-2 border-hero/30 border-t-hero animate-spin"
-          ></span>
-        }
-        {{ loading() ? 'Entrando…' : 'Entrar' }}
+        Entrar
       </button>
-    </form>
+      <button
+        (click)="switchMode('register')"
+        class="flex-1 py-2 rounded-lg font-mono text-[11px] uppercase tracking-[0.06em] transition-colors cursor-pointer"
+        [class]="
+          mode() === 'register'
+            ? 'bg-hero-surface text-hero-ink'
+            : 'text-hero-ink-2 hover:text-hero-ink'
+        "
+      >
+        Criar conta
+      </button>
+    </div>
+
+    @if (mode() === 'login') {
+      <div class="mb-1">
+        <div class="font-mono text-[10px] text-hero-ink-2 uppercase tracking-[0.08em] mb-2">
+          acesso do cliente
+        </div>
+        <h1
+          class="font-tight text-[26px] font-semibold text-hero-ink tracking-[-0.02em] leading-none"
+        >
+          Bem-vindo de volta
+        </h1>
+      </div>
+
+      <!-- Google button -->
+      <div class="flex justify-center mt-5 mb-4">
+        <div #googleBtn></div>
+      </div>
+
+      <!-- Divider -->
+      <div class="flex items-center gap-3 mb-4">
+        <div class="flex-1 h-px bg-hero-border"></div>
+        <span class="font-mono text-[10px] text-hero-ink-2 uppercase tracking-[0.06em]">ou</span>
+        <div class="flex-1 h-px bg-hero-border"></div>
+      </div>
+
+      <form
+        [formGroup]="loginForm"
+        (ngSubmit)="submitLogin()"
+        novalidate
+        class="flex flex-col gap-4"
+      >
+        <!-- Email -->
+        <div class="flex flex-col gap-1.5">
+          <label class="font-mono text-[10px] text-hero-ink-2 uppercase tracking-[0.06em]">
+            E-mail
+          </label>
+          <input
+            type="email"
+            formControlName="email"
+            placeholder="seu@email.com"
+            autocomplete="email"
+            class="w-full bg-hero border border-hero-border rounded-xl px-4 py-3 text-sm text-hero-ink placeholder:text-hero-ink-2 focus:outline-none focus:border-accent transition-colors"
+            [class.border-red-500]="loginEmail.invalid && loginEmail.touched"
+          />
+          @if (loginEmail.invalid && loginEmail.touched) {
+            <span class="font-mono text-[10px] text-red-400">E-mail inválido</span>
+          }
+        </div>
+
+        <!-- Password -->
+        <div class="flex flex-col gap-1.5">
+          <label class="font-mono text-[10px] text-hero-ink-2 uppercase tracking-[0.06em]">
+            Senha
+          </label>
+          <div class="relative">
+            <input
+              [type]="showPassword() ? 'text' : 'password'"
+              formControlName="password"
+              placeholder="••••••••"
+              autocomplete="current-password"
+              class="w-full bg-hero border border-hero-border rounded-xl px-4 py-3 pr-11 text-sm text-hero-ink placeholder:text-hero-ink-2 focus:outline-none focus:border-accent transition-colors"
+              [class.border-red-500]="loginPassword.invalid && loginPassword.touched"
+            />
+            <button
+              type="button"
+              (click)="showPassword.update((v) => !v)"
+              class="absolute right-3.5 top-1/2 -translate-y-1/2 text-hero-ink-2 hover:text-hero-ink transition-colors"
+              [attr.aria-label]="showPassword() ? 'Ocultar senha' : 'Mostrar senha'"
+            >
+              <app-icon
+                [name]="showPassword() ? 'eyeOff' : 'eye'"
+                [size]="16"
+                [strokeWidth]="1.6"
+              />
+            </button>
+          </div>
+          @if (loginPassword.invalid && loginPassword.touched) {
+            <span class="font-mono text-[10px] text-red-400">Senha obrigatória</span>
+          }
+        </div>
+
+        @if (error()) {
+          <div
+            class="px-4 py-3 rounded-xl bg-red-950/50 border border-red-800 font-mono text-[11px] text-red-400"
+          >
+            {{ error() }}
+          </div>
+        }
+
+        <button
+          type="submit"
+          [disabled]="loading()"
+          class="mt-2 w-full bg-accent text-hero rounded-xl py-3.5 text-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-50 transition-opacity cursor-pointer"
+        >
+          @if (loading()) {
+            <span
+              class="w-4 h-4 rounded-full border-2 border-hero/30 border-t-hero animate-spin"
+            ></span>
+          }
+          {{ loading() ? 'Entrando…' : 'Entrar' }}
+        </button>
+      </form>
+    }
+
+    @if (mode() === 'register') {
+      <div class="mb-5">
+        <div class="font-mono text-[10px] text-hero-ink-2 uppercase tracking-[0.08em] mb-2">
+          novo cliente
+        </div>
+        <h1
+          class="font-tight text-[26px] font-semibold text-hero-ink tracking-[-0.02em] leading-none"
+        >
+          Crie sua conta
+        </h1>
+      </div>
+
+      <form
+        [formGroup]="registerForm"
+        (ngSubmit)="submitRegister()"
+        novalidate
+        class="flex flex-col gap-3"
+      >
+        <div class="grid grid-cols-2 gap-3">
+          <div class="flex flex-col gap-1.5">
+            <label class="font-mono text-[10px] text-hero-ink-2 uppercase tracking-[0.06em]">
+              Nome
+            </label>
+            <input
+              type="text"
+              formControlName="firstName"
+              placeholder="João"
+              autocomplete="given-name"
+              class="w-full bg-hero border border-hero-border rounded-xl px-3 py-3 text-sm text-hero-ink placeholder:text-hero-ink-2 focus:outline-none focus:border-accent transition-colors"
+              [class.border-red-500]="regFirstName.invalid && regFirstName.touched"
+            />
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="font-mono text-[10px] text-hero-ink-2 uppercase tracking-[0.06em]">
+              Sobrenome
+            </label>
+            <input
+              type="text"
+              formControlName="lastName"
+              placeholder="Silva"
+              autocomplete="family-name"
+              class="w-full bg-hero border border-hero-border rounded-xl px-3 py-3 text-sm text-hero-ink placeholder:text-hero-ink-2 focus:outline-none focus:border-accent transition-colors"
+              [class.border-red-500]="regLastName.invalid && regLastName.touched"
+            />
+          </div>
+        </div>
+
+        <div class="flex flex-col gap-1.5">
+          <label class="font-mono text-[10px] text-hero-ink-2 uppercase tracking-[0.06em]">
+            E-mail
+          </label>
+          <input
+            type="email"
+            formControlName="email"
+            placeholder="seu@email.com"
+            autocomplete="email"
+            class="w-full bg-hero border border-hero-border rounded-xl px-4 py-3 text-sm text-hero-ink placeholder:text-hero-ink-2 focus:outline-none focus:border-accent transition-colors"
+            [class.border-red-500]="regEmail.invalid && regEmail.touched"
+          />
+          @if (regEmail.invalid && regEmail.touched) {
+            <span class="font-mono text-[10px] text-red-400">E-mail inválido</span>
+          }
+        </div>
+
+        <div class="flex flex-col gap-1.5">
+          <label class="font-mono text-[10px] text-hero-ink-2 uppercase tracking-[0.06em]">
+            Celular
+          </label>
+          <input
+            type="tel"
+            formControlName="phone"
+            placeholder="(11) 99999-9999"
+            autocomplete="tel"
+            class="w-full bg-hero border border-hero-border rounded-xl px-4 py-3 text-sm text-hero-ink placeholder:text-hero-ink-2 focus:outline-none focus:border-accent transition-colors"
+            [class.border-red-500]="regPhone.invalid && regPhone.touched"
+          />
+          @if (regPhone.invalid && regPhone.touched) {
+            <span class="font-mono text-[10px] text-red-400">Celular obrigatório</span>
+          }
+        </div>
+
+        <div class="flex flex-col gap-1.5">
+          <label class="font-mono text-[10px] text-hero-ink-2 uppercase tracking-[0.06em]">
+            Senha
+          </label>
+          <div class="relative">
+            <input
+              [type]="showPassword() ? 'text' : 'password'"
+              formControlName="password"
+              placeholder="mínimo 8 caracteres"
+              autocomplete="new-password"
+              class="w-full bg-hero border border-hero-border rounded-xl px-4 py-3 pr-11 text-sm text-hero-ink placeholder:text-hero-ink-2 focus:outline-none focus:border-accent transition-colors"
+              [class.border-red-500]="regPassword.invalid && regPassword.touched"
+            />
+            <button
+              type="button"
+              (click)="showPassword.update((v) => !v)"
+              class="absolute right-3.5 top-1/2 -translate-y-1/2 text-hero-ink-2 hover:text-hero-ink transition-colors"
+              [attr.aria-label]="showPassword() ? 'Ocultar senha' : 'Mostrar senha'"
+            >
+              <app-icon
+                [name]="showPassword() ? 'eyeOff' : 'eye'"
+                [size]="16"
+                [strokeWidth]="1.6"
+              />
+            </button>
+          </div>
+          @if (regPassword.errors?.['minlength'] && regPassword.touched) {
+            <span class="font-mono text-[10px] text-red-400">Mínimo 8 caracteres</span>
+          } @else if (regPassword.invalid && regPassword.touched) {
+            <span class="font-mono text-[10px] text-red-400">Senha obrigatória</span>
+          }
+        </div>
+
+        @if (error()) {
+          <div
+            class="px-4 py-3 rounded-xl bg-red-950/50 border border-red-800 font-mono text-[11px] text-red-400"
+          >
+            {{ error() }}
+          </div>
+        }
+
+        <button
+          type="submit"
+          [disabled]="loading()"
+          class="mt-2 w-full bg-accent text-hero rounded-xl py-3.5 text-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-50 transition-opacity cursor-pointer"
+        >
+          @if (loading()) {
+            <span
+              class="w-4 h-4 rounded-full border-2 border-hero/30 border-t-hero animate-spin"
+            ></span>
+          }
+          {{ loading() ? 'Criando conta…' : 'Criar conta' }}
+        </button>
+      </form>
+    }
   </div>
 
   <p class="mt-8 font-mono text-[10px] text-hero-ink-2 uppercase tracking-[0.06em]">

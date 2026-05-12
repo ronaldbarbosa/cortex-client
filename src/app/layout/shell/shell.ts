@@ -1,8 +1,9 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { IconComponent } from '../../shared/ui/icon/icon';
 import { LoginModalComponent } from '../../shared/ui/login-modal/login-modal';
 import { TenantContextService } from '../../core/tenant/tenant-context.service';
+import { AuthService } from '../../core/auth/auth.service';
 
 interface Tab {
   label: string;
@@ -15,6 +16,7 @@ const TAB_DEFS: Tab[] = [
   { label: 'Agendar', icon: 'calendar', path: 'agendar' },
   { label: 'Fidelidade', icon: 'star', path: 'fidelidade' },
   { label: 'Histórico', icon: 'clock', path: 'historico' },
+  { label: 'Conta', icon: 'user', path: 'conta' },
 ];
 
 @Component({
@@ -24,11 +26,36 @@ const TAB_DEFS: Tab[] = [
 })
 export class ShellComponent {
   private tenantContext = inject(TenantContextService);
+  readonly auth = inject(AuthService);
 
   readonly tenantName = this.tenantContext.name;
+  readonly user = this.auth.user;
+  readonly isAuthenticated = this.auth.isAuthenticated;
+  readonly dropdownOpen = signal(false);
 
   readonly tabs = computed(() => {
     const slug = this.tenantContext.slug();
     return TAB_DEFS.map((t) => ({ ...t, route: ['/s', slug, t.path] }));
   });
+
+  readonly accountRoute = computed(() => ['/s', this.tenantContext.slug(), 'conta']);
+
+  toggleDropdown(): void {
+    this.dropdownOpen.update((v) => !v);
+  }
+
+  closeDropdown(): void {
+    this.dropdownOpen.set(false);
+  }
+
+  logout(): void {
+    this.dropdownOpen.set(false);
+    this.auth.logout();
+  }
+
+  getInitials(): string {
+    const u = this.user();
+    if (!u) return '?';
+    return `${u.firstName[0] ?? ''}${u.lastName[0] ?? ''}`.toUpperCase();
+  }
 }

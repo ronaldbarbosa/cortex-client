@@ -29,6 +29,8 @@ const PATHS: Record<string, string> = {
   flame:
     '<path d="M12 2s4 5 4 9a4 4 0 01-8 0c0-2 1-3 1-3-1 1-3 3-3 6a6 6 0 0012 0c0-6-6-12-6-12z"/>',
   tag: '<path d="M20 12L12 20a2 2 0 01-3 0L3 14a2 2 0 010-3l8-8h7v7z"/><circle cx="15" cy="9" r="1.2"/>',
+  pencil:
+    '<path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>',
 };
 
 @Component({

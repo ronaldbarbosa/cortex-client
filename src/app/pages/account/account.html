@@ -1,0 +1,214 @@
+<!-- Hero -->
+<div class="bg-hero">
+  <div class="max-w-5xl mx-auto px-5 lg:px-8">
+    <div class="pt-10 pb-6 lg:pt-0 lg:h-48 lg:flex lg:items-center lg:gap-12">
+      <div class="shrink-0 lg:w-56">
+        <p class="font-mono text-[10px] text-hero-ink-2 uppercase tracking-[0.06em] mb-1">Minha</p>
+        <h1 class="font-tight text-2xl lg:text-3xl font-semibold text-hero-ink tracking-tight">
+          Conta
+        </h1>
+      </div>
+
+      @if (isAuthenticated() && user()) {
+        <div class="mt-5 lg:mt-0 flex items-center gap-4">
+          <div
+            class="w-14 h-14 rounded-full bg-accent/20 flex items-center justify-center font-tight text-xl font-bold text-accent shrink-0"
+          >
+            {{ getInitials() }}
+          </div>
+          <div>
+            <p class="font-tight text-lg font-semibold text-hero-ink">
+              {{ user()!.firstName }} {{ user()!.lastName }}
+            </p>
+            <p class="font-mono text-[11px] text-hero-ink-2 mt-0.5">{{ user()!.email }}</p>
+          </div>
+        </div>
+      } @else {
+        <div class="mt-5 lg:mt-0">
+          <p class="font-mono text-[11px] text-hero-ink-2">Faça login para acessar sua conta.</p>
+        </div>
+      }
+    </div>
+  </div>
+</div>
+
+<div class="max-w-5xl mx-auto px-5 lg:px-8 py-6">
+  @if (!isAuthenticated()) {
+    <!-- Not logged in -->
+    <div class="flex flex-col items-center text-center gap-5 py-16 max-w-xs mx-auto">
+      <div class="w-16 h-16 rounded-full bg-border flex items-center justify-center">
+        <app-icon name="user" [size]="28" color="var(--color-ink-3)" [strokeWidth]="1.4" />
+      </div>
+      <div>
+        <p class="font-tight text-[17px] font-semibold text-ink mb-1">Entre na sua conta</p>
+        <p class="font-mono text-[11px] text-ink-3 leading-relaxed">
+          Faça login ou crie uma conta para ver seu histórico, reagendar e editar seus dados.
+        </p>
+      </div>
+      <button
+        (click)="openLogin()"
+        class="w-full bg-accent text-hero font-semibold text-sm py-3.5 rounded-xl cursor-pointer"
+      >
+        Entrar / Criar conta
+      </button>
+    </div>
+  } @else if (profileLoading()) {
+    <!-- Loading -->
+    <div class="bg-surface border border-border rounded-2xl p-5 animate-pulse max-w-md">
+      <div class="h-4 w-32 bg-border rounded mb-4"></div>
+      <div class="flex flex-col gap-3">
+        <div class="h-10 bg-border rounded-xl"></div>
+        <div class="h-10 bg-border rounded-xl"></div>
+        <div class="h-10 bg-border rounded-xl"></div>
+      </div>
+    </div>
+  } @else if (profile()) {
+    <div class="max-w-md mx-auto">
+      <!-- Profile card -->
+      <div class="bg-surface border border-border rounded-2xl p-5 mb-4">
+        <div class="flex items-center justify-between mb-4">
+          <p class="font-mono text-[10px] text-ink-3 uppercase tracking-[0.06em]">
+            Dados de cadastro
+          </p>
+          @if (!editing()) {
+            <button
+              (click)="startEditing()"
+              class="flex items-center gap-1.5 px-3 py-1.5 border border-border rounded-lg font-mono text-[10px] text-ink-2 uppercase tracking-wide hover:border-accent/50 hover:text-accent transition-colors cursor-pointer"
+            >
+              <app-icon name="pencil" [size]="11" [strokeWidth]="1.6" />
+              Editar
+            </button>
+          }
+        </div>
+
+        @if (!editing()) {
+          <!-- Read mode -->
+          <div class="flex flex-col gap-3">
+            <div>
+              <p class="font-mono text-[10px] text-ink-3 uppercase tracking-[0.06em] mb-0.5">
+                Nome
+              </p>
+              <p class="font-tight text-[15px] text-ink">
+                {{ profile()!.firstName }} {{ profile()!.lastName }}
+              </p>
+            </div>
+            <div class="h-px bg-border"></div>
+            <div>
+              <p class="font-mono text-[10px] text-ink-3 uppercase tracking-[0.06em] mb-0.5">
+                Telefone
+              </p>
+              <p class="font-tight text-[15px] text-ink">{{ profile()!.phone }}</p>
+            </div>
+            <div class="h-px bg-border"></div>
+            <div>
+              <p class="font-mono text-[10px] text-ink-3 uppercase tracking-[0.06em] mb-0.5">
+                E-mail
+              </p>
+              <p class="font-tight text-[15px] text-ink">
+                {{ profile()!.email ?? user()!.email }}
+              </p>
+            </div>
+          </div>
+        } @else {
+          <!-- Edit mode -->
+          <form (ngSubmit)="save()" [formGroup]="form" class="flex flex-col gap-3">
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label
+                  class="font-mono text-[10px] text-ink-3 uppercase tracking-[0.06em] block mb-1"
+                  >Nome</label
+                >
+                <input
+                  formControlName="firstName"
+                  type="text"
+                  class="w-full bg-bg border border-border rounded-xl px-3 py-2.5 text-sm text-ink placeholder-ink-3 focus:outline-none focus:border-accent transition-colors"
+                />
+              </div>
+              <div>
+                <label
+                  class="font-mono text-[10px] text-ink-3 uppercase tracking-[0.06em] block mb-1"
+                  >Sobrenome</label
+                >
+                <input
+                  formControlName="lastName"
+                  type="text"
+                  class="w-full bg-bg border border-border rounded-xl px-3 py-2.5 text-sm text-ink placeholder-ink-3 focus:outline-none focus:border-accent transition-colors"
+                />
+              </div>
+            </div>
+            <div>
+              <label class="font-mono text-[10px] text-ink-3 uppercase tracking-[0.06em] block mb-1"
+                >Telefone</label
+              >
+              <input
+                formControlName="phone"
+                type="tel"
+                class="w-full bg-bg border border-border rounded-xl px-3 py-2.5 text-sm text-ink placeholder-ink-3 focus:outline-none focus:border-accent transition-colors"
+              />
+            </div>
+            <div>
+              <label class="font-mono text-[10px] text-ink-3 uppercase tracking-[0.06em] block mb-1"
+                >E-mail</label
+              >
+              <input
+                type="email"
+                [value]="profile()!.email ?? user()!.email"
+                disabled
+                class="w-full bg-border/30 border border-border rounded-xl px-3 py-2.5 text-sm text-ink-3 cursor-not-allowed"
+              />
+            </div>
+
+            @if (saveError()) {
+              <div
+                class="px-4 py-3 rounded-xl bg-red-950/50 border border-red-800 font-mono text-[11px] text-red-400"
+              >
+                {{ saveError() }}
+              </div>
+            }
+
+            <div class="flex gap-3 pt-1">
+              <button
+                type="button"
+                (click)="cancelEditing()"
+                class="flex-1 border border-border rounded-xl py-2.5 font-mono text-[11px] text-ink-2 uppercase tracking-[0.06em] hover:border-accent/40 transition-colors cursor-pointer"
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                [disabled]="form.invalid || saving()"
+                class="flex-1 bg-accent text-hero font-semibold text-sm py-2.5 rounded-xl flex items-center justify-center gap-2 disabled:opacity-40 transition-opacity cursor-pointer"
+              >
+                @if (saving()) {
+                  <span
+                    class="w-4 h-4 rounded-full border-2 border-hero/30 border-t-hero animate-spin"
+                  ></span>
+                }
+                {{ saving() ? 'Salvando…' : 'Salvar' }}
+              </button>
+            </div>
+          </form>
+        }
+
+        @if (saveSuccess()) {
+          <div
+            class="mt-3 px-4 py-3 rounded-xl bg-green-950/50 border border-green-800 font-mono text-[11px] text-green-400"
+          >
+            Dados atualizados com sucesso.
+          </div>
+        }
+      </div>
+
+      <!-- Sign out -->
+      <button
+        (click)="logout()"
+        class="w-full flex items-center justify-center gap-2 border border-border rounded-2xl py-3.5 font-mono text-[11px] text-ink-2 uppercase tracking-[0.06em] hover:border-red-500/50 hover:text-red-400 transition-colors cursor-pointer"
+      >
+        <app-icon name="logout" [size]="14" [strokeWidth]="1.6" />
+        Sair da conta
+      </button>
+    </div>
+  }
+
+  <div class="h-2 lg:h-6"></div>
+</div>

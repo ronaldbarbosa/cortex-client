@@ -33,6 +33,10 @@ export const routes: Routes = [
             canActivate: [authGuard],
             loadComponent: () => import('./pages/history/history').then((m) => m.HistoryComponent),
           },
+          {
+            path: 'conta',
+            loadComponent: () => import('./pages/account/account').then((m) => m.AccountComponent),
+          },
         ],
       },
     ],

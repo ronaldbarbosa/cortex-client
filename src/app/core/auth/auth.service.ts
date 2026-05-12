@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { catchError, map, Observable, of, tap, throwError } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { TenantContextService } from '../tenant/tenant-context.service';
-import { ClientAuthResponse, ClientUser } from './auth.model';
+import { ClientAuthResponse, ClientProfile, ClientUser, UpdateProfileRequest } from './auth.model';
 
 export interface RegisterClientRequest {
   tenantId: string;
@@ -78,6 +78,20 @@ export class AuthService {
           return throwError(() => err);
         }),
       );
+  }
+
+  getProfile(): Observable<ClientProfile> {
+    return this.http.get<ClientProfile>(`${this.base}/me`);
+  }
+
+  updateProfile(req: UpdateProfileRequest): Observable<ClientProfile> {
+    return this.http.patch<ClientProfile>(`${this.base}/me`, req).pipe(
+      tap((profile) => {
+        this._user.update((u) =>
+          u ? { ...u, firstName: profile.firstName, lastName: profile.lastName } : u,
+        );
+      }),
+    );
   }
 
   logout(): void {

@@ -38,6 +38,8 @@ export class LoginModalComponent implements OnDestroy {
   error = signal<string | null>(null);
   showPassword = signal(false);
 
+  private googleInitialized = false;
+
   get loginEmail() {
     return this.loginForm.controls.email;
   }
@@ -78,6 +80,9 @@ export class LoginModalComponent implements OnDestroy {
     this.mode.set(m);
     this.error.set(null);
     this.showPassword.set(false);
+    if (m === 'login') {
+      setTimeout(() => this.initGoogleButton());
+    }
   }
 
   submitLogin(): void {
@@ -141,10 +146,13 @@ export class LoginModalComponent implements OnDestroy {
   private initGoogleButton(): void {
     if (!window.google?.accounts?.id || !this.googleBtnRef) return;
 
-    window.google.accounts.id.initialize({
-      client_id: environment.googleClientId,
-      callback: (response) => this.handleGoogleResponse(response),
-    });
+    if (!this.googleInitialized) {
+      window.google.accounts.id.initialize({
+        client_id: environment.googleClientId,
+        callback: (response) => this.handleGoogleResponse(response),
+      });
+      this.googleInitialized = true;
+    }
 
     window.google.accounts.id.renderButton(this.googleBtnRef!.nativeElement, {
       theme: 'outline',

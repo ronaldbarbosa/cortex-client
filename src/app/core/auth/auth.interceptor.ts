@@ -6,7 +6,8 @@ import { AuthService } from './auth.service';
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const auth = inject(AuthService);
 
-  if (req.url.includes('/auth/') || req.url.includes('/public/')) {
+  const publicPaths = ['/auth/login', '/auth/register', '/auth/refresh', '/public/'];
+  if (publicPaths.some((p) => req.url.includes(p))) {
     return next(req);
   }
 

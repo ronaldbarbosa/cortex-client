@@ -29,6 +29,8 @@ export class LoginComponent implements AfterViewInit, OnDestroy {
 
   mode = signal<'login' | 'register'>('login');
 
+  private googleInitialized = false;
+
   loginForm = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
     password: ['', Validators.required],
@@ -80,6 +82,9 @@ export class LoginComponent implements AfterViewInit, OnDestroy {
     this.mode.set(m);
     this.error.set(null);
     this.showPassword.set(false);
+    if (m === 'login') {
+      setTimeout(() => this.initGoogleButton());
+    }
   }
 
   submitLogin(): void {
@@ -142,10 +147,13 @@ export class LoginComponent implements AfterViewInit, OnDestroy {
   private initGoogleButton(): void {
     if (!window.google?.accounts?.id || !this.googleBtnRef) return;
 
-    window.google.accounts.id.initialize({
-      client_id: environment.googleClientId,
-      callback: (response) => this.handleGoogleResponse(response),
-    });
+    if (!this.googleInitialized) {
+      window.google.accounts.id.initialize({
+        client_id: environment.googleClientId,
+        callback: (response) => this.handleGoogleResponse(response),
+      });
+      this.googleInitialized = true;
+    }
 
     window.google.accounts.id.renderButton(this.googleBtnRef.nativeElement, {
       theme: 'outline',

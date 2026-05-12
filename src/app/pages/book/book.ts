@@ -1,11 +1,14 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { Router } from '@angular/router';
 import { catchError, of, Subscription } from 'rxjs';
 import { IconComponent } from '../../shared/ui/icon/icon';
 import { AuthModalService } from '../../core/auth/auth-modal.service';
 import { AuthService } from '../../core/auth/auth.service';
 import { EstablishmentService } from '../../core/establishment/establishment.service';
+import { TenantContextService } from '../../core/tenant/tenant-context.service';
 import {
+  AppointmentSummary,
   ProfessionalAvailability,
   PublicProfessional,
   PublicServiceItem,
@@ -27,8 +30,10 @@ export class BookComponent {
   private establishmentService = inject(EstablishmentService);
   private auth = inject(AuthService);
   private authModal = inject(AuthModalService);
+  private tenantContext = inject(TenantContextService);
+  private router = inject(Router);
 
-  readonly step = signal<1 | 2 | 3>(1);
+  readonly step = signal<1 | 2 | 3 | 4>(1);
   readonly selectedService = signal<PublicServiceItem | null>(null);
   readonly selectedProfessional = signal<PublicProfessional | null>(null);
   readonly selectedDate = signal<string>(this.toDateString(new Date()));
@@ -62,6 +67,8 @@ export class BookComponent {
   });
 
   readonly confirming = signal(false);
+  readonly bookingError = signal<string | null>(null);
+  readonly confirmedAppointment = signal<AppointmentSummary | null>(null);
 
   private availabilitySub?: Subscription;
   private loginSuccessSub?: Subscription;
@@ -77,13 +84,37 @@ export class BookComponent {
   }
 
   private submitAppointment(): void {
-    // TODO Fase D: POST /appointments com service, professional, date e slot selecionados
-    console.log('Confirmar:', {
-      service: this.selectedService(),
-      professional: this.selectedProfessional(),
-      date: this.selectedDate(),
-      slot: this.selectedSlot(),
-    });
+    const service = this.selectedService();
+    const professional = this.selectedProfessional();
+    const date = this.selectedDate();
+    const slot = this.selectedSlot();
+    const clientId = this.auth.user()?.clientId;
+
+    if (!service || !professional || !slot || !clientId) return;
+
+    this.confirming.set(true);
+    this.bookingError.set(null);
+
+    const startAt = `${date}T${slot}:00+00:00`;
+
+    this.establishmentService
+      .createAppointment({
+        clientId,
+        professionalId: professional.id,
+        startAt,
+        serviceIds: [service.id],
+      })
+      .subscribe({
+        next: (appointment) => {
+          this.confirming.set(false);
+          this.confirmedAppointment.set(appointment);
+          this.step.set(4);
+        },
+        error: () => {
+          this.confirming.set(false);
+          this.bookingError.set('Não foi possível confirmar o agendamento. Tente novamente.');
+        },
+      });
   }
 
   selectService(service: PublicServiceItem): void {
@@ -110,13 +141,35 @@ export class BookComponent {
 
   goBack(): void {
     const current = this.step();
-    if (current > 1) {
+    if (current > 1 && current < 4) {
       this.step.set((current - 1) as 1 | 2 | 3);
       if (current === 3) {
         this.availability.set(null);
         this.selectedSlot.set(null);
       }
     }
+  }
+
+  formatAppointmentDate(isoDate: string): string {
+    return new Intl.DateTimeFormat('pt-BR', {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      timeZone: 'UTC',
+    }).format(new Date(isoDate));
+  }
+
+  navigateToHome(): void {
+    const slug = this.tenantContext.slug();
+    this.router.navigate(['/s', slug, 'inicio']);
+  }
+
+  navigateToHistory(): void {
+    const slug = this.tenantContext.slug();
+    this.router.navigate(['/s', slug, 'historico']);
   }
 
   private fetchAvailability(date: string): void {

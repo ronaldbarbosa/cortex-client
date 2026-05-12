@@ -4,9 +4,12 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { TenantContextService } from '../tenant/tenant-context.service';
 import {
+  AppointmentSummary,
+  CreateAppointmentRequest,
   ProfessionalAvailability,
   PublicProfessional,
   PublicServiceCategory,
+  RescheduleAppointmentRequest,
 } from './establishment.model';
 
 @Injectable({ providedIn: 'root' })
@@ -35,5 +38,32 @@ export class EstablishmentService {
       `${this.baseUrl()}/professionals/${professionalId}/availability`,
       { params: { date, durationMinutes } },
     );
+  }
+
+  createAppointment(req: CreateAppointmentRequest): Observable<AppointmentSummary> {
+    return this.http.post<AppointmentSummary>(`${environment.apiUrl}/appointments`, req);
+  }
+
+  getAppointment(id: string): Observable<AppointmentSummary> {
+    return this.http.get<AppointmentSummary>(`${environment.apiUrl}/appointments/${id}`);
+  }
+
+  getMyAppointments(clientId: string): Observable<AppointmentSummary[]> {
+    return this.http.get<AppointmentSummary[]>(`${environment.apiUrl}/appointments`, {
+      params: { clientId },
+    });
+  }
+
+  cancelAppointment(id: string, reason?: string): Observable<AppointmentSummary> {
+    return this.http.post<AppointmentSummary>(`${environment.apiUrl}/appointments/${id}/cancel`, {
+      reason: reason ?? null,
+    });
+  }
+
+  rescheduleAppointment(
+    id: string,
+    req: RescheduleAppointmentRequest,
+  ): Observable<AppointmentSummary> {
+    return this.http.put<AppointmentSummary>(`${environment.apiUrl}/appointments/${id}`, req);
   }
 }

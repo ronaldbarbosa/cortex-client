@@ -24,3 +24,39 @@ export interface ProfessionalAvailability {
   isAvailable: boolean;
   slots: string[];
 }
+
+export interface CreateAppointmentRequest {
+  clientId: string;
+  professionalId: string;
+  startAt: string;
+  serviceIds: string[];
+}
+
+export interface RescheduleAppointmentRequest {
+  clientId: string;
+  professionalId: string;
+  startAt: string;
+  serviceIds: string[];
+}
+
+export interface AppointmentServiceSummary {
+  id: string;
+  serviceId: string;
+  serviceName: string;
+  priceSnapshot: number;
+  durationMinutesSnapshot: number;
+}
+
+export interface AppointmentSummary {
+  id: string;
+  clientId: string;
+  clientName: string;
+  professionalId: string;
+  professionalName: string;
+  startAt: string;
+  endAt: string;
+  status: string;
+  notes: string | null;
+  cancelReason: string | null;
+  services: AppointmentServiceSummary[];
+}

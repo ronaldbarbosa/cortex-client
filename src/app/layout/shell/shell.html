@@ -78,20 +78,13 @@
     </div>
   </header>
 
-  <main
-    class="flex-1 overflow-auto overscroll-none lg:!pb-0"
-    style="padding-bottom: calc(4rem + env(safe-area-inset-bottom))"
-  >
+  <main class="flex-1 overflow-auto overscroll-none pb-16 lg:pb-0">
     <router-outlet />
   </main>
 
   <!-- Mobile bottom tab bar -->
   <nav
-    class="lg:hidden fixed bottom-0 left-0 right-0 bg-surface border-t border-border flex items-center z-50"
-    style="
-      height: calc(4rem + env(safe-area-inset-bottom));
-      padding-bottom: env(safe-area-inset-bottom);
-    "
+    class="lg:hidden fixed bottom-0 left-0 right-0 h-16 bg-surface border-t border-border flex items-center z-40"
   >
     @for (tab of tabs(); track tab.path) {
       <a

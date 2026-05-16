@@ -11,47 +11,125 @@
       </h1>
 
       <div class="bg-hero-surface border border-hero-border rounded-2xl p-5">
-        <div class="flex items-start justify-between mb-4">
-          <div>
-            <p class="font-mono text-[9px] text-hero-ink-2 uppercase tracking-[0.08em] mb-1">
-              Nível {{ currentTier }}
-            </p>
-            <div class="flex items-end gap-1.5">
-              <span class="font-tight text-4xl font-bold text-accent">{{ points }}</span>
-              <span class="font-mono text-[11px] text-hero-ink-2 mb-1.5">pontos</span>
-            </div>
+        @if (programLoading()) {
+          <div class="space-y-3 animate-pulse">
+            <div class="h-3 w-20 bg-hero-border rounded"></div>
+            <div class="h-10 w-24 bg-hero-border rounded"></div>
+            <div class="h-3 w-40 bg-hero-border rounded"></div>
           </div>
-          <div class="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center">
-            <app-icon name="star" [size]="18" color="var(--color-accent)" [strokeWidth]="1.8" />
-          </div>
-        </div>
-
-        @if (nextTier) {
-          <div>
-            <div class="flex justify-between mb-1.5">
-              <span class="font-mono text-[9px] text-hero-ink-2">{{ currentTier }}</span>
-              <span class="font-mono text-[9px] text-hero-ink-2">{{ nextTier.name }}</span>
+        } @else if (!program() || !program()!.isActive) {
+          <div class="flex flex-col items-center text-center gap-2 py-2">
+            <div class="w-10 h-10 rounded-full bg-hero-border flex items-center justify-center">
+              <app-icon
+                name="star"
+                [size]="18"
+                color="var(--color-hero-ink-2)"
+                [strokeWidth]="1.6"
+              />
             </div>
-            <div class="h-1.5 bg-hero-border rounded-full overflow-hidden">
-              <div
-                class="h-full bg-accent rounded-full transition-all"
-                [style.width.%]="(points / nextTier.minPoints) * 100"
-              ></div>
-            </div>
-            <p class="font-mono text-[10px] text-hero-ink-2 mt-2">
-              Faltam <span class="text-accent">{{ pointsToNext }} pontos</span> para
-              {{ nextTier.name }}
+            <p class="font-tight text-[14px] font-medium text-hero-ink">Programa indisponível</p>
+            <p class="font-mono text-[11px] text-hero-ink-2">
+              Nenhum programa de fidelidade ativo.
             </p>
           </div>
+        } @else if (!isAuthenticated()) {
+          <div class="flex flex-col items-center text-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center">
+              <app-icon name="user" [size]="18" color="var(--color-accent)" [strokeWidth]="1.8" />
+            </div>
+            <div>
+              <p class="font-tight text-[15px] font-medium text-hero-ink mb-1">
+                Acesse para ver seus pontos
+              </p>
+              <p class="font-mono text-[11px] text-hero-ink-2">
+                Entre na sua conta para acompanhar seu progresso.
+              </p>
+            </div>
+            <button
+              (click)="openLoginModal()"
+              class="bg-accent text-hero font-semibold text-sm px-5 py-2.5 rounded-xl transition-opacity hover:opacity-90"
+            >
+              Entrar
+            </button>
+          </div>
+        } @else if (dataLoading()) {
+          <div class="space-y-3 animate-pulse">
+            <div class="h-3 w-20 bg-hero-border rounded"></div>
+            <div class="h-10 w-24 bg-hero-border rounded"></div>
+            <div class="h-3 w-40 bg-hero-border rounded"></div>
+          </div>
+        } @else if (program()!.type === 0) {
+          <div class="flex items-start justify-between mb-3">
+            <div>
+              <p class="font-mono text-[9px] text-hero-ink-2 uppercase tracking-[0.08em] mb-1">
+                Seus pontos
+              </p>
+              <div class="flex items-end gap-1.5">
+                <span class="font-tight text-4xl font-bold text-accent">
+                  {{ summary()?.loyaltyPoints ?? 0 }}
+                </span>
+                <span class="font-mono text-[11px] text-hero-ink-2 mb-1.5">pts</span>
+              </div>
+            </div>
+            <div class="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center">
+              <app-icon name="star" [size]="18" color="var(--color-accent)" [strokeWidth]="1.8" />
+            </div>
+          </div>
+          <p class="font-mono text-[11px] text-hero-ink-2">
+            Equivale a
+            <span class="text-accent">{{ formatPrice(pointsCredit()) }}</span> em crédito ·
+            {{ program()!.redemptionRate }} pts = R$ 1
+          </p>
+          @if (program()!.pointsExpireDays) {
+            <p class="font-mono text-[10px] text-hero-ink-2 mt-1.5">
+              Pontos expiram em {{ program()!.pointsExpireDays }} dias
+            </p>
+          }
+        } @else if (program()!.type === 1) {
+          <p class="font-mono text-[9px] text-hero-ink-2 uppercase tracking-[0.08em] mb-3">
+            Visitas
+          </p>
+          <div class="flex flex-wrap gap-2 mb-3">
+            @for (filled of stamps(); track $index) {
+              <div [class]="stampClass(filled)">
+                @if (filled) {
+                  <app-icon
+                    name="check"
+                    [size]="13"
+                    color="var(--color-accent)"
+                    [strokeWidth]="2.5"
+                  />
+                }
+              </div>
+            }
+          </div>
+          <p class="font-mono text-[11px] text-hero-ink-2">
+            {{ summary()?.loyaltyPoints ?? 0 }} de {{ program()!.visitsRequired }} visitas · Prêmio:
+            <span class="text-accent">{{ program()!.rewardDescription }}</span>
+          </p>
         } @else {
-          <p class="font-mono text-[11px] text-accent">Você atingiu o nível máximo!</p>
+          <div class="flex items-start justify-between mb-3">
+            <div>
+              <p class="font-mono text-[9px] text-hero-ink-2 uppercase tracking-[0.08em] mb-1">
+                Saldo cashback
+              </p>
+              <span class="font-tight text-3xl font-bold text-accent">
+                {{ formatPrice(summary()?.loyaltyBalance ?? 0) }}
+              </span>
+            </div>
+            <div class="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center">
+              <app-icon name="tag" [size]="18" color="var(--color-accent)" [strokeWidth]="1.8" />
+            </div>
+          </div>
+          <p class="font-mono text-[11px] text-hero-ink-2">
+            {{ program()!.cashbackPercentage }}% de cashback em cada visita
+          </p>
         }
       </div>
     </div>
 
-    <!-- Desktop: fixed height, title left / points card right -->
+    <!-- Desktop: fixed height, title left / card right -->
     <div class="hidden lg:flex lg:h-48 lg:gap-12 lg:items-center">
-      <!-- Title column -->
       <div class="shrink-0 w-56">
         <p class="font-mono text-[10px] text-hero-ink-2 uppercase tracking-[0.06em] mb-1">
           Programa de
@@ -59,53 +137,305 @@
         <h1 class="font-tight text-3xl font-semibold text-hero-ink tracking-tight">Fidelidade</h1>
       </div>
 
-      <!-- Points card column -->
       <div class="flex-1 bg-hero-surface border border-hero-border rounded-2xl p-5">
-        <div class="flex items-center justify-between mb-3">
-          <div>
-            <p class="font-mono text-[9px] text-hero-ink-2 uppercase tracking-[0.08em] mb-1">
-              Nível {{ currentTier }}
-            </p>
-            <div class="flex items-end gap-1.5">
-              <span class="font-tight text-4xl font-bold text-accent">{{ points }}</span>
-              <span class="font-mono text-[11px] text-hero-ink-2 mb-1.5">pontos</span>
+        @if (programLoading()) {
+          <div class="flex gap-6 animate-pulse">
+            <div class="space-y-3 flex-1">
+              <div class="h-3 w-20 bg-hero-border rounded"></div>
+              <div class="h-10 w-24 bg-hero-border rounded"></div>
+              <div class="h-3 w-40 bg-hero-border rounded"></div>
             </div>
           </div>
-          <div class="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center">
-            <app-icon name="star" [size]="18" color="var(--color-accent)" [strokeWidth]="1.8" />
+        } @else if (!program() || !program()!.isActive) {
+          <div class="flex items-center gap-4">
+            <div
+              class="w-10 h-10 rounded-full bg-hero-border flex items-center justify-center shrink-0"
+            >
+              <app-icon
+                name="star"
+                [size]="18"
+                color="var(--color-hero-ink-2)"
+                [strokeWidth]="1.6"
+              />
+            </div>
+            <div>
+              <p class="font-tight text-[15px] font-medium text-hero-ink">Programa indisponível</p>
+              <p class="font-mono text-[11px] text-hero-ink-2 mt-0.5">
+                Nenhum programa de fidelidade ativo.
+              </p>
+            </div>
           </div>
-        </div>
-
-        @if (nextTier) {
-          <div>
-            <div class="flex justify-between mb-1.5">
-              <span class="font-mono text-[9px] text-hero-ink-2">{{ currentTier }}</span>
-              <span class="font-mono text-[9px] text-hero-ink-2">{{ nextTier.name }}</span>
+        } @else if (!isAuthenticated()) {
+          <div class="flex items-center gap-5">
+            <div
+              class="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center shrink-0"
+            >
+              <app-icon name="user" [size]="18" color="var(--color-accent)" [strokeWidth]="1.8" />
             </div>
-            <div class="h-1.5 bg-hero-border rounded-full overflow-hidden">
-              <div
-                class="h-full bg-accent rounded-full transition-all"
-                [style.width.%]="(points / nextTier.minPoints) * 100"
-              ></div>
+            <div class="flex-1 min-w-0">
+              <p class="font-tight text-[15px] font-medium text-hero-ink">
+                Acesse para ver seus pontos
+              </p>
+              <p class="font-mono text-[11px] text-hero-ink-2 mt-0.5">
+                Entre na sua conta para acompanhar seu progresso.
+              </p>
             </div>
-            <p class="font-mono text-[10px] text-hero-ink-2 mt-2">
-              Faltam <span class="text-accent">{{ pointsToNext }} pontos</span> para
-              {{ nextTier.name }}
-            </p>
+            <button
+              (click)="openLoginModal()"
+              class="shrink-0 bg-accent text-hero font-semibold text-sm px-5 py-2.5 rounded-xl transition-opacity hover:opacity-90"
+            >
+              Entrar
+            </button>
+          </div>
+        } @else if (dataLoading()) {
+          <div class="flex gap-6 animate-pulse">
+            <div class="space-y-3 flex-1">
+              <div class="h-3 w-20 bg-hero-border rounded"></div>
+              <div class="h-10 w-24 bg-hero-border rounded"></div>
+              <div class="h-3 w-40 bg-hero-border rounded"></div>
+            </div>
+          </div>
+        } @else if (program()!.type === 0) {
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="font-mono text-[9px] text-hero-ink-2 uppercase tracking-[0.08em] mb-1">
+                Seus pontos
+              </p>
+              <div class="flex items-end gap-1.5 mb-2">
+                <span class="font-tight text-4xl font-bold text-accent">
+                  {{ summary()?.loyaltyPoints ?? 0 }}
+                </span>
+                <span class="font-mono text-[11px] text-hero-ink-2 mb-1.5">pts</span>
+              </div>
+              <p class="font-mono text-[11px] text-hero-ink-2">
+                Equivale a
+                <span class="text-accent">{{ formatPrice(pointsCredit()) }}</span> em crédito ·
+                {{ program()!.redemptionRate }} pts = R$ 1
+              </p>
+              @if (program()!.pointsExpireDays) {
+                <p class="font-mono text-[10px] text-hero-ink-2 mt-1">
+                  Pontos expiram em {{ program()!.pointsExpireDays }} dias
+                </p>
+              }
+            </div>
+            <div
+              class="w-12 h-12 rounded-full bg-accent/20 flex items-center justify-center shrink-0"
+            >
+              <app-icon name="star" [size]="22" color="var(--color-accent)" [strokeWidth]="1.8" />
+            </div>
+          </div>
+        } @else if (program()!.type === 1) {
+          <div class="flex items-center gap-8">
+            <div class="flex-1 min-w-0">
+              <p class="font-mono text-[9px] text-hero-ink-2 uppercase tracking-[0.08em] mb-2">
+                Visitas
+              </p>
+              <div class="flex flex-wrap gap-2 mb-2">
+                @for (filled of stamps(); track $index) {
+                  <div [class]="stampClass(filled)">
+                    @if (filled) {
+                      <app-icon
+                        name="check"
+                        [size]="13"
+                        color="var(--color-accent)"
+                        [strokeWidth]="2.5"
+                      />
+                    }
+                  </div>
+                }
+              </div>
+              <p class="font-mono text-[11px] text-hero-ink-2">
+                {{ summary()?.loyaltyPoints ?? 0 }} de {{ program()!.visitsRequired }} visitas ·
+                Prêmio: <span class="text-accent">{{ program()!.rewardDescription }}</span>
+              </p>
+            </div>
+            <div
+              class="w-12 h-12 rounded-full bg-accent/20 flex items-center justify-center shrink-0"
+            >
+              <app-icon name="gift" [size]="22" color="var(--color-accent)" [strokeWidth]="1.8" />
+            </div>
           </div>
         } @else {
-          <p class="font-mono text-[11px] text-accent">Você atingiu o nível máximo!</p>
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="font-mono text-[9px] text-hero-ink-2 uppercase tracking-[0.08em] mb-1">
+                Saldo cashback
+              </p>
+              <span class="font-tight text-3xl font-bold text-accent">
+                {{ formatPrice(summary()?.loyaltyBalance ?? 0) }}
+              </span>
+              <p class="font-mono text-[11px] text-hero-ink-2 mt-2">
+                {{ program()!.cashbackPercentage }}% de cashback em cada visita
+              </p>
+            </div>
+            <div
+              class="w-12 h-12 rounded-full bg-accent/20 flex items-center justify-center shrink-0"
+            >
+              <app-icon name="tag" [size]="22" color="var(--color-accent)" [strokeWidth]="1.8" />
+            </div>
+          </div>
         }
       </div>
     </div>
   </div>
 </div>
 
-<!-- Coming soon -->
-<div class="max-w-5xl mx-auto px-5 lg:px-8 py-16 flex flex-col items-center text-center gap-3">
-  <div class="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center">
-    <app-icon name="star" [size]="22" color="var(--color-accent)" [strokeWidth]="1.6" />
-  </div>
-  <p class="font-tight text-[16px] font-semibold text-ink">Programa de fidelidade</p>
-  <p class="font-mono text-[11px] text-ink-3">Em breve</p>
+<!-- Body -->
+<div class="max-w-5xl mx-auto px-5 lg:px-8 py-6 flex flex-col gap-6">
+  @if (!programLoading() && program() && program()!.isActive) {
+    @if (!isAuthenticated()) {
+      <!-- Login CTA -->
+      <div
+        class="bg-surface border border-border rounded-2xl p-6 flex flex-col items-center text-center gap-3"
+      >
+        <div class="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center">
+          <app-icon name="user" [size]="22" color="var(--color-accent)" [strokeWidth]="1.6" />
+        </div>
+        <div>
+          <p class="font-tight text-[15px] font-semibold text-ink mb-1">Acompanhe seu progresso</p>
+          <p class="font-mono text-[11px] text-ink-3">
+            Entre na sua conta para ver pontos, visitas e histórico.
+          </p>
+        </div>
+        <button
+          (click)="openLoginModal()"
+          class="bg-accent text-hero font-semibold text-sm px-5 py-2.5 rounded-xl transition-opacity hover:opacity-90"
+        >
+          Entrar
+        </button>
+      </div>
+    } @else {
+      <!-- Redeem card: Points -->
+      @if (!dataLoading() && program()!.type === 0 && canRedeem()) {
+        <div class="bg-surface border border-border rounded-2xl p-5">
+          <div class="flex items-start justify-between gap-4">
+            <div class="flex-1 min-w-0">
+              <p class="font-tight text-[15px] font-semibold text-ink mb-1">Resgatar pontos</p>
+              <p class="font-mono text-[11px] text-ink-3">
+                Você tem
+                <span class="text-ink font-medium">{{ summary()?.loyaltyPoints ?? 0 }} pts</span>
+                · equivale a
+                <span class="text-accent font-medium">{{ formatPrice(pointsCredit()) }}</span>
+                em crédito.
+              </p>
+            </div>
+            <button
+              (click)="redeem()"
+              [disabled]="redeeming()"
+              class="shrink-0 bg-accent text-hero font-semibold text-sm px-4 py-2.5 rounded-xl transition-opacity hover:opacity-90 disabled:opacity-50"
+            >
+              {{ redeeming() ? 'Resgatando...' : 'Resgatar' }}
+            </button>
+          </div>
+          @if (redeemSuccess()) {
+            <p class="font-mono text-[11px] text-green-500 mt-3">Resgate realizado com sucesso!</p>
+          }
+          @if (redeemError()) {
+            <p class="font-mono text-[11px] text-red-500 mt-3">{{ redeemError() }}</p>
+          }
+        </div>
+      }
+
+      <!-- Redeem card: Visits -->
+      @if (!dataLoading() && program()!.type === 1 && canRedeem()) {
+        <div class="bg-surface border border-border rounded-2xl p-5">
+          <div class="flex items-start justify-between gap-4">
+            <div class="flex-1 min-w-0">
+              <p class="font-tight text-[15px] font-semibold text-ink mb-1">Prêmio disponível!</p>
+              <p class="font-mono text-[11px] text-ink-3">
+                Você completou {{ program()!.visitsRequired }} visitas. Prêmio:
+                <span class="text-accent font-medium">{{ program()!.rewardDescription }}</span>
+              </p>
+            </div>
+            <button
+              (click)="redeem()"
+              [disabled]="redeeming()"
+              class="shrink-0 bg-accent text-hero font-semibold text-sm px-4 py-2.5 rounded-xl transition-opacity hover:opacity-90 disabled:opacity-50"
+            >
+              {{ redeeming() ? 'Resgatando...' : 'Resgatar' }}
+            </button>
+          </div>
+          @if (redeemSuccess()) {
+            <p class="font-mono text-[11px] text-green-500 mt-3">Resgate realizado com sucesso!</p>
+          }
+          @if (redeemError()) {
+            <p class="font-mono text-[11px] text-red-500 mt-3">{{ redeemError() }}</p>
+          }
+        </div>
+      }
+
+      <!-- Cashback info -->
+      @if (!dataLoading() && program()!.type === 2) {
+        <div class="bg-surface border border-border rounded-2xl p-5">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="w-8 h-8 rounded-xl bg-accent/10 flex items-center justify-center shrink-0">
+              <app-icon
+                name="sparkle"
+                [size]="16"
+                color="var(--color-accent)"
+                [strokeWidth]="1.8"
+              />
+            </div>
+            <p class="font-tight text-[14px] font-semibold text-ink">Como funciona o cashback</p>
+          </div>
+          <p class="font-mono text-[11px] text-ink-3 leading-relaxed">
+            A cada visita você acumula
+            <span class="text-ink font-medium">{{ program()!.cashbackPercentage }}%</span>
+            do valor pago como crédito. O saldo fica disponível para uso nas próximas visitas.
+          </p>
+        </div>
+      }
+
+      <!-- Transaction history -->
+      <div>
+        <h2 class="font-tight text-[15px] font-semibold text-ink mb-4">Histórico</h2>
+        <div class="bg-surface border border-border rounded-2xl overflow-hidden">
+          @if (transactions() === null) {
+            @for (i of [1, 2, 3]; track i) {
+              <div
+                class="px-5 py-4 flex items-center justify-between gap-4 animate-pulse"
+                [class.border-b]="i < 3"
+                [class.border-border]="i < 3"
+              >
+                <div class="flex-1 space-y-1.5">
+                  <div class="h-3 w-28 bg-border rounded"></div>
+                  <div class="h-3 w-40 bg-border rounded"></div>
+                </div>
+                <div class="h-4 w-12 bg-border rounded"></div>
+              </div>
+            }
+          } @else if (transactions()!.length === 0) {
+            <div class="px-5 py-8 flex flex-col items-center text-center gap-2">
+              <app-icon name="star" [size]="20" color="var(--color-ink-3)" [strokeWidth]="1.6" />
+              <p class="font-mono text-[11px] text-ink-3">Nenhuma movimentação ainda.</p>
+            </div>
+          } @else {
+            @for (tx of transactions()!; track tx.id; let last = $last) {
+              <div
+                class="px-5 py-4 flex items-center justify-between gap-4"
+                [class.border-b]="!last"
+                [class.border-border]="!last"
+              >
+                <div class="flex-1 min-w-0">
+                  <p class="font-tight text-[13px] font-medium text-ink leading-tight mb-0.5">
+                    {{ transactionTypeLabel(tx.type) }}
+                  </p>
+                  <p class="font-mono text-[10px] text-ink-3 truncate">{{ tx.description }}</p>
+                  <p class="font-mono text-[10px] text-ink-3 mt-0.5">
+                    {{ formatDate(tx.createdAt) }}
+                  </p>
+                </div>
+                <span
+                  class="font-mono text-[13px] font-semibold shrink-0"
+                  [class]="transactionAmountClass(tx.type)"
+                >
+                  {{ transactionSign(tx.type) }}{{ tx.amount }}
+                </span>
+              </div>
+            }
+          }
+        </div>
+      </div>
+    }
+  }
 </div>

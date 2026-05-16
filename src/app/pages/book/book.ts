@@ -160,7 +160,7 @@ export class BookComponent implements OnInit, OnDestroy {
     this.confirming.set(true);
     this.bookingError.set(null);
 
-    const startAt = new Date(`${date}T${slot}:00`).toISOString();
+    const startAt = `${date}T${slot}:00Z`;
 
     this.establishmentService
       .createAppointment({
@@ -168,6 +168,10 @@ export class BookComponent implements OnInit, OnDestroy {
         professionalId: professional.id,
         startAt,
         serviceIds,
+        rewardServiceId:
+          this.includeRewardService() && this.rewardServiceItem()
+            ? this.rewardServiceItem()!.id
+            : undefined,
       })
       .subscribe({
         next: (appointment) => {

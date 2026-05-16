@@ -30,6 +30,7 @@ export interface CreateAppointmentRequest {
   professionalId: string;
   startAt: string;
   serviceIds: string[];
+  rewardServiceId?: string;
 }
 
 export interface RescheduleAppointmentRequest {
@@ -37,6 +38,7 @@ export interface RescheduleAppointmentRequest {
   professionalId: string;
   startAt: string;
   serviceIds: string[];
+  rewardServiceId?: string;
 }
 
 export interface AppointmentServiceSummary {
@@ -45,6 +47,7 @@ export interface AppointmentServiceSummary {
   serviceName: string;
   priceSnapshot: number;
   durationMinutesSnapshot: number;
+  isReward: boolean;
 }
 
 export interface AppointmentSummary {

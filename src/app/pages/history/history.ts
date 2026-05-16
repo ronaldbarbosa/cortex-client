@@ -171,12 +171,14 @@ export class HistoryComponent implements OnInit {
     this.rescheduleSubmitting.set(true);
     this.rescheduleError.set(null);
 
+    const rewardService = appt.services.find((s) => s.isReward);
     this.establishmentService
       .rescheduleAppointment(appt.id, {
         clientId: appt.clientId,
         professionalId: appt.professionalId,
-        startAt: new Date(`${date}T${slot}:00`).toISOString(),
+        startAt: `${date}T${slot}:00Z`,
         serviceIds: appt.services.map((s) => s.serviceId),
+        rewardServiceId: rewardService?.serviceId,
       })
       .subscribe({
         next: (updated) => {

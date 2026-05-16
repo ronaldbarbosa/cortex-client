@@ -13,6 +13,8 @@ export interface LoyaltyProgramDto {
   pointsExpireDays: number | null;
   visitsRequired: number;
   rewardDescription: string;
+  rewardServiceId: string | null;
+  rewardServiceName: string | null;
   cashbackPercentage: number;
   hasBirthdayBonus: boolean;
   birthdayMultiplier: number;

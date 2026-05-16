@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { catchError, of, Subscription } from 'rxjs';
@@ -13,6 +13,11 @@ import {
   PublicProfessional,
   PublicServiceItem,
 } from '../../core/establishment/establishment.model';
+import {
+  LoyaltyClientSummaryDto,
+  LoyaltyProgramDto,
+  LoyaltyService,
+} from '../loyalty/loyalty.service';
 
 interface DateOption {
   value: string;
@@ -26,8 +31,9 @@ interface DateOption {
   imports: [IconComponent],
   templateUrl: './book.html',
 })
-export class BookComponent {
+export class BookComponent implements OnInit, OnDestroy {
   private establishmentService = inject(EstablishmentService);
+  private loyaltyService = inject(LoyaltyService);
   private auth = inject(AuthService);
   private authModal = inject(AuthModalService);
   private tenantContext = inject(TenantContextService);
@@ -40,6 +46,10 @@ export class BookComponent {
   readonly selectedSlot = signal<string | null>(null);
   readonly availability = signal<ProfessionalAvailability | null>(null);
   readonly availabilityLoading = signal(false);
+
+  readonly loyaltyProgram = signal<LoyaltyProgramDto | null>(null);
+  readonly loyaltySummary = signal<LoyaltyClientSummaryDto | null>(null);
+  readonly includeRewardService = signal(false);
 
   // null = loading; [] = empty/error; [...] = loaded
   readonly serviceCategories = toSignal(
@@ -70,8 +80,52 @@ export class BookComponent {
   readonly bookingError = signal<string | null>(null);
   readonly confirmedAppointment = signal<AppointmentSummary | null>(null);
 
+  readonly rewardServiceItem = computed<PublicServiceItem | null>(() => {
+    const program = this.loyaltyProgram();
+    const cats = this.serviceCategories();
+    if (!program?.rewardServiceId || !cats) return null;
+    for (const cat of cats) {
+      const found = cat.services.find((s) => s.id === program.rewardServiceId);
+      if (found) return found;
+    }
+    return null;
+  });
+
+  readonly willCompleteCard = computed(() => {
+    const program = this.loyaltyProgram();
+    const summary = this.loyaltySummary();
+    if (
+      !program ||
+      !summary ||
+      !program.isActive ||
+      program.type !== 'Visits' ||
+      !program.rewardServiceId
+    )
+      return false;
+    return summary.loyaltyPoints + 1 >= program.visitsRequired;
+  });
+
   private availabilitySub?: Subscription;
   private loginSuccessSub?: Subscription;
+  private loyaltyLoginSub?: Subscription;
+
+  ngOnInit(): void {
+    this.loyaltyService
+      .getProgram()
+      .pipe(catchError(() => of(null)))
+      .subscribe((p) => {
+        this.loyaltyProgram.set(p);
+        if (this.auth.isAuthenticated()) this.loadLoyaltySummary();
+      });
+
+    this.loyaltyLoginSub = this.authModal.loginSuccess$.subscribe(() => this.loadLoyaltySummary());
+  }
+
+  ngOnDestroy(): void {
+    this.availabilitySub?.unsubscribe();
+    this.loginSuccessSub?.unsubscribe();
+    this.loyaltyLoginSub?.unsubscribe();
+  }
 
   confirmBooking(): void {
     if (!this.auth.isAuthenticated()) {
@@ -83,6 +137,12 @@ export class BookComponent {
     this.submitAppointment();
   }
 
+  toggleRewardService(): void {
+    this.includeRewardService.update((v) => !v);
+    this.selectedSlot.set(null);
+    this.fetchAvailability(this.selectedDate());
+  }
+
   private submitAppointment(): void {
     const service = this.selectedService();
     const professional = this.selectedProfessional();
@@ -91,6 +151,11 @@ export class BookComponent {
     const clientId = this.auth.user()?.clientId;
 
     if (!service || !professional || !slot || !clientId) return;
+
+    const serviceIds = [service.id];
+    if (this.includeRewardService() && this.rewardServiceItem()) {
+      serviceIds.push(this.rewardServiceItem()!.id);
+    }
 
     this.confirming.set(true);
     this.bookingError.set(null);
@@ -102,7 +167,7 @@ export class BookComponent {
         clientId,
         professionalId: professional.id,
         startAt,
-        serviceIds: [service.id],
+        serviceIds,
       })
       .subscribe({
         next: (appointment) => {
@@ -125,6 +190,7 @@ export class BookComponent {
   selectProfessional(professional: PublicProfessional): void {
     this.selectedProfessional.set(professional);
     this.selectedSlot.set(null);
+    this.includeRewardService.set(false);
     this.step.set(3);
     this.fetchAvailability(this.selectedDate());
   }
@@ -146,6 +212,7 @@ export class BookComponent {
       if (current === 3) {
         this.availability.set(null);
         this.selectedSlot.set(null);
+        this.includeRewardService.set(false);
       }
     }
   }
@@ -177,17 +244,32 @@ export class BookComponent {
     const service = this.selectedService();
     if (!professional || !service) return;
 
+    const rewardDuration =
+      this.includeRewardService() && this.rewardServiceItem()
+        ? this.rewardServiceItem()!.durationMinutes
+        : 0;
+    const totalDuration = service.durationMinutes + rewardDuration;
+
     this.availabilitySub?.unsubscribe();
     this.availabilityLoading.set(true);
     this.availability.set(null);
 
     this.availabilitySub = this.establishmentService
-      .getAvailability(professional.id, date, service.durationMinutes)
+      .getAvailability(professional.id, date, totalDuration)
       .pipe(catchError(() => of(null)))
       .subscribe((result) => {
         this.availability.set(result);
         this.availabilityLoading.set(false);
       });
+  }
+
+  private loadLoyaltySummary(): void {
+    const clientId = this.auth.user()?.clientId;
+    if (!clientId) return;
+    this.loyaltyService
+      .getClientSummary(clientId)
+      .pipe(catchError(() => of(null)))
+      .subscribe((s) => this.loyaltySummary.set(s));
   }
 
   formatDuration(minutes: number): string {

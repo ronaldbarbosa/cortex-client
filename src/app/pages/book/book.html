@@ -313,6 +313,40 @@
       </div>
     }
 
+    <!-- Loyalty reward offer -->
+    @if (willCompleteCard() && rewardServiceItem()) {
+      <div class="mt-6 rounded-2xl border border-accent/40 bg-accent/5 p-4 flex items-start gap-3">
+        <div
+          class="shrink-0 w-8 h-8 rounded-full bg-accent/15 flex items-center justify-center mt-0.5"
+        >
+          <app-icon name="gift" [size]="16" color="var(--color-accent)" [strokeWidth]="1.8" />
+        </div>
+        <div class="flex-1 min-w-0">
+          <p class="font-tight text-[13px] font-semibold text-ink">
+            Você completará o cartão nesta visita!
+          </p>
+          <p class="font-mono text-[11px] text-ink-3 mt-0.5">
+            Adicionar
+            <span class="text-accent font-medium">{{ rewardServiceItem()!.name }}</span> ({{
+              formatDuration(rewardServiceItem()!.durationMinutes)
+            }}) como prêmio?
+          </p>
+          <button
+            type="button"
+            (click)="toggleRewardService()"
+            class="mt-3 px-4 py-1.5 rounded-lg border font-mono text-[11px] font-medium transition-colors cursor-pointer"
+            [class]="
+              includeRewardService()
+                ? 'border-accent bg-accent/10 text-accent'
+                : 'border-border text-ink-2 hover:border-accent/40'
+            "
+          >
+            {{ includeRewardService() ? 'Incluído no agendamento' : 'Adicionar serviço-prêmio' }}
+          </button>
+        </div>
+      </div>
+    }
+
     <!-- Booking error -->
     @if (bookingError()) {
       <div

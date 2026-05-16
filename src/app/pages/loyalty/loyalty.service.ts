@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
-export type LoyaltyType = 0 | 1 | 2; // 0=Points, 1=Visits, 2=Cashback
+export type LoyaltyType = 'Points' | 'Visits' | 'Cashback';
 
 export interface LoyaltyProgramDto {
   type: LoyaltyType;

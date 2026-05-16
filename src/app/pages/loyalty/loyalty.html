@@ -58,7 +58,7 @@
             <div class="h-10 w-24 bg-hero-border rounded"></div>
             <div class="h-3 w-40 bg-hero-border rounded"></div>
           </div>
-        } @else if (program()!.type === 0) {
+        } @else if (program()!.type === 'Points') {
           <div class="flex items-start justify-between mb-3">
             <div>
               <p class="font-mono text-[9px] text-hero-ink-2 uppercase tracking-[0.08em] mb-1">
@@ -85,7 +85,7 @@
               Pontos expiram em {{ program()!.pointsExpireDays }} dias
             </p>
           }
-        } @else if (program()!.type === 1) {
+        } @else if (program()!.type === 'Visits') {
           <p class="font-mono text-[9px] text-hero-ink-2 uppercase tracking-[0.08em] mb-3">
             Visitas
           </p>
@@ -195,7 +195,7 @@
               <div class="h-3 w-40 bg-hero-border rounded"></div>
             </div>
           </div>
-        } @else if (program()!.type === 0) {
+        } @else if (program()!.type === 'Points') {
           <div class="flex items-center justify-between">
             <div>
               <p class="font-mono text-[9px] text-hero-ink-2 uppercase tracking-[0.08em] mb-1">
@@ -224,7 +224,7 @@
               <app-icon name="star" [size]="22" color="var(--color-accent)" [strokeWidth]="1.8" />
             </div>
           </div>
-        } @else if (program()!.type === 1) {
+        } @else if (program()!.type === 'Visits') {
           <div class="flex items-center gap-8">
             <div class="flex-1 min-w-0">
               <p class="font-mono text-[9px] text-hero-ink-2 uppercase tracking-[0.08em] mb-2">
@@ -306,7 +306,7 @@
       </div>
     } @else {
       <!-- Redeem card: Points -->
-      @if (!dataLoading() && program()!.type === 0 && canRedeem()) {
+      @if (!dataLoading() && program()!.type === 'Points' && canRedeem()) {
         <div class="bg-surface border border-border rounded-2xl p-5">
           <div class="flex items-start justify-between gap-4">
             <div class="flex-1 min-w-0">
@@ -337,7 +337,7 @@
       }
 
       <!-- Redeem card: Visits -->
-      @if (!dataLoading() && program()!.type === 1 && canRedeem()) {
+      @if (!dataLoading() && program()!.type === 'Visits' && canRedeem()) {
         <div class="bg-surface border border-border rounded-2xl p-5">
           <div class="flex items-start justify-between gap-4">
             <div class="flex-1 min-w-0">
@@ -365,7 +365,7 @@
       }
 
       <!-- Cashback info -->
-      @if (!dataLoading() && program()!.type === 2) {
+      @if (!dataLoading() && program()!.type === 'Cashback') {
         <div class="bg-surface border border-border rounded-2xl p-5">
           <div class="flex items-center gap-3 mb-3">
             <div class="w-8 h-8 rounded-xl bg-accent/10 flex items-center justify-center shrink-0">

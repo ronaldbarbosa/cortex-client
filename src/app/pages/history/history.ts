@@ -175,7 +175,7 @@ export class HistoryComponent implements OnInit {
       .rescheduleAppointment(appt.id, {
         clientId: appt.clientId,
         professionalId: appt.professionalId,
-        startAt: `${date}T${slot}:00+00:00`,
+        startAt: new Date(`${date}T${slot}:00`).toISOString(),
         serviceIds: appt.services.map((s) => s.serviceId),
       })
       .subscribe({

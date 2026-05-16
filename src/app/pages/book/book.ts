@@ -95,7 +95,7 @@ export class BookComponent {
     this.confirming.set(true);
     this.bookingError.set(null);
 
-    const startAt = `${date}T${slot}:00+00:00`;
+    const startAt = new Date(`${date}T${slot}:00`).toISOString();
 
     this.establishmentService
       .createAppointment({

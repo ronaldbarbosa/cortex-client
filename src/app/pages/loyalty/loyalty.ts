@@ -35,7 +35,7 @@ export class LoyaltyComponent implements OnInit, OnDestroy {
   readonly stamps = computed<boolean[]>(() => {
     const p = this.program();
     const s = this.summary();
-    if (!p || p.type !== 1) return [];
+    if (!p || p.type !== 'Visits') return [];
     const visits = s?.loyaltyPoints ?? 0;
     return Array.from({ length: p.visitsRequired }, (_, i) => i < visits);
   });
@@ -44,15 +44,15 @@ export class LoyaltyComponent implements OnInit, OnDestroy {
     const p = this.program();
     const s = this.summary();
     if (!p || !s) return false;
-    if (p.type === 0) return s.loyaltyPoints > 0;
-    if (p.type === 1) return s.loyaltyPoints >= p.visitsRequired;
+    if (p.type === 'Points') return s.loyaltyPoints > 0;
+    if (p.type === 'Visits') return s.loyaltyPoints >= p.visitsRequired;
     return false;
   });
 
   readonly pointsCredit = computed(() => {
     const p = this.program();
     const s = this.summary();
-    if (!p || !s || p.type !== 0 || p.redemptionRate === 0) return 0;
+    if (!p || !s || p.type !== 'Points' || p.redemptionRate === 0) return 0;
     return s.loyaltyPoints / p.redemptionRate;
   });
 
@@ -77,7 +77,7 @@ export class LoyaltyComponent implements OnInit, OnDestroy {
     const s = this.summary();
     if (!clientId || !p || !s || this.redeeming()) return;
 
-    const amount = p.type === 0 ? s.loyaltyPoints : 0;
+    const amount = p.type === 'Points' ? s.loyaltyPoints : 0;
     this.redeeming.set(true);
     this.redeemError.set(null);
     this.redeemSuccess.set(false);

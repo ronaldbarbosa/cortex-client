@@ -20,10 +20,14 @@ export interface ClientProfile {
   lastName: string;
   phone: string;
   email: string | null;
+  birthDate: string | null;
+  acceptsMarketing: boolean;
 }
 
 export interface UpdateProfileRequest {
   firstName: string;
   lastName: string;
   phone: string;
+  birthDate: string | null;
+  acceptsMarketing: boolean;
 }

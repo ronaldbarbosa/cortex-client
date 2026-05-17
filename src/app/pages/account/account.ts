@@ -30,6 +30,8 @@ export class AccountComponent {
     firstName: ['', [Validators.required, Validators.maxLength(100)]],
     lastName: ['', [Validators.required, Validators.maxLength(100)]],
     phone: ['', [Validators.required, Validators.maxLength(20)]],
+    birthDate: ['' as string],
+    acceptsMarketing: [false],
   });
 
   constructor() {
@@ -56,7 +58,13 @@ export class AccountComponent {
   cancelEditing(): void {
     const p = this.profile();
     if (p) {
-      this.form.setValue({ firstName: p.firstName, lastName: p.lastName, phone: p.phone });
+      this.form.setValue({
+        firstName: p.firstName,
+        lastName: p.lastName,
+        phone: p.phone,
+        birthDate: p.birthDate ? this.isoToPtBr(p.birthDate) : '',
+        acceptsMarketing: p.acceptsMarketing,
+      });
     }
     this.editing.set(false);
     this.saveError.set(null);
@@ -68,19 +76,55 @@ export class AccountComponent {
     this.saveError.set(null);
     this.saveSuccess.set(false);
 
-    const { firstName, lastName, phone } = this.form.getRawValue();
-    this.auth.updateProfile({ firstName, lastName, phone }).subscribe({
-      next: (updated) => {
-        this.profile.set(updated);
-        this.saving.set(false);
-        this.editing.set(false);
-        this.saveSuccess.set(true);
-      },
-      error: () => {
-        this.saving.set(false);
-        this.saveError.set('Não foi possível salvar. Tente novamente.');
-      },
-    });
+    const { firstName, lastName, phone, birthDate, acceptsMarketing } = this.form.getRawValue();
+    this.auth
+      .updateProfile({
+        firstName,
+        lastName,
+        phone,
+        birthDate: birthDate ? this.parsePtBrDate(birthDate) : null,
+        acceptsMarketing,
+      })
+      .subscribe({
+        next: (updated) => {
+          this.profile.set(updated);
+          this.saving.set(false);
+          this.editing.set(false);
+          this.saveSuccess.set(true);
+        },
+        error: () => {
+          this.saving.set(false);
+          this.saveError.set('Não foi possível salvar. Tente novamente.');
+        },
+      });
+  }
+
+  formatBirthDate(date: string): string {
+    return this.isoToPtBr(date);
+  }
+
+  private isoToPtBr(iso: string): string {
+    const [y, m, d] = iso.split('-');
+    return `${d}/${m}/${y}`;
+  }
+
+  private parsePtBrDate(value: string): string | null {
+    const match = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(value);
+    if (!match) return null;
+    const [, day, month, year] = match;
+    const d = new Date(+year, +month - 1, +day);
+    if (d.getFullYear() !== +year || d.getMonth() !== +month - 1 || d.getDate() !== +day)
+      return null;
+    return `${year}-${month}-${day}`;
+  }
+
+  maskDate(event: Event): void {
+    const el = event.target as HTMLInputElement;
+    let v = el.value.replace(/\D/g, '').substring(0, 8);
+    if (v.length > 4) v = `${v.substring(0, 2)}/${v.substring(2, 4)}/${v.substring(4)}`;
+    else if (v.length > 2) v = `${v.substring(0, 2)}/${v.substring(2)}`;
+    el.value = v;
+    this.form.controls.birthDate.setValue(v, { emitEvent: false });
   }
 
   maskPhone(event: Event): void {
@@ -119,7 +163,13 @@ export class AccountComponent {
         this.profile.set(p);
         this.profileLoading.set(false);
         if (p) {
-          this.form.setValue({ firstName: p.firstName, lastName: p.lastName, phone: p.phone });
+          this.form.setValue({
+            firstName: p.firstName,
+            lastName: p.lastName,
+            phone: p.phone,
+            birthDate: p.birthDate ? this.isoToPtBr(p.birthDate) : '',
+            acceptsMarketing: p.acceptsMarketing,
+          });
         }
       });
   }

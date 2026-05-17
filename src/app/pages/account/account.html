@@ -99,6 +99,31 @@
               </p>
               <p class="font-tight text-[15px] text-ink">{{ profile()!.phone }}</p>
             </div>
+            @if (profile()!.birthDate) {
+              <div class="h-px bg-border"></div>
+              <div>
+                <p class="font-mono text-[10px] text-ink-3 uppercase tracking-[0.06em] mb-0.5">
+                  Data de nascimento
+                </p>
+                <p class="font-tight text-[15px] text-ink">
+                  {{ formatBirthDate(profile()!.birthDate!) }}
+                </p>
+              </div>
+            }
+            <div class="h-px bg-border"></div>
+            <div class="flex items-center justify-between">
+              <p class="font-mono text-[10px] text-ink-3 uppercase tracking-[0.06em]">
+                Comunicações
+              </p>
+              <span
+                class="font-mono text-[10px] px-2 py-0.5 rounded-full"
+                [class]="
+                  profile()!.acceptsMarketing ? 'bg-accent/10 text-accent' : 'bg-border text-ink-3'
+                "
+              >
+                {{ profile()!.acceptsMarketing ? 'Ativadas' : 'Desativadas' }}
+              </span>
+            </div>
             <div class="h-px bg-border"></div>
             <div>
               <p class="font-mono text-[10px] text-ink-3 uppercase tracking-[0.06em] mb-0.5">
@@ -149,6 +174,42 @@
                 (input)="maskPhone($event)"
                 class="w-full bg-bg border border-border rounded-xl px-3 py-2.5 text-sm text-ink placeholder-ink-3 focus:outline-none focus:border-accent transition-colors"
               />
+            </div>
+            <div>
+              <label class="font-mono text-[10px] text-ink-3 uppercase tracking-[0.06em] block mb-1"
+                >Data de nascimento</label
+              >
+              <input
+                formControlName="birthDate"
+                type="text"
+                inputmode="numeric"
+                maxlength="10"
+                placeholder="DD/MM/AAAA"
+                (input)="maskDate($event)"
+                class="w-full bg-bg border border-border rounded-xl px-3 py-2.5 text-sm text-ink placeholder-ink-3 focus:outline-none focus:border-accent transition-colors"
+              />
+            </div>
+            <div class="flex items-center gap-3 pt-0.5">
+              <div class="relative shrink-0">
+                <input
+                  formControlName="acceptsMarketing"
+                  type="checkbox"
+                  id="acceptsMarketing"
+                  class="peer sr-only"
+                />
+                <label
+                  for="acceptsMarketing"
+                  class="flex h-5 w-9 cursor-pointer items-center rounded-full bg-border transition-colors peer-checked:bg-accent"
+                >
+                  <span
+                    class="ml-0.5 h-4 w-4 rounded-full bg-surface shadow transition-transform"
+                    [class.translate-x-4]="form.controls.acceptsMarketing.value"
+                  ></span>
+                </label>
+              </div>
+              <label for="acceptsMarketing" class="font-mono text-[10px] text-ink-2 cursor-pointer">
+                Aceito receber comunicações de marketing
+              </label>
             </div>
             <div>
               <label class="font-mono text-[10px] text-ink-3 uppercase tracking-[0.06em] block mb-1"

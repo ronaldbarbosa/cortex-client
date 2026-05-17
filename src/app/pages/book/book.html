@@ -89,11 +89,15 @@
             }
           </div>
 
-          @if (selectedService()) {
+          @if (selectedServices().length > 0) {
             <div class="flex items-center justify-between gap-3 pt-2 border-t border-hero-border">
               <div class="flex-1 min-w-0">
                 <p class="font-tight text-[13px] font-semibold text-hero-ink truncate">
-                  {{ selectedService()!.name }}
+                  @if (selectedServices().length === 1) {
+                    {{ selectedServices()[0].name }}
+                  } @else {
+                    {{ selectedServices().length }} serviços
+                  }
                 </p>
                 @if (selectedProfessional()) {
                   <p class="font-mono text-[11px] text-hero-ink-2 mt-0.5">
@@ -109,7 +113,7 @@
                 </div>
               }
               <p class="font-tight text-[14px] font-semibold text-hero-ink shrink-0">
-                {{ formatPrice(selectedService()!.price) }}
+                {{ formatPrice(totalPrice()) }}
               </p>
             </div>
           }
@@ -151,11 +155,15 @@
           <div class="flex flex-col lg:grid lg:grid-cols-2 gap-3">
             @for (service of category.services; track service.id) {
               <button
-                (click)="selectService(service)"
-                class="w-full bg-surface border border-border rounded-2xl p-4 text-left hover:border-accent/50 transition-colors"
-                [class.border-accent]="selectedService()?.id === service.id"
+                (click)="toggleService(service)"
+                class="w-full bg-surface border rounded-2xl p-4 text-left transition-colors"
+                [class]="
+                  isServiceSelected(service.id)
+                    ? 'border-accent bg-accent/5 hover:border-accent'
+                    : 'border-border hover:border-accent/50'
+                "
               >
-                <div class="flex items-start justify-between gap-3">
+                <div class="flex items-start gap-3">
                   <div class="flex-1 min-w-0">
                     <p class="font-tight text-[15px] font-semibold text-ink">{{ service.name }}</p>
                     @if (service.description) {
@@ -175,10 +183,20 @@
                       }}</span>
                     </div>
                   </div>
-                  <div class="shrink-0 text-right">
+                  <div class="shrink-0 flex flex-col items-end gap-2">
                     <p class="font-tight text-[16px] font-semibold text-ink">
                       {{ formatPrice(service.price) }}
                     </p>
+                    <div
+                      class="w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all"
+                      [class]="
+                        isServiceSelected(service.id) ? 'border-accent bg-accent' : 'border-border'
+                      "
+                    >
+                      @if (isServiceSelected(service.id)) {
+                        <app-icon name="check" [size]="10" color="white" [strokeWidth]="2.5" />
+                      }
+                    </div>
                   </div>
                 </div>
               </button>
@@ -186,6 +204,35 @@
           </div>
         </div>
       }
+    }
+
+    @if (selectedServices().length > 0) {
+      <div
+        class="fixed bottom-16 left-0 right-0 px-5 py-3 bg-surface/80 backdrop-blur border-t border-border lg:static lg:bottom-auto lg:bg-transparent lg:backdrop-blur-none lg:border-0 lg:mt-6 lg:px-0 lg:py-0"
+      >
+        <div class="flex items-center justify-between mb-3">
+          <div>
+            <p class="font-mono text-[10px] text-ink-3">
+              {{ selectedServices().length }}
+              {{ selectedServices().length === 1 ? 'serviço' : 'serviços' }} selecionado{{
+                selectedServices().length === 1 ? '' : 's'
+              }}
+            </p>
+            <p class="font-tight text-[15px] font-semibold text-ink">
+              {{ formatPrice(totalPrice()) }}
+            </p>
+          </div>
+          <p class="font-mono text-[11px] text-ink-3">
+            {{ formatDuration(totalDuration()) }} total
+          </p>
+        </div>
+        <button
+          (click)="proceedToStep2()"
+          class="w-full bg-accent text-hero font-semibold text-sm py-3.5 rounded-xl cursor-pointer"
+        >
+          Continuar
+        </button>
+      </div>
     }
   </div>
 }
@@ -397,10 +444,20 @@
     <div class="w-full bg-surface border border-border rounded-2xl p-5 text-left mb-6">
       <div class="flex flex-col gap-3">
         <div>
-          <p class="font-mono text-[10px] text-ink-3 uppercase tracking-[0.06em] mb-0.5">Serviço</p>
-          <p class="font-tight text-[15px] font-semibold text-ink">
-            {{ confirmedAppointment()!.services[0]?.serviceName }}
+          <p class="font-mono text-[10px] text-ink-3 uppercase tracking-[0.06em] mb-1">
+            {{ confirmedAppointment()!.services.length === 1 ? 'Serviço' : 'Serviços' }}
           </p>
+          @for (svc of confirmedAppointment()!.services; track svc.id) {
+            <div class="flex items-center justify-between gap-2">
+              <p class="font-tight text-[15px] font-semibold text-ink">{{ svc.serviceName }}</p>
+              @if (svc.isReward) {
+                <span
+                  class="font-mono text-[9px] uppercase tracking-[0.04em] text-accent bg-accent/10 px-2 py-0.5 rounded-full shrink-0"
+                  >Prêmio</span
+                >
+              }
+            </div>
+          }
         </div>
         <div class="h-px bg-border"></div>
         <div>

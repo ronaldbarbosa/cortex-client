@@ -40,7 +40,7 @@ export class BookComponent implements OnInit, OnDestroy {
   private router = inject(Router);
 
   readonly step = signal<1 | 2 | 3 | 4>(1);
-  readonly selectedService = signal<PublicServiceItem | null>(null);
+  readonly selectedServices = signal<PublicServiceItem[]>([]);
   readonly selectedProfessional = signal<PublicProfessional | null>(null);
   readonly selectedDate = signal<string>(this.toDateString(new Date()));
   readonly selectedSlot = signal<string | null>(null);
@@ -51,7 +51,6 @@ export class BookComponent implements OnInit, OnDestroy {
   readonly loyaltySummary = signal<LoyaltyClientSummaryDto | null>(null);
   readonly includeRewardService = signal(false);
 
-  // null = loading; [] = empty/error; [...] = loaded
   readonly serviceCategories = toSignal(
     this.establishmentService.getServices().pipe(catchError(() => of([]))),
     { initialValue: null },
@@ -79,6 +78,19 @@ export class BookComponent implements OnInit, OnDestroy {
   readonly confirming = signal(false);
   readonly bookingError = signal<string | null>(null);
   readonly confirmedAppointment = signal<AppointmentSummary | null>(null);
+
+  readonly totalPrice = computed(() =>
+    this.selectedServices().reduce((sum, s) => sum + s.price, 0),
+  );
+
+  readonly totalDuration = computed(() => {
+    const base = this.selectedServices().reduce((sum, s) => sum + s.durationMinutes, 0);
+    const reward =
+      this.includeRewardService() && this.rewardServiceItem()
+        ? this.rewardServiceItem()!.durationMinutes
+        : 0;
+    return base + reward;
+  });
 
   readonly rewardServiceItem = computed<PublicServiceItem | null>(() => {
     const program = this.loyaltyProgram();
@@ -143,51 +155,19 @@ export class BookComponent implements OnInit, OnDestroy {
     this.fetchAvailability(this.selectedDate());
   }
 
-  private submitAppointment(): void {
-    const service = this.selectedService();
-    const professional = this.selectedProfessional();
-    const date = this.selectedDate();
-    const slot = this.selectedSlot();
-    const clientId = this.auth.user()?.clientId;
-
-    if (!service || !professional || !slot || !clientId) return;
-
-    const serviceIds = [service.id];
-    if (this.includeRewardService() && this.rewardServiceItem()) {
-      serviceIds.push(this.rewardServiceItem()!.id);
-    }
-
-    this.confirming.set(true);
-    this.bookingError.set(null);
-
-    const startAt = `${date}T${slot}:00Z`;
-
-    this.establishmentService
-      .createAppointment({
-        clientId,
-        professionalId: professional.id,
-        startAt,
-        serviceIds,
-        rewardServiceId:
-          this.includeRewardService() && this.rewardServiceItem()
-            ? this.rewardServiceItem()!.id
-            : undefined,
-      })
-      .subscribe({
-        next: (appointment) => {
-          this.confirming.set(false);
-          this.confirmedAppointment.set(appointment);
-          this.step.set(4);
-        },
-        error: () => {
-          this.confirming.set(false);
-          this.bookingError.set('Não foi possível confirmar o agendamento. Tente novamente.');
-        },
-      });
+  toggleService(service: PublicServiceItem): void {
+    this.selectedServices.update((current) => {
+      const idx = current.findIndex((s) => s.id === service.id);
+      return idx >= 0 ? current.filter((s) => s.id !== service.id) : [...current, service];
+    });
   }
 
-  selectService(service: PublicServiceItem): void {
-    this.selectedService.set(service);
+  isServiceSelected(serviceId: string): boolean {
+    return this.selectedServices().some((s) => s.id === serviceId);
+  }
+
+  proceedToStep2(): void {
+    if (this.selectedServices().length === 0) return;
     this.step.set(2);
   }
 
@@ -243,16 +223,54 @@ export class BookComponent implements OnInit, OnDestroy {
     this.router.navigate(['/s', slug, 'historico']);
   }
 
+  private submitAppointment(): void {
+    const services = this.selectedServices();
+    const professional = this.selectedProfessional();
+    const date = this.selectedDate();
+    const slot = this.selectedSlot();
+    const clientId = this.auth.user()?.clientId;
+
+    if (!services.length || !professional || !slot || !clientId) return;
+
+    const serviceIds = services.map((s) => s.id);
+    if (this.includeRewardService() && this.rewardServiceItem()) {
+      serviceIds.push(this.rewardServiceItem()!.id);
+    }
+
+    this.confirming.set(true);
+    this.bookingError.set(null);
+
+    const startAt = `${date}T${slot}:00Z`;
+
+    this.establishmentService
+      .createAppointment({
+        clientId,
+        professionalId: professional.id,
+        startAt,
+        serviceIds,
+        rewardServiceId:
+          this.includeRewardService() && this.rewardServiceItem()
+            ? this.rewardServiceItem()!.id
+            : undefined,
+      })
+      .subscribe({
+        next: (appointment) => {
+          this.confirming.set(false);
+          this.confirmedAppointment.set(appointment);
+          this.step.set(4);
+        },
+        error: () => {
+          this.confirming.set(false);
+          this.bookingError.set('Não foi possível confirmar o agendamento. Tente novamente.');
+        },
+      });
+  }
+
   private fetchAvailability(date: string): void {
     const professional = this.selectedProfessional();
-    const service = this.selectedService();
-    if (!professional || !service) return;
+    if (!professional || this.selectedServices().length === 0) return;
 
-    const rewardDuration =
-      this.includeRewardService() && this.rewardServiceItem()
-        ? this.rewardServiceItem()!.durationMinutes
-        : 0;
-    const totalDuration = service.durationMinutes + rewardDuration;
+    const totalDuration = this.totalDuration();
 
     this.availabilitySub?.unsubscribe();
     this.availabilityLoading.set(true);

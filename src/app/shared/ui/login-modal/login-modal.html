@@ -212,6 +212,9 @@
               formControlName="phone"
               placeholder="(11) 99999-9999"
               autocomplete="tel"
+              inputmode="numeric"
+              maxlength="15"
+              (input)="maskPhone($event)"
               class="w-full bg-hero border border-hero-border rounded-xl px-4 py-3 text-sm text-hero-ink placeholder:text-hero-ink-2 focus:outline-none focus:border-accent transition-colors"
               [class.border-red-500]="regPhone.invalid && regPhone.touched"
             />

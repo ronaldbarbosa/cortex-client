@@ -83,6 +83,23 @@ export class AccountComponent {
     });
   }
 
+  maskPhone(event: Event): void {
+    const el = event.target as HTMLInputElement;
+    const d = el.value.replace(/\D/g, '').substring(0, 11);
+    let v = '';
+    if (d.length === 0) {
+      el.value = '';
+      this.form.controls.phone.setValue('', { emitEvent: false });
+      return;
+    }
+    if (d.length <= 2) v = `(${d}`;
+    else if (d.length <= 6) v = `(${d.substring(0, 2)}) ${d.substring(2)}`;
+    else if (d.length <= 10) v = `(${d.substring(0, 2)}) ${d.substring(2, 6)}-${d.substring(6)}`;
+    else v = `(${d.substring(0, 2)}) ${d.substring(2, 7)}-${d.substring(7)}`;
+    el.value = v;
+    this.form.controls.phone.setValue(v, { emitEvent: false });
+  }
+
   logout(): void {
     this.auth.logout();
   }

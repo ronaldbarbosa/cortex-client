@@ -143,6 +143,10 @@
               <input
                 formControlName="phone"
                 type="tel"
+                inputmode="numeric"
+                maxlength="15"
+                placeholder="(11) 99999-9999"
+                (input)="maskPhone($event)"
                 class="w-full bg-bg border border-border rounded-xl px-3 py-2.5 text-sm text-ink placeholder-ink-3 focus:outline-none focus:border-accent transition-colors"
               />
             </div>

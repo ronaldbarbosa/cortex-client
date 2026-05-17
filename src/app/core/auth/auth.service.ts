@@ -123,7 +123,10 @@ export class AuthService {
   private decodeUser(token: string): ClientUser | null {
     try {
       const payload = token.split('.')[1];
-      const claims = JSON.parse(atob(payload.replace(/-/g, '+').replace(/_/g, '/')));
+      const bytes = Uint8Array.from(atob(payload.replace(/-/g, '+').replace(/_/g, '/')), (c) =>
+        c.charCodeAt(0),
+      );
+      const claims = JSON.parse(new TextDecoder().decode(bytes));
       const fullName: string = claims['name'] ?? claims['email'] ?? '';
       const [firstName = '', ...rest] = fullName.split(' ');
       return {

@@ -126,7 +126,7 @@ export class LoyaltyComponent implements OnInit, OnDestroy {
       day: 'numeric',
       month: 'short',
       year: 'numeric',
-      timeZone: 'UTC',
+      timeZone: 'America/Sao_Paulo',
     }).format(new Date(isoDate));
   }
 

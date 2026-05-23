@@ -176,7 +176,7 @@ export class HistoryComponent implements OnInit {
       .rescheduleAppointment(appt.id, {
         clientId: appt.clientId,
         professionalId: appt.professionalId,
-        startAt: `${date}T${slot}:00Z`,
+        startAt: new Date(`${date}T${slot}:00`).toISOString(),
         serviceIds: appt.services.map((s) => s.serviceId),
         rewardServiceId: rewardService?.serviceId,
       })
@@ -226,7 +226,7 @@ export class HistoryComponent implements OnInit {
       year: 'numeric',
       hour: '2-digit',
       minute: '2-digit',
-      timeZone: 'UTC',
+      timeZone: 'America/Sao_Paulo',
     }).format(new Date(isoDate));
   }
 

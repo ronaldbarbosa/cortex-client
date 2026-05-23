@@ -34,6 +34,11 @@ export const routes: Routes = [
             loadComponent: () => import('./pages/history/history').then((m) => m.HistoryComponent),
           },
           {
+            path: 'profissionais',
+            loadComponent: () =>
+              import('./pages/professionals/professionals').then((m) => m.ProfessionalsComponent),
+          },
+          {
             path: 'conta',
             loadComponent: () => import('./pages/account/account').then((m) => m.AccountComponent),
           },

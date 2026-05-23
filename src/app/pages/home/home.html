@@ -195,64 +195,130 @@
     <div class="flex items-center justify-between mb-4">
       <h2 class="font-tight text-[15px] font-semibold text-ink">Profissionais favoritos</h2>
       <a
-        [routerLink]="['/s', slug(), 'agendar']"
+        [routerLink]="['/s', slug(), 'profissionais']"
         class="font-mono text-[10px] text-ink-3 uppercase tracking-[0.06em] hover:text-accent transition-colors"
       >
         Ver todos
       </a>
     </div>
 
-    <!-- Mobile: horizontal scroll -->
-    <div class="flex gap-3 overflow-x-auto pb-1 -mx-5 px-5 scrollbar-none lg:hidden">
-      @for (pro of favoriteProfessionals; track pro.name) {
-        <a
-          [routerLink]="['/s', slug(), 'agendar']"
-          class="shrink-0 bg-surface border border-border rounded-2xl p-4 flex flex-col items-center gap-2 w-28 hover:border-accent/40 transition-colors"
-        >
+    @if (favoriteProfessionals() === null) {
+      <!-- Loading skeletons -->
+      <div class="flex gap-3 overflow-x-auto pb-1 -mx-5 px-5 scrollbar-none lg:hidden">
+        @for (i of skeletonItems; track i) {
           <div
-            class="w-12 h-12 rounded-full bg-accent/15 flex items-center justify-center font-tight font-bold text-[15px] text-accent"
+            class="shrink-0 bg-surface border border-border rounded-2xl p-4 flex flex-col items-center gap-2 w-28"
           >
-            {{ pro.initials }}
+            <div class="w-12 h-12 rounded-full bg-border animate-pulse"></div>
+            <div class="flex flex-col items-center gap-1.5 w-full">
+              <div class="h-3 w-16 bg-border rounded animate-pulse"></div>
+              <div class="h-2.5 w-10 bg-border rounded animate-pulse"></div>
+            </div>
           </div>
-          <div class="text-center">
-            <p class="font-tight text-[13px] font-semibold text-ink leading-tight">
-              {{ pro.name }}
+        }
+      </div>
+      <div class="hidden lg:grid grid-cols-4 xl:grid-cols-5 gap-3">
+        @for (i of skeletonItems; track i) {
+          <div
+            class="bg-surface border border-border rounded-2xl p-4 flex flex-col items-center gap-2"
+          >
+            <div class="w-12 h-12 rounded-full bg-border animate-pulse"></div>
+            <div class="flex flex-col items-center gap-1.5 w-full">
+              <div class="h-3 w-16 bg-border rounded animate-pulse"></div>
+              <div class="h-2.5 w-10 bg-border rounded animate-pulse"></div>
+            </div>
+          </div>
+        }
+      </div>
+    } @else if (favoriteProfessionals()!.length === 0) {
+      @if (!isAuthenticated()) {
+        <div
+          class="bg-surface border border-border rounded-2xl p-5 flex flex-col items-center text-center gap-3"
+        >
+          <div class="w-10 h-10 rounded-full bg-border flex items-center justify-center">
+            <app-icon name="user" [size]="18" color="var(--color-ink-3)" [strokeWidth]="1.6" />
+          </div>
+          <div>
+            <p class="font-tight text-[14px] font-medium text-ink mb-1">
+              Faça login para ver seus favoritos
             </p>
-            <p class="font-mono text-[9px] text-ink-3 mt-0.5">{{ pro.role }}</p>
+            <p class="font-mono text-[11px] text-ink-3">
+              Seus profissionais mais frequentes aparecem aqui.
+            </p>
           </div>
-          <div class="flex items-center gap-1">
-            <app-icon name="star" [size]="10" color="var(--color-accent)" [strokeWidth]="2" />
-            <span class="font-mono text-[10px] text-ink-2">{{ pro.rating }}</span>
+          <a
+            [routerLink]="['/s', slug(), 'login']"
+            class="bg-accent text-hero font-semibold text-sm px-5 py-2.5 rounded-xl transition-opacity hover:opacity-90"
+          >
+            Entrar
+          </a>
+        </div>
+      } @else {
+        <div
+          class="bg-surface border border-border rounded-2xl p-5 flex flex-col items-center text-center gap-3"
+        >
+          <div class="w-10 h-10 rounded-full bg-border flex items-center justify-center">
+            <app-icon name="user" [size]="18" color="var(--color-ink-3)" [strokeWidth]="1.6" />
           </div>
-        </a>
+          <div>
+            <p class="font-tight text-[14px] font-medium text-ink mb-1">Nenhum favorito ainda</p>
+            <p class="font-mono text-[11px] text-ink-3">
+              Seus profissionais mais frequentes aparecerão aqui.
+            </p>
+          </div>
+        </div>
       }
-    </div>
+    } @else {
+      <!-- Mobile: horizontal scroll -->
+      <div class="flex gap-3 overflow-x-auto pb-1 -mx-5 px-5 scrollbar-none lg:hidden">
+        @for (pro of favoriteProfessionals()!; track pro.id) {
+          <a
+            [routerLink]="['/s', slug(), 'agendar']"
+            [queryParams]="{ professionalId: pro.id }"
+            class="shrink-0 bg-surface border border-border rounded-2xl p-4 flex flex-col items-center gap-2 w-28 hover:border-accent/40 transition-colors"
+          >
+            <div
+              class="w-12 h-12 rounded-full bg-accent/15 flex items-center justify-center font-tight font-bold text-[15px] text-accent"
+            >
+              {{ pro.initials }}
+            </div>
+            <div class="text-center">
+              <p class="font-tight text-[13px] font-semibold text-ink leading-tight">
+                {{ pro.name }}
+              </p>
+              <p class="font-mono text-[9px] text-ink-3 mt-0.5">
+                {{ pro.visitCount }} {{ pro.visitCount === 1 ? 'visita' : 'visitas' }}
+              </p>
+            </div>
+          </a>
+        }
+      </div>
 
-    <!-- Desktop: grid -->
-    <div class="hidden lg:grid grid-cols-4 xl:grid-cols-5 gap-3">
-      @for (pro of favoriteProfessionals; track pro.name) {
-        <a
-          [routerLink]="['/s', slug(), 'agendar']"
-          class="bg-surface border border-border rounded-2xl p-4 flex flex-col items-center gap-2 hover:border-accent/40 transition-colors"
-        >
-          <div
-            class="w-12 h-12 rounded-full bg-accent/15 flex items-center justify-center font-tight font-bold text-[15px] text-accent"
+      <!-- Desktop: grid -->
+      <div class="hidden lg:grid grid-cols-4 xl:grid-cols-5 gap-3">
+        @for (pro of favoriteProfessionals()!; track pro.id) {
+          <a
+            [routerLink]="['/s', slug(), 'agendar']"
+            [queryParams]="{ professionalId: pro.id }"
+            class="bg-surface border border-border rounded-2xl p-4 flex flex-col items-center gap-2 hover:border-accent/40 transition-colors"
           >
-            {{ pro.initials }}
-          </div>
-          <div class="text-center">
-            <p class="font-tight text-[13px] font-semibold text-ink leading-tight">
-              {{ pro.name }}
-            </p>
-            <p class="font-mono text-[9px] text-ink-3 mt-0.5">{{ pro.role }}</p>
-          </div>
-          <div class="flex items-center gap-1">
-            <app-icon name="star" [size]="10" color="var(--color-accent)" [strokeWidth]="2" />
-            <span class="font-mono text-[10px] text-ink-2">{{ pro.rating }}</span>
-          </div>
-        </a>
-      }
-    </div>
+            <div
+              class="w-12 h-12 rounded-full bg-accent/15 flex items-center justify-center font-tight font-bold text-[15px] text-accent"
+            >
+              {{ pro.initials }}
+            </div>
+            <div class="text-center">
+              <p class="font-tight text-[13px] font-semibold text-ink leading-tight">
+                {{ pro.name }}
+              </p>
+              <p class="font-mono text-[9px] text-ink-3 mt-0.5">
+                {{ pro.visitCount }} {{ pro.visitCount === 1 ? 'visita' : 'visitas' }}
+              </p>
+            </div>
+          </a>
+        }
+      </div>
+    }
   </div>
 
   <div class="h-2"></div>

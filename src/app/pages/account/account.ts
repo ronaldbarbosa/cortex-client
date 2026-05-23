@@ -61,7 +61,7 @@ export class AccountComponent {
       this.form.setValue({
         firstName: p.firstName,
         lastName: p.lastName,
-        phone: p.phone,
+        phone: this.formatPhone(p.phone),
         birthDate: p.birthDate ? this.isoToPtBr(p.birthDate) : '',
         acceptsMarketing: p.acceptsMarketing,
       });
@@ -120,28 +120,32 @@ export class AccountComponent {
 
   maskDate(event: Event): void {
     const el = event.target as HTMLInputElement;
-    let v = el.value.replace(/\D/g, '').substring(0, 8);
-    if (v.length > 4) v = `${v.substring(0, 2)}/${v.substring(2, 4)}/${v.substring(4)}`;
-    else if (v.length > 2) v = `${v.substring(0, 2)}/${v.substring(2)}`;
+    const v = this.applyDateMask(el.value);
     el.value = v;
     this.form.controls.birthDate.setValue(v, { emitEvent: false });
   }
 
   maskPhone(event: Event): void {
     const el = event.target as HTMLInputElement;
-    const d = el.value.replace(/\D/g, '').substring(0, 11);
-    let v = '';
-    if (d.length === 0) {
-      el.value = '';
-      this.form.controls.phone.setValue('', { emitEvent: false });
-      return;
-    }
-    if (d.length <= 2) v = `(${d}`;
-    else if (d.length <= 6) v = `(${d.substring(0, 2)}) ${d.substring(2)}`;
-    else if (d.length <= 10) v = `(${d.substring(0, 2)}) ${d.substring(2, 6)}-${d.substring(6)}`;
-    else v = `(${d.substring(0, 2)}) ${d.substring(2, 7)}-${d.substring(7)}`;
+    const v = this.formatPhone(el.value);
     el.value = v;
     this.form.controls.phone.setValue(v, { emitEvent: false });
+  }
+
+  private formatPhone(raw: string): string {
+    const d = raw.replace(/\D/g, '').substring(0, 11);
+    if (d.length === 0) return '';
+    if (d.length <= 2) return `(${d}`;
+    if (d.length <= 6) return `(${d.substring(0, 2)}) ${d.substring(2)}`;
+    if (d.length <= 10) return `(${d.substring(0, 2)}) ${d.substring(2, 6)}-${d.substring(6)}`;
+    return `(${d.substring(0, 2)}) ${d.substring(2, 7)}-${d.substring(7)}`;
+  }
+
+  private applyDateMask(raw: string): string {
+    let v = raw.replace(/\D/g, '').substring(0, 8);
+    if (v.length > 4) v = `${v.substring(0, 2)}/${v.substring(2, 4)}/${v.substring(4)}`;
+    else if (v.length > 2) v = `${v.substring(0, 2)}/${v.substring(2)}`;
+    return v;
   }
 
   logout(): void {
@@ -166,7 +170,7 @@ export class AccountComponent {
           this.form.setValue({
             firstName: p.firstName,
             lastName: p.lastName,
-            phone: p.phone,
+            phone: this.formatPhone(p.phone),
             birthDate: p.birthDate ? this.isoToPtBr(p.birthDate) : '',
             acceptsMarketing: p.acceptsMarketing,
           });

@@ -1,6 +1,6 @@
 import { Component, computed, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { catchError, of, Subscription } from 'rxjs';
 import { IconComponent } from '../../shared/ui/icon/icon';
 import { AuthModalService } from '../../core/auth/auth-modal.service';
@@ -38,6 +38,7 @@ export class BookComponent implements OnInit, OnDestroy {
   private authModal = inject(AuthModalService);
   private tenantContext = inject(TenantContextService);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
 
   readonly step = signal<1 | 2 | 3 | 4>(1);
   readonly selectedServices = signal<PublicServiceItem[]>([]);
@@ -56,10 +57,7 @@ export class BookComponent implements OnInit, OnDestroy {
     { initialValue: null },
   );
 
-  readonly professionals = toSignal(
-    this.establishmentService.getProfessionals().pipe(catchError(() => of([]))),
-    { initialValue: null },
-  );
+  readonly professionals = signal<PublicProfessional[] | null>(null);
 
   readonly dates = computed<DateOption[]>(() => {
     const today = new Date();
@@ -122,6 +120,19 @@ export class BookComponent implements OnInit, OnDestroy {
   private loyaltyLoginSub?: Subscription;
 
   ngOnInit(): void {
+    const preselectedId = this.route.snapshot.queryParamMap.get('professionalId');
+
+    this.establishmentService
+      .getProfessionals()
+      .pipe(catchError(() => of([])))
+      .subscribe((list) => {
+        this.professionals.set(list);
+        if (preselectedId) {
+          const found = list.find((p) => p.id === preselectedId);
+          if (found) this.selectedProfessional.set(found);
+        }
+      });
+
     this.loyaltyService
       .getProgram()
       .pipe(catchError(() => of(null)))
@@ -168,7 +179,14 @@ export class BookComponent implements OnInit, OnDestroy {
 
   proceedToStep2(): void {
     if (this.selectedServices().length === 0) return;
-    this.step.set(2);
+    if (this.selectedProfessional()) {
+      this.selectedSlot.set(null);
+      this.includeRewardService.set(false);
+      this.step.set(3);
+      this.fetchAvailability(this.selectedDate());
+    } else {
+      this.step.set(2);
+    }
   }
 
   selectProfessional(professional: PublicProfessional): void {
@@ -209,7 +227,7 @@ export class BookComponent implements OnInit, OnDestroy {
       year: 'numeric',
       hour: '2-digit',
       minute: '2-digit',
-      timeZone: 'UTC',
+      timeZone: 'America/Sao_Paulo',
     }).format(new Date(isoDate));
   }
 
@@ -240,7 +258,7 @@ export class BookComponent implements OnInit, OnDestroy {
     this.confirming.set(true);
     this.bookingError.set(null);
 
-    const startAt = `${date}T${slot}:00Z`;
+    const startAt = new Date(`${date}T${slot}:00`).toISOString();
 
     this.establishmentService
       .createAppointment({

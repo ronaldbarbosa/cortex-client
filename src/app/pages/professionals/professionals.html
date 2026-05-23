@@ -1,0 +1,75 @@
+<!-- Hero (dark) -->
+<section class="bg-hero text-hero-ink">
+  <div class="max-w-5xl mx-auto px-5 lg:px-8">
+    <div class="pt-10 pb-8">
+      <p class="font-mono text-[10px] text-hero-ink-2 uppercase tracking-[0.06em] mb-1">
+        {{ tenantName() }}
+      </p>
+      <h1 class="font-tight text-2xl lg:text-3xl font-semibold tracking-tight">Profissionais</h1>
+    </div>
+  </div>
+</section>
+
+<!-- Body -->
+<section class="max-w-5xl mx-auto px-5 lg:px-8 pt-6 pb-8">
+  @if (professionals() === null) {
+    <div class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+      @for (i of skeletonItems; track i) {
+        <div
+          class="bg-surface border border-border rounded-2xl p-5 flex flex-col items-center gap-3"
+        >
+          <div class="w-16 h-16 rounded-full bg-border animate-pulse"></div>
+          <div class="flex flex-col items-center gap-2 w-full">
+            <div class="h-4 w-24 bg-border rounded animate-pulse"></div>
+            <div class="h-3 w-16 bg-border rounded animate-pulse"></div>
+          </div>
+          <div class="h-8 w-full bg-border rounded-xl animate-pulse"></div>
+        </div>
+      }
+    </div>
+  } @else if (professionals()!.length === 0) {
+    <div class="flex flex-col items-center text-center gap-3 py-16">
+      <div class="w-12 h-12 rounded-full bg-border flex items-center justify-center">
+        <app-icon name="user" [size]="22" color="var(--color-ink-3)" [strokeWidth]="1.6" />
+      </div>
+      <div>
+        <p class="font-tight text-[15px] font-medium text-ink mb-1">
+          Nenhum profissional disponível
+        </p>
+        <p class="font-mono text-[11px] text-ink-3">Volte em breve.</p>
+      </div>
+    </div>
+  } @else {
+    <div class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+      @for (pro of professionals()!; track pro.id) {
+        <a
+          [routerLink]="['/s', slug(), 'agendar']"
+          [queryParams]="{ professionalId: pro.id }"
+          class="bg-surface border border-border rounded-2xl p-5 flex flex-col items-center gap-3 hover:border-accent/40 transition-colors"
+        >
+          <div
+            class="w-16 h-16 rounded-full bg-accent/15 flex items-center justify-center font-tight font-bold text-xl text-accent"
+          >
+            {{ getInitials(pro.displayName) }}
+          </div>
+          <div class="text-center flex-1 flex flex-col gap-1 w-full">
+            <p class="font-tight text-[14px] font-semibold text-ink leading-tight">
+              {{ pro.displayName }}
+            </p>
+            @if (pro.bio) {
+              <p class="font-mono text-[10px] text-ink-3 leading-relaxed line-clamp-2">
+                {{ pro.bio }}
+              </p>
+            }
+          </div>
+          <div
+            class="w-full flex items-center justify-center gap-1.5 bg-accent/10 text-accent font-mono text-[10px] uppercase tracking-[0.06em] px-3 py-2 rounded-xl"
+          >
+            <app-icon name="calendar" [size]="11" color="var(--color-accent)" [strokeWidth]="2" />
+            Agendar
+          </div>
+        </a>
+      }
+    </div>
+  }
+</section>

@@ -28,7 +28,8 @@ export interface LoyaltyClientSummaryDto {
 export interface LoyaltyTransactionDto {
   id: string;
   type: 'Earn' | 'Redeem' | 'Expire';
-  amount: number;
+  pointsDelta: number;
+  cashbackDelta: number;
   description: string;
   createdAt: string;
 }

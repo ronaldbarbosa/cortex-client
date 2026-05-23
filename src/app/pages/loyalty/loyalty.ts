@@ -102,13 +102,25 @@ export class LoyaltyComponent implements OnInit, OnDestroy {
   }
 
   transactionTypeLabel(type: string): string {
-    if (type === 'Earn') return 'Acúmulo';
+    const p = this.program();
+    if (type === 'Earn') {
+      if (p?.type === 'Visits') return 'Visita registrada';
+      if (p?.type === 'Cashback') return 'Cashback acumulado';
+      return 'Pontos ganhos';
+    }
     if (type === 'Redeem') return 'Resgate';
     return 'Expirado';
   }
 
-  transactionSign(type: string): string {
-    return type === 'Earn' ? '+' : '-';
+  transactionAmountLabel(tx: LoyaltyTransactionDto): string {
+    const p = this.program();
+    const sign = tx.type === 'Earn' ? '+' : '-';
+    if (p?.type === 'Cashback') return `${sign}${this.formatPrice(Math.abs(tx.cashbackDelta))}`;
+    if (p?.type === 'Visits') {
+      const n = Math.abs(tx.pointsDelta);
+      return `${sign}${n} ${n === 1 ? 'visita' : 'visitas'}`;
+    }
+    return `${sign}${Math.abs(tx.pointsDelta)} pts`;
   }
 
   transactionAmountClass(type: string): string {

@@ -117,7 +117,7 @@
       @for (i of [1, 2, 3]; track i) {
         <div
           class="grid items-center px-5 py-4 gap-4 bg-surface border-b border-border last:border-0"
-          style="grid-template-columns: 160px 2fr 1fr 100px 110px 220px"
+          style="grid-template-columns: 160px 2fr 1fr 100px 110px auto"
         >
           <div class="h-3 w-28 bg-border rounded"></div>
           <div class="h-4 w-40 bg-border rounded"></div>
@@ -163,7 +163,7 @@
           </div>
 
           <!-- Status badge -->
-          <div class="mb-3">
+          <div [class.mb-3]="isUpcoming(appt)">
             <span
               class="inline-flex items-center px-2 py-0.5 rounded-full border font-mono text-[9px] uppercase tracking-[0.06em]"
               [ngClass]="statusClass(appt.status)"
@@ -173,8 +173,8 @@
           </div>
 
           <!-- Actions -->
-          <div class="flex gap-2">
-            @if (isUpcoming(appt)) {
+          @if (isUpcoming(appt)) {
+            <div class="flex gap-2">
               <button
                 (click)="openReschedule(appt)"
                 class="flex-1 flex items-center justify-center gap-1.5 border border-border rounded-xl py-2.5 font-mono text-[10px] text-ink-2 uppercase tracking-[0.06em] hover:border-accent/50 hover:text-accent transition-colors cursor-pointer"
@@ -196,21 +196,8 @@
                 }
                 {{ cancelling() === appt.id ? 'Cancelando…' : 'Cancelar' }}
               </button>
-            } @else if (appt.status === 'Completed') {
-              <button
-                class="flex-1 flex items-center justify-center gap-1.5 border border-border rounded-xl py-2.5 font-mono text-[10px] text-ink-2 uppercase tracking-[0.06em] hover:border-accent/50 hover:text-accent transition-colors cursor-pointer"
-              >
-                <app-icon name="star" [size]="12" [strokeWidth]="1.6" />
-                Avaliar
-              </button>
-              <button
-                class="flex-1 flex items-center justify-center gap-1.5 border border-border rounded-xl py-2.5 font-mono text-[10px] text-ink-2 uppercase tracking-[0.06em] hover:border-accent/50 hover:text-accent transition-colors cursor-pointer"
-              >
-                <app-icon name="repeat" [size]="12" [strokeWidth]="1.6" />
-                Repetir
-              </button>
-            }
-          </div>
+            </div>
+          }
         </div>
       }
     </div>
@@ -219,7 +206,7 @@
     <div class="hidden lg:block rounded-xl border border-border overflow-hidden">
       <div
         class="grid text-xs font-semibold text-ink-3 uppercase tracking-wide px-5 py-3 border-b border-border bg-bg"
-        style="grid-template-columns: 160px 2fr 1fr 100px 110px 220px"
+        style="grid-template-columns: 160px 2fr 1fr 100px 110px auto"
       >
         <div>Data</div>
         <div>Serviço</div>
@@ -235,7 +222,7 @@
           [class.border-b]="!last"
           [class.border-border]="!last"
           [class.opacity-60]="appt.status === 'Cancelled' || appt.status === 'NoShow'"
-          style="grid-template-columns: 160px 2fr 1fr 100px 110px 220px"
+          style="grid-template-columns: 160px 2fr 1fr 100px 110px auto"
         >
           <div class="font-mono text-[11px] text-ink-3">{{ formatDate(appt.startAt) }}</div>
           <div class="font-tight text-sm font-medium text-ink truncate">
@@ -275,19 +262,6 @@
                   <app-icon name="x" [size]="11" [strokeWidth]="2" />
                 }
                 {{ cancelling() === appt.id ? 'Cancelando…' : 'Cancelar' }}
-              </button>
-            } @else if (appt.status === 'Completed') {
-              <button
-                class="flex items-center gap-1.5 px-3 py-1.5 border border-border rounded-lg font-mono text-[10px] text-ink-2 uppercase tracking-wide hover:border-accent/50 hover:text-accent transition-colors cursor-pointer"
-              >
-                <app-icon name="star" [size]="11" [strokeWidth]="1.6" />
-                Avaliar
-              </button>
-              <button
-                class="flex items-center gap-1.5 px-3 py-1.5 border border-border rounded-lg font-mono text-[10px] text-ink-2 uppercase tracking-wide hover:border-accent/50 hover:text-accent transition-colors cursor-pointer"
-              >
-                <app-icon name="repeat" [size]="11" [strokeWidth]="1.6" />
-                Repetir
               </button>
             }
           </div>

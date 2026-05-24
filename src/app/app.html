@@ -1,1 +1,7 @@
 <router-outlet />
+
+@if (loading.isLoading()) {
+  <div class="loading-overlay">
+    <app-loader variant="draw" theme="light" [size]="72" />
+  </div>
+}

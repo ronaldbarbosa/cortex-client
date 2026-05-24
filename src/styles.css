@@ -5,17 +5,25 @@
   --font-tight: 'Inter Tight', sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
 
-  --color-ink: #1a1815;
-  --color-ink-2: #57534e;
-  --color-ink-3: #a8a29e;
+  /* Surfaces — Chocolate & Amber (light only) */
   --color-surface: #ffffff;
-  --color-bg: #f5f4f1;
-  --color-border: #e7e5e0;
+  --color-bg: #faf8f5;
+  --color-border: #e0d8cc;
+
+  /* Hierarquia de texto */
+  --color-ink: #14110e;
+  --color-ink-2: #3d2f24;
+  --color-ink-3: #6b5d44;
+
+  /* Brand — âmbar (oklch nativo) */
   --color-accent: oklch(0.65 0.13 60);
-  --color-hero: #14110e;
+  --color-accent-soft: #faf3e8;
+
+  /* Hero section — fundo escuro fixo, não muda com tema */
+  --color-hero: #0a0806;
   --color-hero-ink: #f5f3ee;
   --color-hero-ink-2: #b8b3a8;
-  --color-hero-surface: #1c1916;
+  --color-hero-surface: #14110e;
   --color-hero-border: #2a2622;
 }
 

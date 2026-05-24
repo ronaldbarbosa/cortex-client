@@ -8,12 +8,13 @@ import { provideRouter } from '@angular/router';
 import { routes } from './app.routes';
 import { AuthService } from './core/auth/auth.service';
 import { authInterceptor } from './core/auth/auth.interceptor';
+import { loadingInterceptor } from './core/loading/loading.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes),
-    provideHttpClient(withInterceptors([authInterceptor])),
+    provideHttpClient(withInterceptors([authInterceptor, loadingInterceptor])),
     {
       provide: APP_INITIALIZER,
       useFactory: (auth: AuthService) => () => auth.restoreSession(),

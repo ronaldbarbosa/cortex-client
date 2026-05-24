@@ -47,8 +47,9 @@
             </div>
             <button
               (click)="openLoginModal()"
-              class="bg-accent text-hero font-semibold text-sm px-5 py-2.5 rounded-xl transition-opacity hover:opacity-90"
+              class="flex items-center gap-2 bg-accent text-hero font-semibold text-sm px-5 py-2.5 rounded-xl transition-opacity hover:opacity-90"
             >
+              <app-icon name="arrowR" [size]="15" />
               Entrar
             </button>
           </div>
@@ -182,8 +183,9 @@
             </div>
             <button
               (click)="openLoginModal()"
-              class="shrink-0 bg-accent text-hero font-semibold text-sm px-5 py-2.5 rounded-xl transition-opacity hover:opacity-90"
+              class="shrink-0 flex items-center gap-2 bg-accent text-hero font-semibold text-sm px-5 py-2.5 rounded-xl transition-opacity hover:opacity-90"
             >
+              <app-icon name="arrowR" [size]="15" />
               Entrar
             </button>
           </div>
@@ -299,8 +301,9 @@
         </div>
         <button
           (click)="openLoginModal()"
-          class="bg-accent text-hero font-semibold text-sm px-5 py-2.5 rounded-xl transition-opacity hover:opacity-90"
+          class="flex items-center gap-2 bg-accent text-hero font-semibold text-sm px-5 py-2.5 rounded-xl transition-opacity hover:opacity-90"
         >
+          <app-icon name="arrowR" [size]="15" />
           Entrar
         </button>
       </div>
@@ -322,8 +325,9 @@
             <button
               (click)="redeem()"
               [disabled]="redeeming()"
-              class="shrink-0 bg-accent text-hero font-semibold text-sm px-4 py-2.5 rounded-xl transition-opacity hover:opacity-90 disabled:opacity-50"
+              class="shrink-0 flex items-center gap-2 bg-accent text-hero font-semibold text-sm px-4 py-2.5 rounded-xl transition-opacity hover:opacity-90 disabled:opacity-50"
             >
+              <app-icon name="check" [size]="15" />
               {{ redeeming() ? 'Resgatando...' : 'Resgatar' }}
             </button>
           </div>
@@ -352,8 +356,9 @@
             <button
               (click)="redeem()"
               [disabled]="redeeming()"
-              class="shrink-0 bg-accent text-hero font-semibold text-sm px-4 py-2.5 rounded-xl transition-opacity hover:opacity-90 disabled:opacity-50"
+              class="shrink-0 flex items-center gap-2 bg-accent text-hero font-semibold text-sm px-4 py-2.5 rounded-xl transition-opacity hover:opacity-90 disabled:opacity-50"
             >
+              <app-icon name="check" [size]="15" />
               {{ redeeming() ? 'Resgatando...' : 'Resgatar' }}
             </button>
           </div>

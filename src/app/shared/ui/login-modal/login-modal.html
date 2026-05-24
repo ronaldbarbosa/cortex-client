@@ -138,6 +138,8 @@
               <span
                 class="w-4 h-4 rounded-full border-2 border-hero/30 border-t-hero animate-spin"
               ></span>
+            } @else {
+              <app-icon name="arrowR" [size]="15" />
             }
             {{ loading() ? 'Entrando…' : 'Entrar' }}
           </button>
@@ -261,6 +263,8 @@
               <span
                 class="w-4 h-4 rounded-full border-2 border-hero/30 border-t-hero animate-spin"
               ></span>
+            } @else {
+              <app-icon name="arrowR" [size]="15" />
             }
             {{ loading() ? 'Criando conta…' : 'Criar conta' }}
           </button>

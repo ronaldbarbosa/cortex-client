@@ -228,8 +228,9 @@
         </div>
         <button
           (click)="proceedToStep2()"
-          class="w-full bg-accent text-hero font-semibold text-sm py-3.5 rounded-xl cursor-pointer"
+          class="w-full flex items-center justify-center gap-2 bg-accent text-hero font-semibold text-sm py-3.5 rounded-xl cursor-pointer"
         >
+          <app-icon name="arrowR" [size]="16" />
           Continuar
         </button>
       </div>
@@ -417,6 +418,8 @@
             <span
               class="w-4 h-4 rounded-full border-2 border-hero/30 border-t-hero animate-spin"
             ></span>
+          } @else {
+            <app-icon name="check" [size]="16" />
           }
           {{ confirming() ? 'Confirmando…' : 'Confirmar agendamento' }}
         </button>
@@ -492,14 +495,16 @@
     <div class="flex flex-col gap-3 w-full">
       <button
         (click)="navigateToHistory()"
-        class="w-full bg-accent text-hero font-semibold text-sm py-3.5 rounded-xl cursor-pointer"
+        class="w-full flex items-center justify-center gap-2 bg-accent text-hero font-semibold text-sm py-3.5 rounded-xl cursor-pointer"
       >
+        <app-icon name="arrowR" [size]="16" />
         Ver meus agendamentos
       </button>
       <button
         (click)="navigateToHome()"
-        class="w-full border border-border text-ink font-semibold text-sm py-3.5 rounded-xl hover:border-accent/50 transition-colors cursor-pointer"
+        class="w-full flex items-center justify-center gap-2 border border-border text-ink font-semibold text-sm py-3.5 rounded-xl hover:border-accent/50 transition-colors cursor-pointer"
       >
+        <app-icon name="chevronL" [size]="16" />
         Voltar ao início
       </button>
     </div>

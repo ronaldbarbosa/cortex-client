@@ -47,8 +47,9 @@
       </div>
       <button
         (click)="openLogin()"
-        class="w-full bg-accent text-hero font-semibold text-sm py-3.5 rounded-xl cursor-pointer"
+        class="w-full flex items-center justify-center gap-2 bg-accent text-hero font-semibold text-sm py-3.5 rounded-xl cursor-pointer"
       >
+        <app-icon name="arrowR" [size]="16" />
         Entrar / Criar conta
       </button>
     </div>
@@ -190,21 +191,22 @@
               />
             </div>
             <div class="flex items-center gap-3 pt-0.5">
-              <div class="relative shrink-0">
-                <input
-                  formControlName="acceptsMarketing"
-                  type="checkbox"
-                  id="acceptsMarketing"
-                  class="peer sr-only"
-                />
-                <label
-                  for="acceptsMarketing"
-                  class="flex h-5 w-9 cursor-pointer items-center rounded-full bg-border transition-colors peer-checked:bg-accent"
-                >
-                  <span
-                    class="ml-0.5 h-4 w-4 rounded-full bg-surface shadow transition-transform"
-                    [class.translate-x-4]="form.controls.acceptsMarketing.value"
-                  ></span>
+              <div class="shrink-0">
+                <label for="acceptsMarketing" class="relative cursor-pointer select-none">
+                  <div class="relative">
+                    <input
+                      formControlName="acceptsMarketing"
+                      type="checkbox"
+                      id="acceptsMarketing"
+                      class="sr-only peer"
+                    />
+                    <div
+                      class="w-9 h-5 bg-border rounded-full peer-checked:bg-accent transition-colors"
+                    ></div>
+                    <div
+                      class="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow-sm transition-transform peer-checked:translate-x-4"
+                    ></div>
+                  </div>
                 </label>
               </div>
               <label for="acceptsMarketing" class="font-mono text-[10px] text-ink-2 cursor-pointer">
@@ -235,8 +237,9 @@
               <button
                 type="button"
                 (click)="cancelEditing()"
-                class="flex-1 border border-border rounded-xl py-2.5 font-mono text-[11px] text-ink-2 uppercase tracking-[0.06em] hover:border-accent/40 transition-colors cursor-pointer"
+                class="flex-1 flex items-center justify-center gap-2 border border-border rounded-xl py-2.5 font-mono text-[11px] text-ink-2 uppercase tracking-[0.06em] hover:border-accent/40 transition-colors cursor-pointer"
               >
+                <app-icon name="x" [size]="13" />
                 Cancelar
               </button>
               <button
@@ -248,6 +251,8 @@
                   <span
                     class="w-4 h-4 rounded-full border-2 border-hero/30 border-t-hero animate-spin"
                   ></span>
+                } @else {
+                  <app-icon name="check" [size]="16" />
                 }
                 {{ saving() ? 'Salvando…' : 'Salvar' }}
               </button>

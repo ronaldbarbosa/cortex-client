@@ -89,10 +89,10 @@
               placeholder="seu@email.com"
               autocomplete="email"
               class="w-full bg-hero border border-hero-border rounded-xl px-4 py-3 text-sm text-hero-ink placeholder:text-hero-ink-2 focus:outline-none focus:border-accent transition-colors"
-              [class.border-red-500]="loginEmail.invalid && loginEmail.touched"
+              [class.border-danger]="loginEmail.invalid && loginEmail.touched"
             />
             @if (loginEmail.invalid && loginEmail.touched) {
-              <span class="font-mono text-[10px] text-red-400">E-mail inválido</span>
+              <span class="font-mono text-[10px] text-danger">E-mail inválido</span>
             }
           </div>
 
@@ -107,7 +107,7 @@
                 placeholder="••••••••"
                 autocomplete="current-password"
                 class="w-full bg-hero border border-hero-border rounded-xl px-4 py-3 pr-11 text-sm text-hero-ink placeholder:text-hero-ink-2 focus:outline-none focus:border-accent transition-colors"
-                [class.border-red-500]="loginPassword.invalid && loginPassword.touched"
+                [class.border-danger]="loginPassword.invalid && loginPassword.touched"
               />
               <button
                 type="button"
@@ -123,17 +123,11 @@
               </button>
             </div>
             @if (loginPassword.invalid && loginPassword.touched) {
-              <span class="font-mono text-[10px] text-red-400">Senha obrigatória</span>
+              <span class="font-mono text-[10px] text-danger">Senha obrigatória</span>
             }
           </div>
 
-          @if (error()) {
-            <div
-              class="px-4 py-3 rounded-xl bg-red-950/50 border border-red-800 font-mono text-[11px] text-red-400"
-            >
-              {{ error() }}
-            </div>
-          }
+          <app-alert [message]="error()" />
 
           <button
             type="submit"
@@ -168,7 +162,7 @@
                 placeholder="João"
                 autocomplete="given-name"
                 class="w-full bg-hero border border-hero-border rounded-xl px-3 py-3 text-sm text-hero-ink placeholder:text-hero-ink-2 focus:outline-none focus:border-accent transition-colors"
-                [class.border-red-500]="regFirstName.invalid && regFirstName.touched"
+                [class.border-danger]="regFirstName.invalid && regFirstName.touched"
               />
             </div>
             <div class="flex flex-col gap-1.5">
@@ -181,7 +175,7 @@
                 placeholder="Silva"
                 autocomplete="family-name"
                 class="w-full bg-hero border border-hero-border rounded-xl px-3 py-3 text-sm text-hero-ink placeholder:text-hero-ink-2 focus:outline-none focus:border-accent transition-colors"
-                [class.border-red-500]="regLastName.invalid && regLastName.touched"
+                [class.border-danger]="regLastName.invalid && regLastName.touched"
               />
             </div>
           </div>
@@ -196,10 +190,10 @@
               placeholder="seu@email.com"
               autocomplete="email"
               class="w-full bg-hero border border-hero-border rounded-xl px-4 py-3 text-sm text-hero-ink placeholder:text-hero-ink-2 focus:outline-none focus:border-accent transition-colors"
-              [class.border-red-500]="regEmail.invalid && regEmail.touched"
+              [class.border-danger]="regEmail.invalid && regEmail.touched"
             />
             @if (regEmail.invalid && regEmail.touched) {
-              <span class="font-mono text-[10px] text-red-400">E-mail inválido</span>
+              <span class="font-mono text-[10px] text-danger">E-mail inválido</span>
             }
           </div>
 
@@ -216,10 +210,10 @@
               maxlength="15"
               (input)="maskPhone($event)"
               class="w-full bg-hero border border-hero-border rounded-xl px-4 py-3 text-sm text-hero-ink placeholder:text-hero-ink-2 focus:outline-none focus:border-accent transition-colors"
-              [class.border-red-500]="regPhone.invalid && regPhone.touched"
+              [class.border-danger]="regPhone.invalid && regPhone.touched"
             />
             @if (regPhone.invalid && regPhone.touched) {
-              <span class="font-mono text-[10px] text-red-400">Celular obrigatório</span>
+              <span class="font-mono text-[10px] text-danger">Celular obrigatório</span>
             }
           </div>
 
@@ -234,7 +228,7 @@
                 placeholder="mínimo 8 caracteres"
                 autocomplete="new-password"
                 class="w-full bg-hero border border-hero-border rounded-xl px-4 py-3 pr-11 text-sm text-hero-ink placeholder:text-hero-ink-2 focus:outline-none focus:border-accent transition-colors"
-                [class.border-red-500]="regPassword.invalid && regPassword.touched"
+                [class.border-danger]="regPassword.invalid && regPassword.touched"
               />
               <button
                 type="button"
@@ -250,19 +244,13 @@
               </button>
             </div>
             @if (regPassword.errors?.['minlength'] && regPassword.touched) {
-              <span class="font-mono text-[10px] text-red-400">Mínimo 8 caracteres</span>
+              <span class="font-mono text-[10px] text-danger">Mínimo 8 caracteres</span>
             } @else if (regPassword.invalid && regPassword.touched) {
-              <span class="font-mono text-[10px] text-red-400">Senha obrigatória</span>
+              <span class="font-mono text-[10px] text-danger">Senha obrigatória</span>
             }
           </div>
 
-          @if (error()) {
-            <div
-              class="px-4 py-3 rounded-xl bg-red-950/50 border border-red-800 font-mono text-[11px] text-red-400"
-            >
-              {{ error() }}
-            </div>
-          }
+          <app-alert [message]="error()" />
 
           <button
             type="submit"

@@ -34,12 +34,12 @@ const STATUS_LABELS: Record<AppointmentStatus, string> = {
 };
 
 const STATUS_CLASSES: Record<AppointmentStatus, string> = {
-  Scheduled: 'bg-yellow-900/40 text-yellow-400 border-yellow-800/50',
+  Scheduled: 'bg-warning/15 text-warning border-warning/30',
   Confirmed: 'bg-accent/15 text-accent border-accent/30',
-  InProgress: 'bg-blue-900/40 text-blue-400 border-blue-800/50',
-  Completed: 'bg-green-900/40 text-green-400 border-green-800/50',
-  Cancelled: 'bg-red-900/40 text-red-400 border-red-800/50',
-  NoShow: 'bg-orange-900/40 text-orange-400 border-orange-800/50',
+  InProgress: 'bg-info/15 text-info border-info/30',
+  Completed: 'bg-success/15 text-success border-success/30',
+  Cancelled: 'bg-danger/15 text-danger border-danger/30',
+  NoShow: 'bg-danger/10 text-danger/60 border-danger/20',
 };
 
 @Component({

@@ -185,7 +185,7 @@
               <button
                 (click)="cancel(appt)"
                 [disabled]="cancelling() === appt.id"
-                class="flex-1 flex items-center justify-center gap-1.5 border border-border rounded-xl py-2.5 font-mono text-[10px] text-ink-2 uppercase tracking-[0.06em] hover:border-red-500/50 hover:text-red-400 disabled:opacity-50 transition-colors cursor-pointer"
+                class="flex-1 flex items-center justify-center gap-1.5 border border-border rounded-xl py-2.5 font-mono text-[10px] text-ink-2 uppercase tracking-[0.06em] hover:border-danger/50 hover:text-danger disabled:opacity-50 transition-colors cursor-pointer"
               >
                 @if (cancelling() === appt.id) {
                   <span
@@ -252,7 +252,7 @@
               <button
                 (click)="cancel(appt)"
                 [disabled]="cancelling() === appt.id"
-                class="flex items-center gap-1.5 px-3 py-1.5 border border-border rounded-lg font-mono text-[10px] text-ink-2 uppercase tracking-wide hover:border-red-500/50 hover:text-red-400 disabled:opacity-50 transition-colors cursor-pointer"
+                class="flex items-center gap-1.5 px-3 py-1.5 border border-border rounded-lg font-mono text-[10px] text-ink-2 uppercase tracking-wide hover:border-danger/50 hover:text-danger disabled:opacity-50 transition-colors cursor-pointer"
               >
                 @if (cancelling() === appt.id) {
                   <span
@@ -374,7 +374,7 @@
         <!-- Error -->
         @if (rescheduleError()) {
           <div
-            class="mb-4 px-4 py-3 rounded-xl bg-red-950/50 border border-red-800 font-mono text-[11px] text-red-400"
+            class="mb-4 px-4 py-3 rounded-xl bg-danger/10 border border-danger/30 font-mono text-[11px] text-danger"
           >
             {{ rescheduleError() }}
           </div>

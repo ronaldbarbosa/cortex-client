@@ -12,11 +12,13 @@ import { Router } from '@angular/router';
 import { AuthService } from '../../core/auth/auth.service';
 import { TenantContextService } from '../../core/tenant/tenant-context.service';
 import { IconComponent } from '../../shared/ui/icon/icon';
+import { AlertComponent } from '../../shared/ui/alert/alert';
+import { apiErrorMessage } from '../../core/utils/api-error';
 import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-login',
-  imports: [ReactiveFormsModule, IconComponent],
+  imports: [ReactiveFormsModule, IconComponent, AlertComponent],
   templateUrl: './login.html',
 })
 export class LoginComponent implements AfterViewInit, OnDestroy {
@@ -153,9 +155,14 @@ export class LoginComponent implements AfterViewInit, OnDestroy {
           const slug = this.tenantContext.slug();
           this.router.navigate(['/s', slug, 'inicio']);
         },
-        error: () => {
+        error: (err) => {
           this.loading.set(false);
-          this.error.set('Não foi possível criar a conta. Verifique os dados e tente novamente.');
+          this.error.set(
+            apiErrorMessage(
+              err,
+              'Não foi possível criar a conta. Verifique os dados e tente novamente.',
+            ),
+          );
         },
       });
   }

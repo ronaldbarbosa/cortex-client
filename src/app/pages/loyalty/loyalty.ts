@@ -1,6 +1,7 @@
 import { Component, computed, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { catchError, of, Subscription } from 'rxjs';
 import { IconComponent } from '../../shared/ui/icon/icon';
+import { AlertComponent } from '../../shared/ui/alert/alert';
 import { AuthService } from '../../core/auth/auth.service';
 import { AuthModalService } from '../../core/auth/auth-modal.service';
 import {
@@ -12,7 +13,7 @@ import {
 
 @Component({
   selector: 'app-loyalty',
-  imports: [IconComponent],
+  imports: [IconComponent, AlertComponent],
   templateUrl: './loyalty.html',
 })
 export class LoyaltyComponent implements OnInit, OnDestroy {
@@ -124,7 +125,7 @@ export class LoyaltyComponent implements OnInit, OnDestroy {
   }
 
   transactionAmountClass(type: string): string {
-    if (type === 'Earn') return 'text-green-400';
+    if (type === 'Earn') return 'text-success';
     if (type === 'Redeem') return 'text-accent';
     return 'text-ink-3 line-through';
   }

@@ -4,11 +4,13 @@ import { AuthModalService } from '../../../core/auth/auth-modal.service';
 import { AuthService } from '../../../core/auth/auth.service';
 import { TenantContextService } from '../../../core/tenant/tenant-context.service';
 import { IconComponent } from '../icon/icon';
+import { AlertComponent } from '../alert/alert';
+import { apiErrorMessage } from '../../../core/utils/api-error';
 import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-login-modal',
-  imports: [ReactiveFormsModule, IconComponent],
+  imports: [ReactiveFormsModule, IconComponent, AlertComponent],
   templateUrl: './login-modal.html',
 })
 export class LoginModalComponent implements OnDestroy {
@@ -148,9 +150,14 @@ export class LoginModalComponent implements OnDestroy {
           this.loading.set(false);
           this.authModal.notifySuccess();
         },
-        error: () => {
+        error: (err) => {
           this.loading.set(false);
-          this.error.set('Não foi possível criar a conta. Verifique os dados e tente novamente.');
+          this.error.set(
+            apiErrorMessage(
+              err,
+              'Não foi possível criar a conta. Verifique os dados e tente novamente.',
+            ),
+          );
         },
       });
   }

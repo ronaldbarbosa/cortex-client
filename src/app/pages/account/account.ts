@@ -2,13 +2,14 @@ import { Component, effect, inject, signal } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { catchError, of } from 'rxjs';
 import { IconComponent } from '../../shared/ui/icon/icon';
+import { AlertComponent } from '../../shared/ui/alert/alert';
 import { AuthService } from '../../core/auth/auth.service';
 import { AuthModalService } from '../../core/auth/auth-modal.service';
 import { ClientProfile } from '../../core/auth/auth.model';
 
 @Component({
   selector: 'app-account',
-  imports: [IconComponent, ReactiveFormsModule],
+  imports: [IconComponent, ReactiveFormsModule, AlertComponent],
   templateUrl: './account.html',
 })
 export class AccountComponent {

@@ -1,0 +1,126 @@
+<div class="min-h-dvh bg-hero flex flex-col items-center justify-center p-6">
+  <!-- Brand -->
+  <div class="mb-10 flex flex-col items-center gap-3">
+    <div
+      class="w-12 h-12 rounded-2xl bg-accent flex items-center justify-center font-tight font-extrabold text-xl text-hero"
+    >
+      C
+    </div>
+    <span class="font-tight font-bold text-hero-ink text-lg tracking-tight">Vexion Studio</span>
+  </div>
+
+  <!-- Card -->
+  <div class="w-full max-w-sm bg-hero-surface border border-hero-border rounded-2xl p-7">
+    @if (invalidLink()) {
+      <div class="flex flex-col items-center text-center gap-4">
+        <div
+          class="w-12 h-12 rounded-full bg-red-500/15 flex items-center justify-center text-red-400"
+        >
+          <app-icon name="close" [size]="22" />
+        </div>
+        <div>
+          <p class="font-tight font-semibold text-hero-ink text-[17px] mb-1">Link inválido</p>
+          <p class="font-mono text-[11px] text-hero-ink-2 leading-relaxed">
+            Este link está incompleto ou foi modificado.<br />Solicite um novo link de recuperação.
+          </p>
+        </div>
+      </div>
+    } @else if (done()) {
+      <div class="flex flex-col items-center text-center gap-4">
+        <div
+          class="w-12 h-12 rounded-full bg-green-500/15 flex items-center justify-center text-green-400"
+        >
+          <app-icon name="check" [size]="22" />
+        </div>
+        <div>
+          <p class="font-tight font-semibold text-hero-ink text-[17px] mb-1">Senha redefinida!</p>
+          <p class="font-mono text-[11px] text-hero-ink-2 leading-relaxed">
+            Sua senha foi alterada com sucesso.<br />Você já pode fazer login.
+          </p>
+        </div>
+        @if (slug) {
+          <a
+            [routerLink]="['/s', slug, 'login']"
+            class="font-mono text-[11px] text-hero-ink-2 hover:text-hero-ink transition-colors underline"
+          >
+            Ir para o login
+          </a>
+        }
+      </div>
+    } @else {
+      <div class="mb-6">
+        <p class="font-mono text-[10px] text-hero-ink-2 uppercase tracking-[0.08em] mb-2">
+          acesso do cliente
+        </p>
+        <h1
+          class="font-tight text-[24px] font-semibold text-hero-ink tracking-[-0.02em] leading-none"
+        >
+          Nova senha
+        </h1>
+        <p class="font-mono text-[11px] text-hero-ink-2 mt-2">
+          Defina uma nova senha para sua conta.
+        </p>
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="submit()" class="flex flex-col gap-4">
+        <div class="flex flex-col gap-1.5">
+          <label class="font-mono text-[10px] text-hero-ink-2 uppercase tracking-[0.06em]">
+            Nova senha
+          </label>
+          <div class="relative">
+            <input
+              formControlName="password"
+              [type]="showPassword() ? 'text' : 'password'"
+              placeholder="Mínimo 8 caracteres"
+              class="w-full bg-hero border border-hero-border rounded-xl px-4 py-3 pr-11 text-sm text-hero-ink placeholder:text-hero-ink-2 focus:outline-none focus:border-accent transition-colors"
+              [class.border-red-400]="c['password'].invalid && c['password'].touched"
+            />
+            <button
+              type="button"
+              (click)="showPassword.set(!showPassword())"
+              class="absolute right-3.5 top-1/2 -translate-y-1/2 text-hero-ink-2 hover:text-hero-ink transition-colors"
+            >
+              <app-icon [name]="showPassword() ? 'eyeOff' : 'eye'" [size]="16" />
+            </button>
+          </div>
+          @if (c['password'].invalid && c['password'].touched) {
+            <span class="font-mono text-[10px] text-red-400">Mínimo 8 caracteres.</span>
+          }
+        </div>
+
+        <div class="flex flex-col gap-1.5">
+          <label class="font-mono text-[10px] text-hero-ink-2 uppercase tracking-[0.06em]">
+            Confirmar senha
+          </label>
+          <input
+            formControlName="confirmPassword"
+            [type]="showPassword() ? 'text' : 'password'"
+            placeholder="Repita a senha"
+            class="w-full bg-hero border border-hero-border rounded-xl px-4 py-3 text-sm text-hero-ink placeholder:text-hero-ink-2 focus:outline-none focus:border-accent transition-colors"
+            [class.border-red-400]="c['confirmPassword'].touched && form.hasError('mismatch')"
+          />
+          @if (c['confirmPassword'].touched && form.hasError('mismatch')) {
+            <span class="font-mono text-[10px] text-red-400">As senhas não coincidem.</span>
+          }
+        </div>
+
+        <app-alert [message]="error()" />
+
+        <button
+          type="submit"
+          [disabled]="loading()"
+          class="mt-1 w-full bg-accent text-hero rounded-xl py-3 text-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-50 transition-opacity cursor-pointer"
+        >
+          @if (loading()) {
+            <span
+              class="w-3.5 h-3.5 rounded-full border-2 border-hero/30 border-t-hero animate-spin"
+            ></span>
+          } @else {
+            <app-icon name="check" [size]="15" />
+          }
+          {{ loading() ? 'Salvando…' : 'Definir nova senha' }}
+        </button>
+      </form>
+    }
+  </div>
+</div>

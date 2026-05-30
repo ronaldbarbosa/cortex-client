@@ -87,9 +87,17 @@
 
         <!-- Password -->
         <div class="flex flex-col gap-1.5">
-          <label class="font-mono text-[10px] text-hero-ink-2 uppercase tracking-[0.06em]">
-            Senha
-          </label>
+          <div class="flex items-center justify-between">
+            <label class="font-mono text-[10px] text-hero-ink-2 uppercase tracking-[0.06em]">
+              Senha
+            </label>
+            <a
+              [routerLink]="['/s', tenantContext.slug(), 'esqueci-senha']"
+              class="font-mono text-[10px] text-hero-ink-2 hover:text-hero-ink transition-colors"
+            >
+              Esqueceu?
+            </a>
+          </div>
           <div class="relative">
             <input
               [type]="showPassword() ? 'text' : 'password'"

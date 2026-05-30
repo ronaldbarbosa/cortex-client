@@ -12,6 +12,11 @@ export const routes: Routes = [
         loadComponent: () => import('./pages/login/login').then((m) => m.LoginComponent),
       },
       {
+        path: 'esqueci-senha',
+        loadComponent: () =>
+          import('./pages/esqueci-senha/esqueci-senha').then((m) => m.EsqueciSenhaComponent),
+      },
+      {
         path: '',
         loadComponent: () => import('./layout/shell/shell').then((m) => m.ShellComponent),
         children: [
@@ -45,6 +50,16 @@ export const routes: Routes = [
         ],
       },
     ],
+  },
+  {
+    path: 'redefinir-senha',
+    loadComponent: () =>
+      import('./pages/redefinir-senha/redefinir-senha').then((m) => m.RedefinirSenhaComponent),
+  },
+  {
+    path: 'confirmar-email',
+    loadComponent: () =>
+      import('./pages/confirmar-email/confirmar-email').then((m) => m.ConfirmarEmailComponent),
   },
   {
     path: 'nao-encontrado',

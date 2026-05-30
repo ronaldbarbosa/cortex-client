@@ -8,7 +8,7 @@ import {
   ViewChild,
 } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../core/auth/auth.service';
 import { TenantContextService } from '../../core/tenant/tenant-context.service';
 import { IconComponent } from '../../shared/ui/icon/icon';
@@ -18,14 +18,14 @@ import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-login',
-  imports: [ReactiveFormsModule, IconComponent, AlertComponent],
+  imports: [ReactiveFormsModule, RouterLink, IconComponent, AlertComponent],
   templateUrl: './login.html',
 })
 export class LoginComponent implements AfterViewInit, OnDestroy {
   private fb = inject(FormBuilder);
   private auth = inject(AuthService);
   private router = inject(Router);
-  private tenantContext = inject(TenantContextService);
+  readonly tenantContext = inject(TenantContextService);
 
   @ViewChild('googleBtn') googleBtnRef?: ElementRef<HTMLDivElement>;
 

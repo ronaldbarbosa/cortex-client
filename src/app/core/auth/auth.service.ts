@@ -50,6 +50,21 @@ export class AuthService {
       );
   }
 
+  requestPasswordReset(email: string): Observable<void> {
+    return this.http.post<void>(`${this.base}/request-password-reset`, { email, source: 'client' });
+  }
+
+  resetPassword(userId: string, token: string, newPassword: string): Observable<void> {
+    return this.http.post<void>(`${this.base}/reset-password`, { userId, token, newPassword });
+  }
+
+  requestEmailChange(newEmail: string): Observable<void> {
+    return this.http.post<void>(`${environment.apiUrl}/me/request-email-change`, {
+      newEmail,
+      source: 'client',
+    });
+  }
+
   loginWithGoogle(idToken: string): Observable<void> {
     const tenantId = this.tenantContext.tenantId();
     return this.http

@@ -1,0 +1,67 @@
+<div class="min-h-dvh bg-hero flex flex-col items-center justify-center p-6">
+  <!-- Brand -->
+  <div class="mb-10 flex flex-col items-center gap-3">
+    <div
+      class="w-12 h-12 rounded-2xl bg-accent flex items-center justify-center font-tight font-extrabold text-xl text-hero"
+    >
+      C
+    </div>
+    <span class="font-tight font-bold text-hero-ink text-lg tracking-tight">Vexion Studio</span>
+  </div>
+
+  <!-- Card -->
+  <div class="w-full max-w-sm bg-hero-surface border border-hero-border rounded-2xl p-7">
+    @if (status() === 'loading') {
+      <div class="flex flex-col items-center gap-3">
+        <span
+          class="w-8 h-8 rounded-full border-2 border-hero-border border-t-accent animate-spin"
+        ></span>
+        <p class="font-mono text-[11px] text-hero-ink-2">Confirmando alteração de e-mail…</p>
+      </div>
+    } @else if (status() === 'success') {
+      <div class="flex flex-col items-center text-center gap-4">
+        <div
+          class="w-12 h-12 rounded-full bg-green-500/15 flex items-center justify-center text-green-400"
+        >
+          <app-icon name="check" [size]="22" />
+        </div>
+        <div>
+          <p class="font-tight font-semibold text-hero-ink text-[17px] mb-1">E-mail alterado!</p>
+          <p class="font-mono text-[11px] text-hero-ink-2 leading-relaxed">
+            Seu e-mail foi atualizado com sucesso.<br />
+            Faça login novamente com o novo endereço.
+          </p>
+        </div>
+      </div>
+    } @else if (status() === 'invalid') {
+      <div class="flex flex-col items-center text-center gap-4">
+        <div
+          class="w-12 h-12 rounded-full bg-red-500/15 flex items-center justify-center text-red-400"
+        >
+          <app-icon name="close" [size]="22" />
+        </div>
+        <div>
+          <p class="font-tight font-semibold text-hero-ink text-[17px] mb-1">Link inválido</p>
+          <p class="font-mono text-[11px] text-hero-ink-2">
+            Este link está incompleto ou foi modificado.
+          </p>
+        </div>
+      </div>
+    } @else {
+      <div class="flex flex-col items-center text-center gap-4">
+        <div
+          class="w-12 h-12 rounded-full bg-red-500/15 flex items-center justify-center text-red-400"
+        >
+          <app-icon name="close" [size]="22" />
+        </div>
+        <div>
+          <p class="font-tight font-semibold text-hero-ink text-[17px] mb-1">Link expirado</p>
+          <p class="font-mono text-[11px] text-hero-ink-2 leading-relaxed">
+            Este link já foi usado ou expirou.<br />
+            Solicite uma nova alteração de e-mail na sua conta.
+          </p>
+        </div>
+      </div>
+    }
+  </div>
+</div>

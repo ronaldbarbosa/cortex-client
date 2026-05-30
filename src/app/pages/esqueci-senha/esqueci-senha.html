@@ -1,0 +1,96 @@
+<div class="min-h-dvh bg-hero flex flex-col items-center justify-center p-6">
+  <!-- Brand -->
+  <div class="mb-10 flex flex-col items-center gap-3">
+    <div
+      class="w-12 h-12 rounded-2xl bg-accent flex items-center justify-center font-tight font-extrabold text-xl text-hero"
+    >
+      C
+    </div>
+    <span class="font-tight font-bold text-hero-ink text-lg tracking-tight">Vexion Studio</span>
+  </div>
+
+  <!-- Card -->
+  <div class="w-full max-w-sm bg-hero-surface border border-hero-border rounded-2xl p-7">
+    @if (sent()) {
+      <div class="flex flex-col items-center text-center gap-4">
+        <div
+          class="w-12 h-12 rounded-full bg-green-500/15 flex items-center justify-center text-green-400"
+        >
+          <app-icon name="check" [size]="22" />
+        </div>
+        <div>
+          <p class="font-tight font-semibold text-hero-ink text-[17px] mb-1">E-mail enviado</p>
+          <p class="font-mono text-[11px] text-hero-ink-2 leading-relaxed">
+            Se este e-mail estiver cadastrado, você receberá as instruções em instantes.<br />
+            Verifique também sua caixa de spam.
+          </p>
+        </div>
+        <a
+          [routerLink]="['/s', tenantContext.slug(), 'login']"
+          class="font-mono text-[11px] text-hero-ink-2 hover:text-hero-ink transition-colors underline"
+        >
+          Voltar ao login
+        </a>
+      </div>
+    } @else {
+      <div class="mb-6">
+        <p class="font-mono text-[10px] text-hero-ink-2 uppercase tracking-[0.08em] mb-2">
+          acesso do cliente
+        </p>
+        <h1
+          class="font-tight text-[24px] font-semibold text-hero-ink tracking-[-0.02em] leading-none"
+        >
+          Recuperar acesso
+        </h1>
+        <p class="font-mono text-[11px] text-hero-ink-2 mt-2">
+          Informe o e-mail da sua conta. Enviaremos um link para redefinir a senha.
+        </p>
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="submit()" novalidate class="flex flex-col gap-4">
+        <div class="flex flex-col gap-1.5">
+          <label class="font-mono text-[10px] text-hero-ink-2 uppercase tracking-[0.06em]">
+            E-mail
+          </label>
+          <input
+            type="email"
+            formControlName="email"
+            placeholder="seu@email.com"
+            autocomplete="email"
+            class="w-full bg-hero border border-hero-border rounded-xl px-4 py-3 text-sm text-hero-ink placeholder:text-hero-ink-2 focus:outline-none focus:border-accent transition-colors"
+            [class.border-red-400]="email.invalid && email.touched"
+          />
+          @if (email.invalid && email.touched) {
+            <span class="font-mono text-[10px] text-red-400">Informe um e-mail válido.</span>
+          }
+        </div>
+
+        <app-alert [message]="error()" />
+
+        <button
+          type="submit"
+          [disabled]="loading()"
+          class="mt-1 w-full bg-accent text-hero rounded-xl py-3 text-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-50 transition-opacity cursor-pointer"
+        >
+          @if (loading()) {
+            <span
+              class="w-3.5 h-3.5 rounded-full border-2 border-hero/30 border-t-hero animate-spin"
+            ></span>
+          } @else {
+            <app-icon name="arrowR" [size]="15" />
+          }
+          {{ loading() ? 'Enviando…' : 'Enviar link de recuperação' }}
+        </button>
+
+        <div class="text-center">
+          <a
+            [routerLink]="['/s', tenantContext.slug(), 'login']"
+            class="font-mono text-[11px] text-hero-ink-2 hover:text-hero-ink transition-colors"
+          >
+            Voltar ao login
+          </a>
+        </div>
+      </form>
+    }
+  </div>
+</div>

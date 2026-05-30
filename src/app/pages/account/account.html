@@ -265,6 +265,65 @@
         }
       </div>
 
+      <!-- Email change card -->
+      <div class="bg-surface border border-border rounded-2xl p-5 mb-4">
+        <p class="font-mono text-[10px] text-ink-3 uppercase tracking-[0.06em] mb-4">
+          Alterar e-mail
+        </p>
+
+        @if (emailSent()) {
+          <app-alert
+            message="Link enviado! Verifique a caixa de entrada do novo e-mail para confirmar."
+            variant="success"
+          />
+        } @else {
+          <form
+            [formGroup]="emailForm"
+            (ngSubmit)="requestEmailChange()"
+            class="flex flex-col gap-3"
+          >
+            <div>
+              <label
+                class="font-mono text-[10px] text-ink-3 uppercase tracking-[0.06em] block mb-1"
+              >
+                Novo e-mail
+              </label>
+              <input
+                type="email"
+                formControlName="newEmail"
+                placeholder="novo@email.com"
+                class="w-full bg-bg border border-border rounded-xl px-3 py-2.5 text-sm text-ink placeholder:text-ink-3 focus:outline-none focus:border-accent transition-colors"
+                [class.border-red-400]="
+                  emailForm.controls.newEmail.invalid && emailForm.controls.newEmail.touched
+                "
+              />
+              @if (emailForm.controls.newEmail.invalid && emailForm.controls.newEmail.touched) {
+                <span class="font-mono text-[10px] text-red-500 mt-0.5 block">
+                  Informe um e-mail válido.
+                </span>
+              }
+            </div>
+
+            @if (emailError()) {
+              <div
+                class="px-4 py-3 rounded-xl bg-danger/10 border border-danger/30 font-mono text-[11px] text-danger"
+              >
+                {{ emailError() }}
+              </div>
+            }
+
+            <button
+              type="submit"
+              [disabled]="emailSaving()"
+              class="w-full bg-border/50 text-ink-2 font-mono text-[11px] uppercase tracking-[0.06em] py-2.5 rounded-xl flex items-center justify-center gap-2 hover:bg-accent/10 hover:text-accent transition-colors disabled:opacity-40 cursor-pointer"
+            >
+              <app-icon name="arrowR" [size]="13" [strokeWidth]="1.6" />
+              {{ emailSaving() ? 'Enviando…' : 'Enviar link de confirmação' }}
+            </button>
+          </form>
+        }
+      </div>
+
       <!-- Sign out -->
       <button
         (click)="logout()"

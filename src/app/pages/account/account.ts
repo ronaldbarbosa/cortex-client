@@ -6,6 +6,7 @@ import { AlertComponent } from '../../shared/ui/alert/alert';
 import { AuthService } from '../../core/auth/auth.service';
 import { AuthModalService } from '../../core/auth/auth-modal.service';
 import { ClientProfile } from '../../core/auth/auth.model';
+import { apiErrorMessage } from '../../core/utils/api-error';
 
 @Component({
   selector: 'app-account',
@@ -26,6 +27,13 @@ export class AccountComponent {
   readonly saving = signal(false);
   readonly saveError = signal<string | null>(null);
   readonly saveSuccess = signal(false);
+
+  readonly emailForm = this.fb.nonNullable.group({
+    newEmail: ['', [Validators.required, Validators.email]],
+  });
+  readonly emailSaving = signal(false);
+  readonly emailSent = signal(false);
+  readonly emailError = signal<string | null>(null);
 
   readonly form = this.fb.nonNullable.group({
     firstName: ['', [Validators.required, Validators.maxLength(100)]],
@@ -147,6 +155,29 @@ export class AccountComponent {
     if (v.length > 4) v = `${v.substring(0, 2)}/${v.substring(2, 4)}/${v.substring(4)}`;
     else if (v.length > 2) v = `${v.substring(0, 2)}/${v.substring(2)}`;
     return v;
+  }
+
+  requestEmailChange(): void {
+    if (this.emailForm.invalid) {
+      this.emailForm.markAllAsTouched();
+      return;
+    }
+    const { newEmail } = this.emailForm.getRawValue();
+    this.emailSaving.set(true);
+    this.emailSent.set(false);
+    this.emailError.set(null);
+
+    this.auth.requestEmailChange(newEmail).subscribe({
+      next: () => {
+        this.emailSaving.set(false);
+        this.emailSent.set(true);
+        this.emailForm.reset();
+      },
+      error: (err) => {
+        this.emailSaving.set(false);
+        this.emailError.set(apiErrorMessage(err, 'Erro ao solicitar alteração de e-mail.'));
+      },
+    });
   }
 
   logout(): void {

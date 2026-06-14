@@ -219,7 +219,8 @@ export class BookComponent implements OnInit, OnDestroy {
     }
   }
 
-  formatAppointmentDate(isoDate: string): string {
+  // Recebe a hora-de-parede do salão (ISO sem fuso) — exibe direto, sem conversão.
+  formatAppointmentDate(localIso: string): string {
     return new Intl.DateTimeFormat('pt-BR', {
       weekday: 'long',
       day: 'numeric',
@@ -227,8 +228,7 @@ export class BookComponent implements OnInit, OnDestroy {
       year: 'numeric',
       hour: '2-digit',
       minute: '2-digit',
-      timeZone: 'America/Sao_Paulo',
-    }).format(new Date(isoDate));
+    }).format(new Date(localIso));
   }
 
   navigateToHome(): void {
@@ -258,13 +258,14 @@ export class BookComponent implements OnInit, OnDestroy {
     this.confirming.set(true);
     this.bookingError.set(null);
 
-    const startAt = new Date(`${date}T${slot}:00`).toISOString();
+    // Hora-de-parede do salão (sem fuso) — o backend converte para UTC.
+    const startLocal = `${date}T${slot}:00`;
 
     this.establishmentService
       .createAppointment({
         clientId,
         professionalId: professional.id,
-        startAt,
+        startLocal,
         serviceIds,
         rewardServiceId:
           this.includeRewardService() && this.rewardServiceItem()

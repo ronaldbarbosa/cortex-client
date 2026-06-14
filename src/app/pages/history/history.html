@@ -158,7 +158,9 @@
               <p class="font-tight text-[15px] font-semibold text-ink">
                 {{ formatPrice(appointmentPrice(appt)) }}
               </p>
-              <p class="font-mono text-[10px] text-ink-3 mt-0.5">{{ formatDate(appt.startAt) }}</p>
+              <p class="font-mono text-[10px] text-ink-3 mt-0.5">
+                {{ formatDate(appt.startLocal) }}
+              </p>
             </div>
           </div>
 
@@ -224,7 +226,7 @@
           [class.opacity-60]="appt.status === 'Cancelled' || appt.status === 'NoShow'"
           style="grid-template-columns: 160px 2fr 1fr 100px 110px auto"
         >
-          <div class="font-mono text-[11px] text-ink-3">{{ formatDate(appt.startAt) }}</div>
+          <div class="font-mono text-[11px] text-ink-3">{{ formatDate(appt.startLocal) }}</div>
           <div class="font-tight text-sm font-medium text-ink truncate">
             {{ serviceLabel(appt) }}
           </div>

@@ -176,7 +176,8 @@ export class HistoryComponent implements OnInit {
       .rescheduleAppointment(appt.id, {
         clientId: appt.clientId,
         professionalId: appt.professionalId,
-        startAt: new Date(`${date}T${slot}:00`).toISOString(),
+        // Hora-de-parede do salão (sem fuso) — o backend converte para UTC.
+        startLocal: `${date}T${slot}:00`,
         serviceIds: appt.services.map((s) => s.serviceId),
         rewardServiceId: rewardService?.serviceId,
       })
@@ -219,15 +220,15 @@ export class HistoryComponent implements OnInit {
     return STATUS_CLASSES[status as AppointmentStatus] ?? '';
   }
 
-  formatDate(isoDate: string): string {
+  // Recebe a hora-de-parede do salão (ISO sem fuso) — exibe direto, sem conversão.
+  formatDate(localIso: string): string {
     return new Intl.DateTimeFormat('pt-BR', {
       day: 'numeric',
       month: 'short',
       year: 'numeric',
       hour: '2-digit',
       minute: '2-digit',
-      timeZone: 'America/Sao_Paulo',
-    }).format(new Date(isoDate));
+    }).format(new Date(localIso));
   }
 
   formatPrice(value: number): string {

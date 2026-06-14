@@ -28,7 +28,8 @@ export interface ProfessionalAvailability {
 export interface CreateAppointmentRequest {
   clientId: string;
   professionalId: string;
-  startAt: string;
+  /** Hora-de-parede do salão (sem fuso): "YYYY-MM-DDTHH:mm:ss". */
+  startLocal: string;
   serviceIds: string[];
   rewardServiceId?: string;
 }
@@ -36,7 +37,8 @@ export interface CreateAppointmentRequest {
 export interface RescheduleAppointmentRequest {
   clientId: string;
   professionalId: string;
-  startAt: string;
+  /** Hora-de-parede do salão (sem fuso): "YYYY-MM-DDTHH:mm:ss". */
+  startLocal: string;
   serviceIds: string[];
   rewardServiceId?: string;
 }
@@ -56,8 +58,12 @@ export interface AppointmentSummary {
   clientName: string;
   professionalId: string;
   professionalName: string;
+  /** Instante UTC (ISO com Z). Use para comparação de instante. */
   startAt: string;
   endAt: string;
+  /** Hora-de-parede do salão (ISO sem fuso). Use para exibir. */
+  startLocal: string;
+  endLocal: string;
   status: string;
   notes: string | null;
   cancelReason: string | null;

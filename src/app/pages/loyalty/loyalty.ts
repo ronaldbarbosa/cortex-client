@@ -1,7 +1,7 @@
 import { Component, computed, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { catchError, of, Subscription } from 'rxjs';
 import { IconComponent } from '../../shared/ui/icon/icon';
-import { AlertComponent } from '../../shared/ui/alert/alert';
+import { ToastService } from '../../shared/ui/overlay/toast.service';
 import { AuthService } from '../../core/auth/auth.service';
 import { AuthModalService } from '../../core/auth/auth-modal.service';
 import {
@@ -13,13 +13,14 @@ import {
 
 @Component({
   selector: 'app-loyalty',
-  imports: [IconComponent, AlertComponent],
+  imports: [IconComponent],
   templateUrl: './loyalty.html',
 })
 export class LoyaltyComponent implements OnInit, OnDestroy {
   private loyaltyService = inject(LoyaltyService);
   private auth = inject(AuthService);
   private authModal = inject(AuthModalService);
+  private toast = inject(ToastService);
 
   readonly program = signal<LoyaltyProgramDto | null>(null);
   readonly summary = signal<LoyaltyClientSummaryDto | null>(null);
@@ -27,8 +28,6 @@ export class LoyaltyComponent implements OnInit, OnDestroy {
   readonly programLoading = signal(true);
   readonly dataLoading = signal(false);
   readonly redeeming = signal(false);
-  readonly redeemError = signal<string | null>(null);
-  readonly redeemSuccess = signal(false);
 
   readonly isAuthenticated = this.auth.isAuthenticated;
   readonly clientId = computed(() => this.auth.user()?.clientId ?? null);
@@ -80,18 +79,16 @@ export class LoyaltyComponent implements OnInit, OnDestroy {
 
     const amount = p.type === 'Points' ? s.loyaltyPoints : 0;
     this.redeeming.set(true);
-    this.redeemError.set(null);
-    this.redeemSuccess.set(false);
 
     this.loyaltyService.redeem(clientId, amount).subscribe({
       next: () => {
         this.redeeming.set(false);
-        this.redeemSuccess.set(true);
         this.loadClientData();
+        this.toast.success('Resgate realizado!');
       },
       error: () => {
         this.redeeming.set(false);
-        this.redeemError.set('Não foi possível resgatar. Tente novamente.');
+        this.toast.error('Não foi possível resgatar.', 'Tente novamente.');
       },
     });
   }

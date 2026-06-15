@@ -13,12 +13,13 @@ import { AuthService } from '../../core/auth/auth.service';
 import { TenantContextService } from '../../core/tenant/tenant-context.service';
 import { IconComponent } from '../../shared/ui/icon/icon';
 import { AlertComponent } from '../../shared/ui/alert/alert';
+import { FieldErrorComponent } from '../../shared/ui/overlay/field-error';
 import { apiErrorMessage } from '../../core/utils/api-error';
 import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-login',
-  imports: [ReactiveFormsModule, RouterLink, IconComponent, AlertComponent],
+  imports: [ReactiveFormsModule, RouterLink, IconComponent, AlertComponent, FieldErrorComponent],
   templateUrl: './login.html',
 })
 export class LoginComponent implements AfterViewInit, OnDestroy {

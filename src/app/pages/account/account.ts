@@ -2,7 +2,8 @@ import { Component, effect, inject, signal } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { catchError, of } from 'rxjs';
 import { IconComponent } from '../../shared/ui/icon/icon';
-import { AlertComponent } from '../../shared/ui/alert/alert';
+import { FieldErrorComponent } from '../../shared/ui/overlay/field-error';
+import { ToastService } from '../../shared/ui/overlay/toast.service';
 import { AuthService } from '../../core/auth/auth.service';
 import { AuthModalService } from '../../core/auth/auth-modal.service';
 import { ClientProfile } from '../../core/auth/auth.model';
@@ -10,13 +11,14 @@ import { apiErrorMessage } from '../../core/utils/api-error';
 
 @Component({
   selector: 'app-account',
-  imports: [IconComponent, ReactiveFormsModule, AlertComponent],
+  imports: [IconComponent, ReactiveFormsModule, FieldErrorComponent],
   templateUrl: './account.html',
 })
 export class AccountComponent {
   private auth = inject(AuthService);
   private authModal = inject(AuthModalService);
   private fb = inject(FormBuilder);
+  private toast = inject(ToastService);
 
   readonly user = this.auth.user;
   readonly isAuthenticated = this.auth.isAuthenticated;
@@ -25,15 +27,11 @@ export class AccountComponent {
   readonly profileLoading = signal(false);
   readonly editing = signal(false);
   readonly saving = signal(false);
-  readonly saveError = signal<string | null>(null);
-  readonly saveSuccess = signal(false);
 
   readonly emailForm = this.fb.nonNullable.group({
     newEmail: ['', [Validators.required, Validators.email]],
   });
   readonly emailSaving = signal(false);
-  readonly emailSent = signal(false);
-  readonly emailError = signal<string | null>(null);
 
   readonly form = this.fb.nonNullable.group({
     firstName: ['', [Validators.required, Validators.maxLength(100)]],
@@ -59,8 +57,6 @@ export class AccountComponent {
   }
 
   startEditing(): void {
-    this.saveError.set(null);
-    this.saveSuccess.set(false);
     this.editing.set(true);
   }
 
@@ -76,14 +72,11 @@ export class AccountComponent {
       });
     }
     this.editing.set(false);
-    this.saveError.set(null);
   }
 
   save(): void {
     if (this.form.invalid) return;
     this.saving.set(true);
-    this.saveError.set(null);
-    this.saveSuccess.set(false);
 
     const { firstName, lastName, phone, birthDate, acceptsMarketing } = this.form.getRawValue();
     this.auth
@@ -99,11 +92,11 @@ export class AccountComponent {
           this.profile.set(updated);
           this.saving.set(false);
           this.editing.set(false);
-          this.saveSuccess.set(true);
+          this.toast.success('Dados atualizados.');
         },
         error: () => {
           this.saving.set(false);
-          this.saveError.set('Não foi possível salvar. Tente novamente.');
+          this.toast.error('Não foi possível salvar.', 'Tente novamente.');
         },
       });
   }
@@ -164,18 +157,22 @@ export class AccountComponent {
     }
     const { newEmail } = this.emailForm.getRawValue();
     this.emailSaving.set(true);
-    this.emailSent.set(false);
-    this.emailError.set(null);
 
     this.auth.requestEmailChange(newEmail).subscribe({
       next: () => {
         this.emailSaving.set(false);
-        this.emailSent.set(true);
         this.emailForm.reset();
+        this.toast.success(
+          'Link enviado.',
+          'Verifique a caixa de entrada do novo e-mail para confirmar.',
+        );
       },
       error: (err) => {
         this.emailSaving.set(false);
-        this.emailError.set(apiErrorMessage(err, 'Erro ao solicitar alteração de e-mail.'));
+        this.toast.error(
+          'Erro ao solicitar alteração de e-mail.',
+          apiErrorMessage(err, 'Tente novamente.'),
+        );
       },
     });
   }

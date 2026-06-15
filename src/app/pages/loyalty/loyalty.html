@@ -331,14 +331,6 @@
               {{ redeeming() ? 'Resgatando...' : 'Resgatar' }}
             </button>
           </div>
-          @if (redeemSuccess()) {
-            <app-alert
-              message="Resgate realizado com sucesso!"
-              variant="success"
-              class="mt-3 block"
-            />
-          }
-          <app-alert [message]="redeemError()" class="mt-3 block" />
         </div>
       }
 
@@ -362,14 +354,6 @@
               {{ redeeming() ? 'Resgatando...' : 'Resgatar' }}
             </button>
           </div>
-          @if (redeemSuccess()) {
-            <app-alert
-              message="Resgate realizado com sucesso!"
-              variant="success"
-              class="mt-3 block"
-            />
-          }
-          <app-alert [message]="redeemError()" class="mt-3 block" />
         </div>
       }
 

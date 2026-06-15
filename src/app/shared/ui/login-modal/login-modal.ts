@@ -5,12 +5,13 @@ import { AuthService } from '../../../core/auth/auth.service';
 import { TenantContextService } from '../../../core/tenant/tenant-context.service';
 import { IconComponent } from '../icon/icon';
 import { AlertComponent } from '../alert/alert';
+import { FieldErrorComponent } from '../overlay/field-error';
 import { apiErrorMessage } from '../../../core/utils/api-error';
 import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-login-modal',
-  imports: [ReactiveFormsModule, IconComponent, AlertComponent],
+  imports: [ReactiveFormsModule, IconComponent, AlertComponent, FieldErrorComponent],
   templateUrl: './login-modal.html',
 })
 export class LoginModalComponent implements OnDestroy {

@@ -91,9 +91,10 @@
               class="w-full bg-hero border border-hero-border rounded-xl px-4 py-3 text-sm text-hero-ink placeholder:text-hero-ink-2 focus:outline-none focus:border-accent transition-colors"
               [class.border-danger]="loginEmail.invalid && loginEmail.touched"
             />
-            @if (loginEmail.invalid && loginEmail.touched) {
-              <span class="font-mono text-[10px] text-danger">E-mail inválido</span>
-            }
+            <app-field-error
+              [control]="loginEmail"
+              [messages]="{ required: 'E-mail inválido', email: 'E-mail inválido' }"
+            />
           </div>
 
           <div class="flex flex-col gap-1.5">
@@ -122,9 +123,10 @@
                 />
               </button>
             </div>
-            @if (loginPassword.invalid && loginPassword.touched) {
-              <span class="font-mono text-[10px] text-danger">Senha obrigatória</span>
-            }
+            <app-field-error
+              [control]="loginPassword"
+              [messages]="{ required: 'Senha obrigatória' }"
+            />
           </div>
 
           <app-alert [message]="error()" />
@@ -194,9 +196,10 @@
               class="w-full bg-hero border border-hero-border rounded-xl px-4 py-3 text-sm text-hero-ink placeholder:text-hero-ink-2 focus:outline-none focus:border-accent transition-colors"
               [class.border-danger]="regEmail.invalid && regEmail.touched"
             />
-            @if (regEmail.invalid && regEmail.touched) {
-              <span class="font-mono text-[10px] text-danger">E-mail inválido</span>
-            }
+            <app-field-error
+              [control]="regEmail"
+              [messages]="{ required: 'E-mail inválido', email: 'E-mail inválido' }"
+            />
           </div>
 
           <div class="flex flex-col gap-1.5">
@@ -214,9 +217,10 @@
               class="w-full bg-hero border border-hero-border rounded-xl px-4 py-3 text-sm text-hero-ink placeholder:text-hero-ink-2 focus:outline-none focus:border-accent transition-colors"
               [class.border-danger]="regPhone.invalid && regPhone.touched"
             />
-            @if (regPhone.invalid && regPhone.touched) {
-              <span class="font-mono text-[10px] text-danger">Celular obrigatório</span>
-            }
+            <app-field-error
+              [control]="regPhone"
+              [messages]="{ required: 'Celular obrigatório' }"
+            />
           </div>
 
           <div class="flex flex-col gap-1.5">
@@ -245,11 +249,10 @@
                 />
               </button>
             </div>
-            @if (regPassword.errors?.['minlength'] && regPassword.touched) {
-              <span class="font-mono text-[10px] text-danger">Mínimo 8 caracteres</span>
-            } @else if (regPassword.invalid && regPassword.touched) {
-              <span class="font-mono text-[10px] text-danger">Senha obrigatória</span>
-            }
+            <app-field-error
+              [control]="regPassword"
+              [messages]="{ required: 'Senha obrigatória', minlength: 'Mínimo 8 caracteres' }"
+            />
           </div>
 
           <app-alert [message]="error()" />

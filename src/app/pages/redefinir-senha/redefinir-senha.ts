@@ -10,6 +10,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { AuthService } from '../../core/auth/auth.service';
 import { AlertComponent } from '../../shared/ui/alert/alert';
 import { IconComponent } from '../../shared/ui/icon/icon';
+import { FieldErrorComponent } from '../../shared/ui/overlay/field-error';
 import { apiErrorMessage } from '../../core/utils/api-error';
 
 function passwordsMatch(control: AbstractControl): ValidationErrors | null {
@@ -20,7 +21,7 @@ function passwordsMatch(control: AbstractControl): ValidationErrors | null {
 
 @Component({
   selector: 'app-redefinir-senha',
-  imports: [ReactiveFormsModule, RouterLink, AlertComponent, IconComponent],
+  imports: [ReactiveFormsModule, RouterLink, AlertComponent, IconComponent, FieldErrorComponent],
   templateUrl: './redefinir-senha.html',
 })
 export class RedefinirSenhaComponent implements OnInit {

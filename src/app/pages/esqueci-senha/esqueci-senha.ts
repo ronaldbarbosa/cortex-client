@@ -5,11 +5,12 @@ import { AuthService } from '../../core/auth/auth.service';
 import { TenantContextService } from '../../core/tenant/tenant-context.service';
 import { AlertComponent } from '../../shared/ui/alert/alert';
 import { IconComponent } from '../../shared/ui/icon/icon';
+import { FieldErrorComponent } from '../../shared/ui/overlay/field-error';
 import { apiErrorMessage } from '../../core/utils/api-error';
 
 @Component({
   selector: 'app-esqueci-senha',
-  imports: [ReactiveFormsModule, RouterLink, AlertComponent, IconComponent],
+  imports: [ReactiveFormsModule, RouterLink, AlertComponent, IconComponent, FieldErrorComponent],
   templateUrl: './esqueci-senha.html',
 })
 export class EsqueciSenhaComponent {

@@ -21,7 +21,7 @@
     } @else if (status() === 'success') {
       <div class="flex flex-col items-center text-center gap-4">
         <div
-          class="w-12 h-12 rounded-full bg-green-500/15 flex items-center justify-center text-green-400"
+          class="w-12 h-12 rounded-full bg-success/10 flex items-center justify-center text-success"
         >
           <app-icon name="check" [size]="22" />
         </div>
@@ -36,9 +36,9 @@
     } @else if (status() === 'invalid') {
       <div class="flex flex-col items-center text-center gap-4">
         <div
-          class="w-12 h-12 rounded-full bg-red-500/15 flex items-center justify-center text-red-400"
+          class="w-12 h-12 rounded-full bg-danger/10 flex items-center justify-center text-danger"
         >
-          <app-icon name="close" [size]="22" />
+          <app-icon name="x" [size]="22" />
         </div>
         <div>
           <p class="font-tight font-semibold text-hero-ink text-[17px] mb-1">Link inválido</p>
@@ -50,9 +50,9 @@
     } @else {
       <div class="flex flex-col items-center text-center gap-4">
         <div
-          class="w-12 h-12 rounded-full bg-red-500/15 flex items-center justify-center text-red-400"
+          class="w-12 h-12 rounded-full bg-danger/10 flex items-center justify-center text-danger"
         >
-          <app-icon name="close" [size]="22" />
+          <app-icon name="x" [size]="22" />
         </div>
         <div>
           <p class="font-tight font-semibold text-hero-ink text-[17px] mb-1">Link expirado</p>

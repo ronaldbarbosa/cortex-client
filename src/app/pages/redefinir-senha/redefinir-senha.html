@@ -14,9 +14,9 @@
     @if (invalidLink()) {
       <div class="flex flex-col items-center text-center gap-4">
         <div
-          class="w-12 h-12 rounded-full bg-red-500/15 flex items-center justify-center text-red-400"
+          class="w-12 h-12 rounded-full bg-danger/10 flex items-center justify-center text-danger"
         >
-          <app-icon name="close" [size]="22" />
+          <app-icon name="x" [size]="22" />
         </div>
         <div>
           <p class="font-tight font-semibold text-hero-ink text-[17px] mb-1">Link inválido</p>
@@ -28,7 +28,7 @@
     } @else if (done()) {
       <div class="flex flex-col items-center text-center gap-4">
         <div
-          class="w-12 h-12 rounded-full bg-green-500/15 flex items-center justify-center text-green-400"
+          class="w-12 h-12 rounded-full bg-success/10 flex items-center justify-center text-success"
         >
           <app-icon name="check" [size]="22" />
         </div>
@@ -73,7 +73,7 @@
               [type]="showPassword() ? 'text' : 'password'"
               placeholder="Mínimo 8 caracteres"
               class="w-full bg-hero border border-hero-border rounded-xl px-4 py-3 pr-11 text-sm text-hero-ink placeholder:text-hero-ink-2 focus:outline-none focus:border-accent transition-colors"
-              [class.border-red-400]="c['password'].invalid && c['password'].touched"
+              [class.border-danger]="c['password'].invalid && c['password'].touched"
             />
             <button
               type="button"
@@ -83,9 +83,10 @@
               <app-icon [name]="showPassword() ? 'eyeOff' : 'eye'" [size]="16" />
             </button>
           </div>
-          @if (c['password'].invalid && c['password'].touched) {
-            <span class="font-mono text-[10px] text-red-400">Mínimo 8 caracteres.</span>
-          }
+          <app-field-error
+            [control]="c['password']"
+            [messages]="{ required: 'Mínimo 8 caracteres.', minlength: 'Mínimo 8 caracteres.' }"
+          />
         </div>
 
         <div class="flex flex-col gap-1.5">
@@ -97,11 +98,15 @@
             [type]="showPassword() ? 'text' : 'password'"
             placeholder="Repita a senha"
             class="w-full bg-hero border border-hero-border rounded-xl px-4 py-3 text-sm text-hero-ink placeholder:text-hero-ink-2 focus:outline-none focus:border-accent transition-colors"
-            [class.border-red-400]="c['confirmPassword'].touched && form.hasError('mismatch')"
+            [class.border-danger]="c['confirmPassword'].touched && form.hasError('mismatch')"
           />
-          @if (c['confirmPassword'].touched && form.hasError('mismatch')) {
-            <span class="font-mono text-[10px] text-red-400">As senhas não coincidem.</span>
-          }
+          <app-field-error
+            [message]="
+              c['confirmPassword'].touched && form.hasError('mismatch')
+                ? 'As senhas não coincidem.'
+                : null
+            "
+          />
         </div>
 
         <app-alert [message]="error()" />

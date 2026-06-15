@@ -2,6 +2,8 @@ import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { NgClass } from '@angular/common';
 import { catchError, of, Subscription } from 'rxjs';
 import { IconComponent } from '../../shared/ui/icon/icon';
+import { ConfirmDialogService } from '../../shared/ui/overlay/confirm-dialog.service';
+import { ToastService } from '../../shared/ui/overlay/toast.service';
 import { AuthService } from '../../core/auth/auth.service';
 import { EstablishmentService } from '../../core/establishment/establishment.service';
 import {
@@ -50,6 +52,8 @@ const STATUS_CLASSES: Record<AppointmentStatus, string> = {
 export class HistoryComponent implements OnInit {
   private auth = inject(AuthService);
   private establishmentService = inject(EstablishmentService);
+  private confirmDialog = inject(ConfirmDialogService);
+  private toast = inject(ToastService);
 
   private clientId = this.auth.user()?.clientId ?? '';
 
@@ -123,7 +127,17 @@ export class HistoryComponent implements OnInit {
     );
   }
 
-  cancel(appt: AppointmentSummary): void {
+  async cancel(appt: AppointmentSummary): Promise<void> {
+    const ok = await this.confirmDialog.confirm({
+      title: 'Cancelar agendamento?',
+      message: 'Tem certeza de que deseja cancelar este horário?',
+      tone: 'danger',
+      icon: 'x',
+      confirmLabel: 'Cancelar agendamento',
+      cancelLabel: 'Manter',
+    });
+    if (!ok) return;
+
     this.cancelling.set(appt.id);
     this.establishmentService.cancelAppointment(appt.id, 'Cancelado pelo cliente').subscribe({
       next: (updated) => {
@@ -131,8 +145,12 @@ export class HistoryComponent implements OnInit {
         this.appointments.update((list) =>
           list ? list.map((a) => (a.id === appt.id ? updated : a)) : list,
         );
+        this.toast.success('Agendamento cancelado.');
       },
-      error: () => this.cancelling.set(null),
+      error: () => {
+        this.cancelling.set(null);
+        this.toast.error('Erro ao cancelar.', 'Tente novamente.');
+      },
     });
   }
 
@@ -188,6 +206,7 @@ export class HistoryComponent implements OnInit {
             list ? list.map((a) => (a.id === appt.id ? updated : a)) : list,
           );
           this.closeReschedule();
+          this.toast.success('Agendamento reagendado.');
         },
         error: () => {
           this.rescheduleSubmitting.set(false);

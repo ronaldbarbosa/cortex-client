@@ -20,11 +20,11 @@ function passwordsMatch(control: AbstractControl): ValidationErrors | null {
 }
 
 @Component({
-  selector: 'app-redefinir-senha',
+  selector: 'app-reset-password',
   imports: [ReactiveFormsModule, RouterLink, AlertComponent, IconComponent, FieldErrorComponent],
-  templateUrl: './redefinir-senha.html',
+  templateUrl: './reset-password.html',
 })
-export class RedefinirSenhaComponent implements OnInit {
+export class ResetPasswordComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private auth = inject(AuthService);
   private fb = inject(FormBuilder);

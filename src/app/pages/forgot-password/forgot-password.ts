@@ -9,11 +9,11 @@ import { FieldErrorComponent } from '../../shared/ui/overlay/field-error';
 import { apiErrorMessage } from '../../core/utils/api-error';
 
 @Component({
-  selector: 'app-esqueci-senha',
+  selector: 'app-forgot-password',
   imports: [ReactiveFormsModule, RouterLink, AlertComponent, IconComponent, FieldErrorComponent],
-  templateUrl: './esqueci-senha.html',
+  templateUrl: './forgot-password.html',
 })
-export class EsqueciSenhaComponent {
+export class ForgotPasswordComponent {
   private auth = inject(AuthService);
   private fb = inject(FormBuilder);
   readonly tenantContext = inject(TenantContextService);

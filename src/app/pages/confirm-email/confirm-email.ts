@@ -5,11 +5,11 @@ import { environment } from '../../../environments/environment';
 import { IconComponent } from '../../shared/ui/icon/icon';
 
 @Component({
-  selector: 'app-confirmar-email',
+  selector: 'app-confirm-email',
   imports: [IconComponent],
-  templateUrl: './confirmar-email.html',
+  templateUrl: './confirm-email.html',
 })
-export class ConfirmarEmailComponent implements OnInit {
+export class ConfirmEmailComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private http = inject(HttpClient);
 

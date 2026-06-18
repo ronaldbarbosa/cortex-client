@@ -65,6 +65,9 @@ export const routes: Routes = [
     path: 'nao-encontrado',
     loadComponent: () => import('./pages/not-found/not-found').then((m) => m.NotFoundComponent),
   },
-  { path: '', redirectTo: 'nao-encontrado', pathMatch: 'full' },
+  {
+    path: '',
+    loadComponent: () => import('./pages/landing/landing').then((m) => m.LandingComponent),
+  },
   { path: '**', redirectTo: 'nao-encontrado' },
 ];

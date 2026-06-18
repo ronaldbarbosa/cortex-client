@@ -1,0 +1,183 @@
+<div class="min-h-dvh bg-bg text-ink font-sans flex flex-col">
+  <!-- Nav -->
+  <header class="sticky top-0 z-50 bg-bg/90 backdrop-blur border-b border-border">
+    <div class="max-w-5xl mx-auto px-5 lg:px-8 h-14 flex items-center justify-between">
+      <img src="02_vexion_tesoura_light.svg" alt="Vexion Studio" class="w-42 md:w-50" />
+
+      <a
+        href="#contato"
+        class="flex items-center gap-1.5 bg-ink text-bg text-[13px] font-medium px-4 py-2 rounded-xl hover:bg-ink-2 transition-colors"
+      >
+        Agendar demonstração
+        <app-icon name="arrowR" [size]="13" color="currentColor" [strokeWidth]="2" />
+      </a>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <section class="bg-hero text-hero-ink">
+    <div
+      class="max-w-5xl mx-auto px-5 lg:px-8 py-20 lg:py-28 flex flex-col items-center text-center gap-6"
+    >
+      <div
+        class="inline-flex items-center gap-2 border border-hero-border rounded-full px-4 py-1.5 text-hero-ink-2 font-mono text-[11px] uppercase tracking-[0.08em]"
+      >
+        <span class="w-1.5 h-1.5 rounded-full bg-accent"></span>
+        Gestão de salões — Vexion Studio
+      </div>
+
+      <h1
+        class="font-tight text-4xl lg:text-5xl font-semibold tracking-tight leading-tight max-w-2xl"
+      >
+        Tudo que seu salão precisa,<br class="hidden lg:block" />
+        em um só lugar.
+      </h1>
+
+      <p class="text-hero-ink-2 text-[15px] lg:text-[16px] leading-relaxed max-w-xl">
+        Agendamentos, histórico técnico, comissões, fidelidade e marketing automático — desenvolvido
+        para salões que levam o serviço a sério.
+      </p>
+
+      <div class="flex flex-col sm:flex-row items-center gap-3 mt-2">
+        <a
+          href="#contato"
+          class="w-full sm:w-auto bg-accent text-hero font-semibold text-[14px] px-7 py-3 rounded-xl hover:opacity-90 transition-opacity text-center"
+        >
+          Quero para meu salão
+        </a>
+        <a
+          href="#funcionalidades"
+          class="w-full sm:w-auto border border-hero-border text-hero-ink-2 font-medium text-[14px] px-7 py-3 rounded-xl hover:border-accent hover:text-accent transition-colors text-center"
+        >
+          Ver funcionalidades
+        </a>
+      </div>
+
+      <!-- Trust bar -->
+      <div
+        class="mt-8 flex items-center gap-6 text-hero-ink-2 font-mono text-[11px] uppercase tracking-[0.06em]"
+      >
+        <span class="flex items-center gap-1.5">
+          <app-icon name="check" [size]="12" color="var(--color-accent)" [strokeWidth]="2.5" />
+          Sem contrato de fidelidade
+        </span>
+        <span class="hidden sm:flex items-center gap-1.5">
+          <app-icon name="check" [size]="12" color="var(--color-accent)" [strokeWidth]="2.5" />
+          Suporte incluído
+        </span>
+        <span class="hidden sm:flex items-center gap-1.5">
+          <app-icon name="check" [size]="12" color="var(--color-accent)" [strokeWidth]="2.5" />
+          LGPD desde o dia um
+        </span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section id="funcionalidades" class="max-w-5xl mx-auto px-5 lg:px-8 py-16 lg:py-24 w-full">
+    <div class="text-center mb-12">
+      <p class="font-mono text-[10px] text-ink-3 uppercase tracking-[0.08em] mb-3">
+        Funcionalidades
+      </p>
+      <h2 class="font-tight text-2xl lg:text-3xl font-semibold tracking-tight text-ink">
+        Feito para quem trabalha com beleza
+      </h2>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      @for (f of features; track f.title) {
+        <div
+          class="bg-surface border border-border rounded-2xl p-5 flex flex-col gap-3 hover:border-accent/40 transition-colors"
+        >
+          <div class="w-9 h-9 rounded-xl bg-accent/10 flex items-center justify-center shrink-0">
+            <app-icon [name]="f.icon" [size]="17" color="var(--color-accent)" [strokeWidth]="1.8" />
+          </div>
+          <div>
+            <h3 class="font-tight text-[14px] font-semibold text-ink mb-1">{{ f.title }}</h3>
+            <p class="text-[13px] text-ink-3 leading-relaxed">{{ f.description }}</p>
+          </div>
+        </div>
+      }
+    </div>
+  </section>
+
+  <!-- Highlight strip -->
+  <section class="bg-hero text-hero-ink">
+    <div class="max-w-5xl mx-auto px-5 lg:px-8 py-12 lg:py-16">
+      <div class="lg:flex lg:items-center lg:justify-between gap-12">
+        <div class="mb-8 lg:mb-0">
+          <p class="font-mono text-[10px] text-hero-ink-2 uppercase tracking-[0.08em] mb-3">
+            Diferencial
+          </p>
+          <h2 class="font-tight text-2xl lg:text-3xl font-semibold tracking-tight mb-4 max-w-md">
+            O primeiro sistema que entende a pausa da química
+          </h2>
+          <p class="text-hero-ink-2 text-[14px] leading-relaxed max-w-sm">
+            Coloração tem tempo de ação. O Vexion Studio permite encaixar outro atendimento nesse
+            intervalo, maximizando a produtividade sem gerar conflitos na agenda.
+          </p>
+        </div>
+        <div class="shrink-0 grid grid-cols-2 gap-3 lg:w-72">
+          <div class="bg-hero-surface border border-hero-border rounded-2xl p-4 text-center">
+            <p class="font-tight text-2xl font-bold text-hero-ink mb-1">+30%</p>
+            <p class="font-mono text-[10px] text-hero-ink-2 uppercase tracking-[0.06em]">
+              Capacidade da agenda
+            </p>
+          </div>
+          <div class="bg-hero-surface border border-hero-border rounded-2xl p-4 text-center">
+            <p class="font-tight text-2xl font-bold text-hero-ink mb-1">0</p>
+            <p class="font-mono text-[10px] text-hero-ink-2 uppercase tracking-[0.06em]">
+              Conflitos de horário
+            </p>
+          </div>
+          <div
+            class="col-span-2 bg-hero-surface border border-hero-border rounded-2xl p-4 text-center"
+          >
+            <p class="font-tight text-2xl font-bold text-accent mb-1">100%</p>
+            <p class="font-mono text-[10px] text-hero-ink-2 uppercase tracking-[0.06em]">
+              Histórico preservado por cliente
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section id="contato" class="max-w-5xl mx-auto px-5 lg:px-8 py-16 lg:py-24 w-full">
+    <div
+      class="bg-surface border border-border rounded-3xl p-8 lg:p-12 text-center flex flex-col items-center gap-5"
+    >
+      <img src="02_icone_light.svg" alt="Vexion Studio" class="w-12 h-12" />
+      <div>
+        <h2 class="font-tight text-2xl lg:text-3xl font-semibold tracking-tight text-ink mb-3">
+          Pronto para transformar seu salão?
+        </h2>
+        <p class="text-ink-3 text-[14px] leading-relaxed max-w-md mx-auto">
+          Agende uma demonstração gratuita. Mostramos tudo em 30 minutos e configuramos o sistema
+          junto com você.
+        </p>
+      </div>
+      <a
+        href="mailto:contato@vexionstudio.com.br"
+        class="flex items-center gap-2 bg-ink text-bg font-semibold text-[14px] px-8 py-3.5 rounded-xl hover:bg-ink-2 transition-colors"
+      >
+        Falar com a equipe
+        <app-icon name="arrowR" [size]="14" color="currentColor" [strokeWidth]="2" />
+      </a>
+      <p class="font-mono text-[11px] text-ink-3">Sem compromisso · Resposta em até 24 h</p>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="border-t border-border mt-auto">
+    <div
+      class="max-w-5xl mx-auto px-5 lg:px-8 py-8 flex flex-col sm:flex-row items-center justify-between gap-4"
+    >
+      <img src="02_vexion_tesoura_light.svg" alt="Vexion Studio" class="w-42 md:w-50" />
+      <p class="font-mono text-[11px] text-ink-3 text-center">
+        Gestão de salões · LGPD compliant · © {{ year }} Vexion Studio
+      </p>
+    </div>
+  </footer>
+</div>

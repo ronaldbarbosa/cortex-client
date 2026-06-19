@@ -66,6 +66,11 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/not-found/not-found').then((m) => m.NotFoundComponent),
   },
   {
+    path: 'indisponivel',
+    loadComponent: () =>
+      import('./pages/unavailable/unavailable').then((m) => m.UnavailableComponent),
+  },
+  {
     path: '',
     loadComponent: () => import('./pages/landing/landing').then((m) => m.LandingComponent),
   },

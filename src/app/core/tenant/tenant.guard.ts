@@ -18,6 +18,10 @@ export const tenantGuard: CanActivateFn = async (route) => {
     const tenant = await firstValueFrom(
       http.get<Tenant>(`${environment.apiUrl}/public/establishments/${slug}`),
     );
+    // Licença inativa → salão não aceita agendamento online: bloqueia o acesso à página.
+    if (!tenant.onlineBookingEnabled) {
+      return router.createUrlTree(['/indisponivel'], { queryParams: { salao: tenant.name } });
+    }
     tenantContext.set(tenant);
     return true;
   } catch {

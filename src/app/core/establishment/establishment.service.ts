@@ -27,10 +27,12 @@ export class EstablishmentService {
     return this.http.get<PublicServiceCategory[]>(`${this.baseUrl()}/services`);
   }
 
-  getProfessionals(): Observable<PublicProfessional[]> {
+  getProfessionals(serviceIds?: string[]): Observable<PublicProfessional[]> {
     const unitId = this.unitContext.unitId();
-    const params: Record<string, string> = {};
+    const params: Record<string, string | string[]> = {};
     if (unitId) params['unitId'] = unitId;
+    // Filtra por quem executa TODOS os serviços escolhidos (some quem não faz, ex.: admin).
+    if (serviceIds && serviceIds.length > 0) params['serviceIds'] = serviceIds;
     return this.http.get<PublicProfessional[]>(`${this.baseUrl()}/professionals`, { params });
   }
 

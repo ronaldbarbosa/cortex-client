@@ -124,16 +124,18 @@ export class BookComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     const preselectedId = this.route.snapshot.queryParamMap.get('professionalId');
 
-    this.establishmentService
-      .getProfessionals()
-      .pipe(catchError(() => of([])))
-      .subscribe((list) => {
-        this.professionals.set(list);
-        if (preselectedId) {
+    // Deep-link com profissional pré-selecionado: resolve o profissional pela lista completa.
+    // No fluxo normal a lista é carregada (filtrada por serviço) ao entrar no passo 2.
+    if (preselectedId) {
+      this.establishmentService
+        .getProfessionals()
+        .pipe(catchError(() => of([])))
+        .subscribe((list) => {
+          this.professionals.set(list);
           const found = list.find((p) => p.id === preselectedId);
           if (found) this.selectedProfessional.set(found);
-        }
-      });
+        });
+    }
 
     this.loyaltyService
       .getProgram()
@@ -187,8 +189,18 @@ export class BookComponent implements OnInit, OnDestroy {
       this.step.set(3);
       this.fetchAvailability(this.selectedDate());
     } else {
+      this.loadProfessionalsForSelectedServices();
       this.step.set(2);
     }
+  }
+
+  private loadProfessionalsForSelectedServices(): void {
+    const serviceIds = this.selectedServices().map((s) => s.id);
+    this.professionals.set(null);
+    this.establishmentService
+      .getProfessionals(serviceIds)
+      .pipe(catchError(() => of([])))
+      .subscribe((list) => this.professionals.set(list));
   }
 
   selectProfessional(professional: PublicProfessional): void {

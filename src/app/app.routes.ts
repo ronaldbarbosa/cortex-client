@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/auth/auth.guard';
 import { tenantGuard } from './core/tenant/tenant.guard';
+import { unitGuard } from './core/unit/unit.guard';
 
 export const routes: Routes = [
   {
@@ -17,37 +18,54 @@ export const routes: Routes = [
           import('./pages/forgot-password/forgot-password').then((m) => m.ForgotPasswordComponent),
       },
       {
-        path: '',
-        loadComponent: () => import('./layout/shell/shell').then((m) => m.ShellComponent),
+        path: 'u/:unitSlug',
+        canActivate: [unitGuard],
         children: [
-          { path: '', redirectTo: 'inicio', pathMatch: 'full' },
           {
-            path: 'inicio',
-            loadComponent: () => import('./pages/home/home').then((m) => m.HomeComponent),
-          },
-          {
-            path: 'agendar',
-            loadComponent: () => import('./pages/book/book').then((m) => m.BookComponent),
-          },
-          {
-            path: 'fidelidade',
-            loadComponent: () => import('./pages/loyalty/loyalty').then((m) => m.LoyaltyComponent),
-          },
-          {
-            path: 'historico',
-            canActivate: [authGuard],
-            loadComponent: () => import('./pages/history/history').then((m) => m.HistoryComponent),
-          },
-          {
-            path: 'profissionais',
-            loadComponent: () =>
-              import('./pages/professionals/professionals').then((m) => m.ProfessionalsComponent),
-          },
-          {
-            path: 'conta',
-            loadComponent: () => import('./pages/account/account').then((m) => m.AccountComponent),
+            path: '',
+            loadComponent: () => import('./layout/shell/shell').then((m) => m.ShellComponent),
+            children: [
+              { path: '', redirectTo: 'inicio', pathMatch: 'full' },
+              {
+                path: 'inicio',
+                loadComponent: () => import('./pages/home/home').then((m) => m.HomeComponent),
+              },
+              {
+                path: 'agendar',
+                loadComponent: () => import('./pages/book/book').then((m) => m.BookComponent),
+              },
+              {
+                path: 'fidelidade',
+                loadComponent: () =>
+                  import('./pages/loyalty/loyalty').then((m) => m.LoyaltyComponent),
+              },
+              {
+                path: 'historico',
+                canActivate: [authGuard],
+                loadComponent: () =>
+                  import('./pages/history/history').then((m) => m.HistoryComponent),
+              },
+              {
+                path: 'profissionais',
+                loadComponent: () =>
+                  import('./pages/professionals/professionals').then(
+                    (m) => m.ProfessionalsComponent,
+                  ),
+              },
+              {
+                path: 'conta',
+                loadComponent: () =>
+                  import('./pages/account/account').then((m) => m.AccountComponent),
+              },
+            ],
           },
         ],
+      },
+      {
+        path: '',
+        pathMatch: 'full',
+        loadComponent: () =>
+          import('./pages/unit-select/unit-select').then((m) => m.UnitSelectComponent),
       },
     ],
   },

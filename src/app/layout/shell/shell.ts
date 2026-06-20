@@ -3,6 +3,7 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { IconComponent } from '../../shared/ui/icon/icon';
 import { LoginModalComponent } from '../../shared/ui/login-modal/login-modal';
 import { TenantContextService } from '../../core/tenant/tenant-context.service';
+import { UnitContextService } from '../../core/unit/unit-context.service';
 import { AuthService } from '../../core/auth/auth.service';
 
 interface Tab {
@@ -26,6 +27,7 @@ const TAB_DEFS: Tab[] = [
 })
 export class ShellComponent {
   private tenantContext = inject(TenantContextService);
+  private unitContext = inject(UnitContextService);
   readonly auth = inject(AuthService);
 
   readonly tenantName = this.tenantContext.name;
@@ -35,10 +37,17 @@ export class ShellComponent {
 
   readonly tabs = computed(() => {
     const slug = this.tenantContext.slug();
-    return TAB_DEFS.map((t) => ({ ...t, route: ['/s', slug, t.path] }));
+    const unitSlug = this.unitContext.unitSlug();
+    return TAB_DEFS.map((t) => ({ ...t, route: ['/s', slug, 'u', unitSlug, t.path] }));
   });
 
-  readonly accountRoute = computed(() => ['/s', this.tenantContext.slug(), 'conta']);
+  readonly accountRoute = computed(() => [
+    '/s',
+    this.tenantContext.slug(),
+    'u',
+    this.unitContext.unitSlug(),
+    'conta',
+  ]);
 
   toggleDropdown(): void {
     this.dropdownOpen.update((v) => !v);

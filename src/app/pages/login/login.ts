@@ -121,7 +121,7 @@ export class LoginComponent implements AfterViewInit, OnDestroy {
       next: () => {
         this.loading.set(false);
         const slug = this.tenantContext.slug();
-        this.router.navigate(['/s', slug, 'inicio']);
+        this.router.navigate(['/s', slug]);
       },
       error: () => {
         this.loading.set(false);
@@ -154,7 +154,7 @@ export class LoginComponent implements AfterViewInit, OnDestroy {
         next: () => {
           this.loading.set(false);
           const slug = this.tenantContext.slug();
-          this.router.navigate(['/s', slug, 'inicio']);
+          this.router.navigate(['/s', slug]);
         },
         error: (err) => {
           this.loading.set(false);
@@ -196,7 +196,7 @@ export class LoginComponent implements AfterViewInit, OnDestroy {
       next: () => {
         this.loading.set(false);
         const slug = this.tenantContext.slug();
-        this.router.navigate(['/s', slug, 'inicio']);
+        this.router.navigate(['/s', slug]);
       },
       error: () => {
         this.loading.set(false);

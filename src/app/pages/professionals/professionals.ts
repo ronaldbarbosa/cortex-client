@@ -3,6 +3,7 @@ import { RouterLink } from '@angular/router';
 import { catchError, of } from 'rxjs';
 import { IconComponent } from '../../shared/ui/icon/icon';
 import { TenantContextService } from '../../core/tenant/tenant-context.service';
+import { UnitContextService } from '../../core/unit/unit-context.service';
 import { EstablishmentService } from '../../core/establishment/establishment.service';
 import { PublicProfessional } from '../../core/establishment/establishment.model';
 
@@ -19,9 +20,11 @@ function getInitials(name: string): string {
 })
 export class ProfessionalsComponent implements OnInit {
   private tenantContext = inject(TenantContextService);
+  private unitContext = inject(UnitContextService);
   private establishmentService = inject(EstablishmentService);
 
   readonly slug = this.tenantContext.slug;
+  readonly unitSlug = this.unitContext.unitSlug;
   readonly tenantName = this.tenantContext.name;
 
   // null = loading

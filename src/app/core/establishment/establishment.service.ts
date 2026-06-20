@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { TenantContextService } from '../tenant/tenant-context.service';
+import { UnitContextService } from '../unit/unit-context.service';
 import {
   AppointmentSummary,
   CreateAppointmentRequest,
@@ -16,6 +17,7 @@ import {
 export class EstablishmentService {
   private http = inject(HttpClient);
   private tenantContext = inject(TenantContextService);
+  private unitContext = inject(UnitContextService);
 
   private baseUrl = computed(
     () => `${environment.apiUrl}/public/establishments/${this.tenantContext.slug()}`,
@@ -26,7 +28,10 @@ export class EstablishmentService {
   }
 
   getProfessionals(): Observable<PublicProfessional[]> {
-    return this.http.get<PublicProfessional[]>(`${this.baseUrl()}/professionals`);
+    const unitId = this.unitContext.unitId();
+    const params: Record<string, string> = {};
+    if (unitId) params['unitId'] = unitId;
+    return this.http.get<PublicProfessional[]>(`${this.baseUrl()}/professionals`, { params });
   }
 
   getAvailability(
@@ -34,9 +39,12 @@ export class EstablishmentService {
     date: string,
     durationMinutes: number,
   ): Observable<ProfessionalAvailability> {
+    const unitId = this.unitContext.unitId();
+    const params: Record<string, string | number> = { date, durationMinutes };
+    if (unitId) params['unitId'] = unitId;
     return this.http.get<ProfessionalAvailability>(
       `${this.baseUrl()}/professionals/${professionalId}/availability`,
-      { params: { date, durationMinutes } },
+      { params },
     );
   }
 

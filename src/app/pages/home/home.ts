@@ -3,6 +3,7 @@ import { RouterLink } from '@angular/router';
 import { catchError, of } from 'rxjs';
 import { IconComponent } from '../../shared/ui/icon/icon';
 import { TenantContextService } from '../../core/tenant/tenant-context.service';
+import { UnitContextService } from '../../core/unit/unit-context.service';
 import { AuthService } from '../../core/auth/auth.service';
 import { EstablishmentService } from '../../core/establishment/establishment.service';
 
@@ -33,10 +34,12 @@ function getInitials(name: string): string {
 })
 export class HomeComponent implements OnInit {
   private tenantContext = inject(TenantContextService);
+  private unitContext = inject(UnitContextService);
   private auth = inject(AuthService);
   private establishmentService = inject(EstablishmentService);
 
   readonly slug = this.tenantContext.slug;
+  readonly unitSlug = this.unitContext.unitSlug;
   readonly isAuthenticated = this.auth.isAuthenticated;
 
   readonly nextAppointment: NextAppointment | null = null;

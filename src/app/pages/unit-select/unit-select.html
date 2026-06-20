@@ -1,0 +1,28 @@
+<div class="flex flex-col items-center justify-center min-h-dvh bg-bg px-4">
+  <div class="w-full max-w-sm">
+    <div class="text-center mb-8">
+      <h1 class="font-tight text-2xl font-bold text-ink">{{ tenantName() }}</h1>
+      <p class="text-sm text-ink-2 mt-1">Selecione a unidade para agendar</p>
+    </div>
+
+    <div class="flex flex-col gap-3">
+      @for (unit of units(); track unit.id) {
+        <button
+          (click)="select(unit.slug)"
+          class="flex items-center gap-4 p-4 bg-surface border border-border rounded-2xl hover:border-accent/40 hover:bg-accent/5 transition-colors text-left cursor-pointer"
+        >
+          <div class="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center shrink-0">
+            <app-icon name="building" [size]="18" class="text-accent" />
+          </div>
+          <div class="min-w-0">
+            <p class="font-medium text-ink truncate">{{ unit.name }}</p>
+            @if (unit.phone) {
+              <p class="text-xs text-ink-3 mt-0.5">{{ unit.phone }}</p>
+            }
+          </div>
+          <app-icon name="chevronRight" [size]="16" class="text-ink-3 ml-auto shrink-0" />
+        </button>
+      }
+    </div>
+  </div>
+</div>

@@ -7,6 +7,7 @@ import { AuthModalService } from '../../core/auth/auth-modal.service';
 import { AuthService } from '../../core/auth/auth.service';
 import { EstablishmentService } from '../../core/establishment/establishment.service';
 import { TenantContextService } from '../../core/tenant/tenant-context.service';
+import { UnitContextService } from '../../core/unit/unit-context.service';
 import {
   AppointmentSummary,
   ProfessionalAvailability,
@@ -37,6 +38,7 @@ export class BookComponent implements OnInit, OnDestroy {
   private auth = inject(AuthService);
   private authModal = inject(AuthModalService);
   private tenantContext = inject(TenantContextService);
+  private unitContext = inject(UnitContextService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
 
@@ -233,12 +235,14 @@ export class BookComponent implements OnInit, OnDestroy {
 
   navigateToHome(): void {
     const slug = this.tenantContext.slug();
-    this.router.navigate(['/s', slug, 'inicio']);
+    const unitSlug = this.unitContext.unitSlug();
+    this.router.navigate(['/s', slug, 'u', unitSlug, 'inicio']);
   }
 
   navigateToHistory(): void {
     const slug = this.tenantContext.slug();
-    this.router.navigate(['/s', slug, 'historico']);
+    const unitSlug = this.unitContext.unitSlug();
+    this.router.navigate(['/s', slug, 'u', unitSlug, 'historico']);
   }
 
   private submitAppointment(): void {
@@ -267,6 +271,7 @@ export class BookComponent implements OnInit, OnDestroy {
         professionalId: professional.id,
         startLocal,
         serviceIds,
+        unitId: this.unitContext.unitId() ?? undefined,
         rewardServiceId:
           this.includeRewardService() && this.rewardServiceItem()
             ? this.rewardServiceItem()!.id

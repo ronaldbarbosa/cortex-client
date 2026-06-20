@@ -59,7 +59,7 @@
             <p class="font-mono text-[11px] text-hero-ink-2">Que tal marcar algo novo?</p>
           </div>
           <a
-            [routerLink]="['/s', slug(), 'agendar']"
+            [routerLink]="['/s', slug(), 'u', unitSlug(), 'agendar']"
             class="bg-accent text-hero font-semibold text-sm px-5 py-2.5 rounded-xl transition-opacity hover:opacity-90"
           >
             Agendar agora
@@ -132,7 +132,7 @@
             <p class="font-mono text-[11px] text-hero-ink-2">Que tal marcar algo novo?</p>
           </div>
           <a
-            [routerLink]="['/s', slug(), 'agendar']"
+            [routerLink]="['/s', slug(), 'u', unitSlug(), 'agendar']"
             class="shrink-0 bg-accent text-hero font-semibold text-sm px-5 py-2.5 rounded-xl transition-opacity hover:opacity-90"
           >
             Agendar agora
@@ -148,7 +148,7 @@
   <!-- Quick actions -->
   <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
     <a
-      [routerLink]="['/s', slug(), 'agendar']"
+      [routerLink]="['/s', slug(), 'u', unitSlug(), 'agendar']"
       class="bg-surface border border-border rounded-2xl p-4 flex flex-col gap-2.5 hover:border-accent/40 transition-colors"
     >
       <div class="w-8 h-8 rounded-xl bg-accent/10 flex items-center justify-center">
@@ -160,7 +160,7 @@
     </a>
 
     <a
-      [routerLink]="['/s', slug(), 'fidelidade']"
+      [routerLink]="['/s', slug(), 'u', unitSlug(), 'fidelidade']"
       class="bg-surface border border-border rounded-2xl p-4 flex flex-col gap-2.5 hover:border-accent/40 transition-colors"
     >
       <div class="w-8 h-8 rounded-xl bg-accent/10 flex items-center justify-center">
@@ -170,7 +170,7 @@
     </a>
 
     <a
-      [routerLink]="['/s', slug(), 'historico']"
+      [routerLink]="['/s', slug(), 'u', unitSlug(), 'historico']"
       class="bg-surface border border-border rounded-2xl p-4 flex flex-col gap-2.5 hover:border-accent/40 transition-colors"
     >
       <div class="w-8 h-8 rounded-xl bg-accent/10 flex items-center justify-center">
@@ -180,7 +180,7 @@
     </a>
 
     <a
-      [routerLink]="['/s', slug(), 'agendar']"
+      [routerLink]="['/s', slug(), 'u', unitSlug(), 'agendar']"
       class="bg-surface border border-border rounded-2xl p-4 flex flex-col gap-2.5 hover:border-accent/40 transition-colors"
     >
       <div class="w-8 h-8 rounded-xl bg-accent/10 flex items-center justify-center">
@@ -195,7 +195,7 @@
     <div class="flex items-center justify-between mb-4">
       <h2 class="font-tight text-[15px] font-semibold text-ink">Profissionais favoritos</h2>
       <a
-        [routerLink]="['/s', slug(), 'profissionais']"
+        [routerLink]="['/s', slug(), 'u', unitSlug(), 'profissionais']"
         class="font-mono text-[10px] text-ink-3 uppercase tracking-[0.06em] hover:text-accent transition-colors"
       >
         Ver todos
@@ -273,7 +273,7 @@
       <div class="flex gap-3 overflow-x-auto pb-1 -mx-5 px-5 scrollbar-none lg:hidden">
         @for (pro of favoriteProfessionals()!; track pro.id) {
           <a
-            [routerLink]="['/s', slug(), 'agendar']"
+            [routerLink]="['/s', slug(), 'u', unitSlug(), 'agendar']"
             [queryParams]="{ professionalId: pro.id }"
             class="shrink-0 bg-surface border border-border rounded-2xl p-4 flex flex-col items-center gap-2 w-28 hover:border-accent/40 transition-colors"
           >
@@ -298,7 +298,7 @@
       <div class="hidden lg:grid grid-cols-4 xl:grid-cols-5 gap-3">
         @for (pro of favoriteProfessionals()!; track pro.id) {
           <a
-            [routerLink]="['/s', slug(), 'agendar']"
+            [routerLink]="['/s', slug(), 'u', unitSlug(), 'agendar']"
             [queryParams]="{ professionalId: pro.id }"
             class="bg-surface border border-border rounded-2xl p-4 flex flex-col items-center gap-2 hover:border-accent/40 transition-colors"
           >

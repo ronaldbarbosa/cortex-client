@@ -32,6 +32,8 @@ export interface CreateAppointmentRequest {
   startLocal: string;
   serviceIds: string[];
   rewardServiceId?: string;
+  /** Unidade escolhida na rota (/u/:unitSlug) — define a filial do atendimento. */
+  unitId?: string;
 }
 
 export interface RescheduleAppointmentRequest {

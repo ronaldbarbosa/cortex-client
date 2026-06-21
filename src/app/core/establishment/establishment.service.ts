@@ -24,7 +24,11 @@ export class EstablishmentService {
   );
 
   getServices(): Observable<PublicServiceCategory[]> {
-    return this.http.get<PublicServiceCategory[]>(`${this.baseUrl()}/services`);
+    // Filtra pelos serviços oferecidos na filial escolhida (quando há unidade no contexto).
+    const unitId = this.unitContext.unitId();
+    const params: Record<string, string> = {};
+    if (unitId) params['unitId'] = unitId;
+    return this.http.get<PublicServiceCategory[]>(`${this.baseUrl()}/services`, { params });
   }
 
   getProfessionals(serviceIds?: string[]): Observable<PublicProfessional[]> {

@@ -4,7 +4,7 @@ import { ToastData, ToastService } from './toast.service';
 import { TONE_BADGE, TONE_BAR, TONE_FG, TONE_TRACK, Tone } from './tone';
 
 /**
- * Host global dos toasts. Stack no canto superior-direito (desktop) e faixa
+ * Host global dos toasts. Stack no canto inferior-direito (desktop) e faixa
  * inferior (mobile). Montado uma vez no shell da aplicação.
  */
 @Component({
@@ -12,7 +12,7 @@ import { TONE_BADGE, TONE_BAR, TONE_FG, TONE_TRACK, Tone } from './tone';
   imports: [IconComponent],
   template: `
     <div
-      class="fixed z-[60] flex flex-col gap-2.5 pointer-events-none bottom-4 left-4 right-4 items-stretch sm:top-4 sm:bottom-auto sm:left-auto sm:right-4 sm:items-end"
+      class="fixed z-[60] flex flex-col gap-2.5 pointer-events-none bottom-4 left-4 right-4 items-stretch sm:top-auto sm:bottom-4 sm:left-auto sm:right-4 sm:items-end"
     >
       @for (t of toast.toasts(); track t.id) {
         <div

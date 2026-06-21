@@ -7,7 +7,8 @@ export type ModalSize = 'sm' | 'md' | 'lg';
 
 /**
  * Shell de modal padronizado: backdrop com blur, card centralizado no desktop e
- * bottom-sheet no mobile. Fecha no Esc e no clique fora (configurável).
+ * bottom-sheet no mobile. Fecha exclusivamente pelo botão de fechar do cabeçalho
+ * ou por ações explícitas do conteúdo — clique fora e tecla Esc não fecham.
  *
  * Cabeçalho opcional: se `title` for informado, renderiza badge + título +
  * subtítulo + botão fechar. Caso contrário, o conteúdo projetado controla tudo.
@@ -22,7 +23,6 @@ export type ModalSize = 'sm' | 'md' | 'lg';
   template: `
     <div
       class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/40 backdrop-blur-[2px]"
-      (click)="onBackdrop()"
       role="dialog"
       aria-modal="true"
       [attr.aria-label]="title()"
@@ -30,7 +30,6 @@ export type ModalSize = 'sm' | 'md' | 'lg';
       <div
         class="w-full bg-surface border border-border shadow-xl rounded-t-2xl sm:rounded-2xl max-h-[92vh] sm:max-h-[90vh] flex flex-col overflow-hidden"
         [class]="widthClass()"
-        (click)="$event.stopPropagation()"
       >
         @if (title()) {
           <div
@@ -73,9 +72,6 @@ export type ModalSize = 'sm' | 'md' | 'lg';
       </div>
     </div>
   `,
-  host: {
-    '(document:keydown.escape)': 'closed.emit()',
-  },
 })
 export class ModalComponent implements OnInit, OnDestroy {
   size = input<ModalSize>('md');
@@ -83,7 +79,6 @@ export class ModalComponent implements OnInit, OnDestroy {
   subtitle = input<string>();
   badgeIcon = input<string>();
   badgeTone = input<Tone>('neutral');
-  closeOnBackdrop = input(true);
 
   closed = output<void>();
 
@@ -97,10 +92,6 @@ export class ModalComponent implements OnInit, OnDestroy {
 
   widthClass = computed(() => this.widths[this.size()]);
   badgeClass = computed(() => TONE_BADGE[this.badgeTone()]);
-
-  onBackdrop(): void {
-    if (this.closeOnBackdrop()) this.closed.emit();
-  }
 
   ngOnInit(): void {
     this.doc.body.style.overflow = 'hidden';

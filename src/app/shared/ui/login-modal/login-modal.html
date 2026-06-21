@@ -2,7 +2,6 @@
   <!-- Backdrop -->
   <div
     class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4"
-    (click)="close()"
     role="dialog"
     aria-modal="true"
     aria-label="Entrar na conta"
@@ -10,7 +9,6 @@
     <!-- Panel -->
     <div
       class="w-full sm:max-w-sm bg-hero-surface border border-hero-border rounded-t-3xl sm:rounded-2xl p-7 shadow-2xl"
-      (click)="$event.stopPropagation()"
     >
       <!-- Header -->
       <div class="flex items-center justify-between mb-5">

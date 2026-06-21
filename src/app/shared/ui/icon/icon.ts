@@ -7,6 +7,8 @@ const PATHS: Record<string, string> = {
   star: '<path d="M12 3l2.7 5.5 6 .9-4.3 4.2 1 6-5.4-2.8-5.4 2.8 1-6L3.3 9.4l6-.9z"/>',
   clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
   user: '<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-7 8-7s8 3 8 7"/>',
+  building:
+    '<path d="M6 22V6a2 2 0 012-2h8a2 2 0 012 2v16"/><path d="M2 22h20"/><path d="M10 10h4M10 14h4M10 18h4"/>',
   chevron: '<path d="M9 6l6 6-6 6"/>',
   chevronD: '<path d="M6 9l6 6 6-6"/>',
   chevronL: '<path d="M15 6l-6 6 6 6"/>',

@@ -16,6 +16,7 @@ import { AlertComponent } from '../../shared/ui/alert/alert';
 import { FieldErrorComponent } from '../../shared/ui/overlay/field-error';
 import { apiErrorMessage } from '../../core/utils/api-error';
 import { environment } from '../../../environments/environment';
+import { ToastService } from '../../shared/ui/overlay/toast.service';
 
 @Component({
   selector: 'app-login',
@@ -26,6 +27,7 @@ export class LoginComponent implements AfterViewInit, OnDestroy {
   private fb = inject(FormBuilder);
   private auth = inject(AuthService);
   private router = inject(Router);
+  private toast = inject(ToastService);
   readonly tenantContext = inject(TenantContextService);
 
   @ViewChild('googleBtn') googleBtnRef?: ElementRef<HTMLDivElement>;
@@ -126,6 +128,7 @@ export class LoginComponent implements AfterViewInit, OnDestroy {
       error: () => {
         this.loading.set(false);
         this.error.set('E-mail ou senha incorretos.');
+        this.toast.error('Credenciais inválidas', 'E-mail ou senha incorretos.');
       },
     });
   }
@@ -158,12 +161,12 @@ export class LoginComponent implements AfterViewInit, OnDestroy {
         },
         error: (err) => {
           this.loading.set(false);
-          this.error.set(
-            apiErrorMessage(
-              err,
-              'Não foi possível criar a conta. Verifique os dados e tente novamente.',
-            ),
+          const msg = apiErrorMessage(
+            err,
+            'Não foi possível criar a conta. Verifique os dados e tente novamente.',
           );
+          this.error.set(msg);
+          this.toast.error('Erro ao criar conta', msg);
         },
       });
   }
@@ -201,6 +204,7 @@ export class LoginComponent implements AfterViewInit, OnDestroy {
       error: () => {
         this.loading.set(false);
         this.error.set('Não foi possível autenticar com o Google.');
+        this.toast.error('Erro de autenticação', 'Não foi possível autenticar com o Google.');
       },
     });
   }

@@ -7,6 +7,7 @@ import { AlertComponent } from '../../shared/ui/alert/alert';
 import { IconComponent } from '../../shared/ui/icon/icon';
 import { FieldErrorComponent } from '../../shared/ui/overlay/field-error';
 import { apiErrorMessage } from '../../core/utils/api-error';
+import { ToastService } from '../../shared/ui/overlay/toast.service';
 
 @Component({
   selector: 'app-forgot-password',
@@ -16,6 +17,7 @@ import { apiErrorMessage } from '../../core/utils/api-error';
 export class ForgotPasswordComponent {
   private auth = inject(AuthService);
   private fb = inject(FormBuilder);
+  private toast = inject(ToastService);
   readonly tenantContext = inject(TenantContextService);
 
   form = this.fb.nonNullable.group({
@@ -46,7 +48,9 @@ export class ForgotPasswordComponent {
       },
       error: (err) => {
         this.loading.set(false);
-        this.error.set(apiErrorMessage(err, 'Erro ao enviar o e-mail. Tente novamente.'));
+        const msg = apiErrorMessage(err, 'Erro ao enviar o e-mail. Tente novamente.');
+        this.error.set(msg);
+        this.toast.error('Erro ao enviar', msg);
       },
     });
   }

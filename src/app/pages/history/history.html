@@ -374,13 +374,7 @@
         }
 
         <!-- Error -->
-        @if (rescheduleError()) {
-          <div
-            class="mb-4 px-4 py-3 rounded-xl bg-danger/10 border border-danger/30 font-mono text-[11px] text-danger"
-          >
-            {{ rescheduleError() }}
-          </div>
-        }
+        <app-alert [message]="rescheduleError()" class="mb-4 block" />
 
         <!-- Actions -->
         <div class="flex gap-3 pb-1">

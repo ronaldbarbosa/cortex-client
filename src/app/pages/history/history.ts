@@ -1,7 +1,9 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { NgClass } from '@angular/common';
 import { catchError, of, Subscription } from 'rxjs';
+import { AlertComponent } from '../../shared/ui/alert/alert';
 import { IconComponent } from '../../shared/ui/icon/icon';
+import { apiErrorMessage } from '../../core/utils/api-error';
 import { ConfirmDialogService } from '../../shared/ui/overlay/confirm-dialog.service';
 import { ToastService } from '../../shared/ui/overlay/toast.service';
 import { AuthService } from '../../core/auth/auth.service';
@@ -46,7 +48,7 @@ const STATUS_CLASSES: Record<AppointmentStatus, string> = {
 
 @Component({
   selector: 'app-history',
-  imports: [IconComponent, NgClass],
+  imports: [AlertComponent, IconComponent, NgClass],
   templateUrl: './history.html',
 })
 export class HistoryComponent implements OnInit {
@@ -208,9 +210,11 @@ export class HistoryComponent implements OnInit {
           this.closeReschedule();
           this.toast.success('Agendamento reagendado.');
         },
-        error: () => {
+        error: (err) => {
           this.rescheduleSubmitting.set(false);
-          this.rescheduleError.set('Não foi possível reagendar. Tente novamente.');
+          this.rescheduleError.set(
+            apiErrorMessage(err, 'Não foi possível reagendar. Tente novamente.'),
+          );
         },
       });
   }

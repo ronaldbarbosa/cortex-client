@@ -12,6 +12,7 @@ import { AlertComponent } from '../../shared/ui/alert/alert';
 import { IconComponent } from '../../shared/ui/icon/icon';
 import { FieldErrorComponent } from '../../shared/ui/overlay/field-error';
 import { apiErrorMessage } from '../../core/utils/api-error';
+import { ToastService } from '../../shared/ui/overlay/toast.service';
 
 function passwordsMatch(control: AbstractControl): ValidationErrors | null {
   const password = control.get('password')?.value;
@@ -28,6 +29,7 @@ export class ResetPasswordComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private auth = inject(AuthService);
   private fb = inject(FormBuilder);
+  private toast = inject(ToastService);
 
   private userId = '';
   private token = '';
@@ -80,9 +82,12 @@ export class ResetPasswordComponent implements OnInit {
       },
       error: (err) => {
         this.loading.set(false);
-        this.error.set(
-          apiErrorMessage(err, 'Link inválido ou expirado. Solicite um novo link de recuperação.'),
+        const msg = apiErrorMessage(
+          err,
+          'Link inválido ou expirado. Solicite um novo link de recuperação.',
         );
+        this.error.set(msg);
+        this.toast.error('Erro ao redefinir senha', msg);
       },
     });
   }

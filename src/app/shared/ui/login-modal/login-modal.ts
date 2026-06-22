@@ -4,20 +4,21 @@ import { AuthModalService } from '../../../core/auth/auth-modal.service';
 import { AuthService } from '../../../core/auth/auth.service';
 import { TenantContextService } from '../../../core/tenant/tenant-context.service';
 import { IconComponent } from '../icon/icon';
-import { AlertComponent } from '../alert/alert';
 import { FieldErrorComponent } from '../overlay/field-error';
+import { ToastService } from '../overlay/toast.service';
 import { apiErrorMessage } from '../../../core/utils/api-error';
 import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-login-modal',
-  imports: [ReactiveFormsModule, IconComponent, AlertComponent, FieldErrorComponent],
+  imports: [ReactiveFormsModule, IconComponent, FieldErrorComponent],
   templateUrl: './login-modal.html',
 })
 export class LoginModalComponent implements OnDestroy {
   private fb = inject(FormBuilder);
   private auth = inject(AuthService);
   private tenantContext = inject(TenantContextService);
+  private toast = inject(ToastService);
   readonly authModal = inject(AuthModalService);
 
   @ViewChild('googleBtn') googleBtnRef?: ElementRef<HTMLDivElement>;
@@ -38,7 +39,6 @@ export class LoginModalComponent implements OnDestroy {
   });
 
   loading = signal(false);
-  error = signal<string | null>(null);
   showPassword = signal(false);
 
   private googleInitialized = false;
@@ -69,7 +69,6 @@ export class LoginModalComponent implements OnDestroy {
     effect(() => {
       if (this.authModal.isOpen()) {
         this.mode.set('login');
-        this.error.set(null);
         setTimeout(() => this.initGoogleButton());
       }
     });
@@ -97,7 +96,6 @@ export class LoginModalComponent implements OnDestroy {
 
   switchMode(m: 'login' | 'register'): void {
     this.mode.set(m);
-    this.error.set(null);
     this.showPassword.set(false);
     if (m === 'login') {
       setTimeout(() => this.initGoogleButton());
@@ -111,7 +109,6 @@ export class LoginModalComponent implements OnDestroy {
     }
 
     this.loading.set(true);
-    this.error.set(null);
 
     const { email, password } = this.loginForm.getRawValue();
     this.auth.login(email, password).subscribe({
@@ -121,7 +118,7 @@ export class LoginModalComponent implements OnDestroy {
       },
       error: () => {
         this.loading.set(false);
-        this.error.set('E-mail ou senha incorretos.');
+        this.toast.error('Credenciais inválidas', 'E-mail ou senha incorretos.');
       },
     });
   }
@@ -133,7 +130,6 @@ export class LoginModalComponent implements OnDestroy {
     }
 
     this.loading.set(true);
-    this.error.set(null);
 
     const v = this.registerForm.getRawValue();
 
@@ -153,7 +149,8 @@ export class LoginModalComponent implements OnDestroy {
         },
         error: (err) => {
           this.loading.set(false);
-          this.error.set(
+          this.toast.error(
+            'Erro ao criar conta',
             apiErrorMessage(
               err,
               'Não foi possível criar a conta. Verifique os dados e tente novamente.',
@@ -189,7 +186,6 @@ export class LoginModalComponent implements OnDestroy {
 
   private handleGoogleResponse(response: google.accounts.id.CredentialResponse): void {
     this.loading.set(true);
-    this.error.set(null);
 
     this.auth.loginWithGoogle(response.credential).subscribe({
       next: () => {
@@ -198,7 +194,7 @@ export class LoginModalComponent implements OnDestroy {
       },
       error: () => {
         this.loading.set(false);
-        this.error.set('Não foi possível autenticar com o Google.');
+        this.toast.error('Erro de autenticação', 'Não foi possível autenticar com o Google.');
       },
     });
   }

@@ -2,7 +2,9 @@ import { Component, computed, inject, OnDestroy, OnInit, signal } from '@angular
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { catchError, of, Subscription } from 'rxjs';
+import { AlertComponent } from '../../shared/ui/alert/alert';
 import { IconComponent } from '../../shared/ui/icon/icon';
+import { apiErrorMessage } from '../../core/utils/api-error';
 import { AuthModalService } from '../../core/auth/auth-modal.service';
 import { AuthService } from '../../core/auth/auth.service';
 import { EstablishmentService } from '../../core/establishment/establishment.service';
@@ -29,7 +31,7 @@ interface DateOption {
 
 @Component({
   selector: 'app-book',
-  imports: [IconComponent],
+  imports: [AlertComponent, IconComponent],
   templateUrl: './book.html',
 })
 export class BookComponent implements OnInit, OnDestroy {
@@ -295,9 +297,11 @@ export class BookComponent implements OnInit, OnDestroy {
           this.confirmedAppointment.set(appointment);
           this.step.set(4);
         },
-        error: () => {
+        error: (err) => {
           this.confirming.set(false);
-          this.bookingError.set('Não foi possível confirmar o agendamento. Tente novamente.');
+          this.bookingError.set(
+            apiErrorMessage(err, 'Não foi possível confirmar o agendamento. Tente novamente.'),
+          );
         },
       });
   }

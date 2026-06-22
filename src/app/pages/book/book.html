@@ -396,13 +396,7 @@
     }
 
     <!-- Booking error -->
-    @if (bookingError()) {
-      <div
-        class="mt-4 px-4 py-3 rounded-xl bg-danger/10 border border-danger/30 font-mono text-[11px] text-danger"
-      >
-        {{ bookingError() }}
-      </div>
-    }
+    <app-alert [message]="bookingError()" class="mt-4 block" />
 
     <!-- Confirm button -->
     @if (selectedSlot()) {

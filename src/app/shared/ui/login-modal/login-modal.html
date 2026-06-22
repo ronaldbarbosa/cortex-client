@@ -127,8 +127,6 @@
             />
           </div>
 
-          <app-alert [message]="error()" />
-
           <button
             type="submit"
             [disabled]="loading()"
@@ -252,8 +250,6 @@
               [messages]="{ required: 'Senha obrigatória', minlength: 'Mínimo 8 caracteres' }"
             />
           </div>
-
-          <app-alert [message]="error()" />
 
           <button
             type="submit"

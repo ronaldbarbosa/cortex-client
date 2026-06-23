@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, output, signal } from '@angular/core';
+import { Component, inject, input, OnInit, output, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { IconComponent } from '../../shared/ui/icon/icon';
 import { FieldErrorComponent } from '../../shared/ui/overlay/field-error';
@@ -16,6 +16,7 @@ type Step = 'plan' | 'establishment' | 'account' | 'success';
 })
 export class TrialWizardComponent implements OnInit {
   closed = output<void>();
+  initialPlanId = input<string | null>(null);
 
   private fb = inject(FormBuilder);
   private svc = inject(TrialService);
@@ -57,7 +58,12 @@ export class TrialWizardComponent implements OnInit {
     this.svc.getPlans().subscribe({
       next: (plans) => {
         this.plans.set(plans);
-        if (plans.length > 0) this.selectedPlan.set(plans.find((p) => p.isDefault) ?? plans[0]);
+        if (plans.length > 0) {
+          const preselected = this.initialPlanId()
+            ? plans.find((p) => p.id === this.initialPlanId())
+            : null;
+          this.selectedPlan.set(preselected ?? plans.find((p) => p.isDefault) ?? plans[0]);
+        }
         this.plansLoading.set(false);
       },
       error: () => {

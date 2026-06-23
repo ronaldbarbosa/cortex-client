@@ -1,5 +1,5 @@
 @if (showWizard()) {
-  <app-trial-wizard (closed)="showWizard.set(false)" />
+  <app-trial-wizard [initialPlanId]="selectedPlanId()" (closed)="closeWizard()" />
 }
 
 <div class="min-h-dvh bg-bg text-ink font-sans flex flex-col">
@@ -7,6 +7,11 @@
   <header class="sticky top-0 z-50 bg-bg/90 backdrop-blur border-b border-border">
     <div class="max-w-5xl mx-auto px-5 lg:px-8 h-14 flex items-center justify-between">
       <img src="02_vexion_tesoura_light.svg" alt="Vexion Studio" class="w-42 md:w-50" />
+
+      <nav class="hidden sm:flex items-center gap-6 text-[13px] text-ink-3">
+        <a href="#funcionalidades" class="hover:text-ink transition-colors">Funcionalidades</a>
+        <a href="#planos" class="hover:text-ink transition-colors">Planos</a>
+      </nav>
 
       <a
         href="#contato"
@@ -45,7 +50,7 @@
       <div class="flex flex-col sm:flex-row items-center gap-3 mt-2">
         <button
           type="button"
-          (click)="showWizard.set(true)"
+          (click)="openWizard()"
           class="w-full sm:w-auto bg-accent text-hero font-semibold text-[14px] px-7 py-3 rounded-xl hover:opacity-90 transition-opacity text-center cursor-pointer"
         >
           Teste agora — grátis
@@ -146,6 +151,172 @@
         </div>
       </div>
     </div>
+  </section>
+
+  <!-- Plans -->
+  <section id="planos" class="max-w-5xl mx-auto px-5 lg:px-8 py-16 lg:py-24 w-full">
+    <div class="text-center mb-10">
+      <p class="font-mono text-[10px] text-ink-3 uppercase tracking-[0.08em] mb-3">Planos</p>
+      <h2 class="font-tight text-2xl lg:text-3xl font-semibold tracking-tight text-ink mb-3">
+        Simples, transparente, sem surpresas
+      </h2>
+      <p class="text-ink-3 text-[14px] leading-relaxed max-w-sm mx-auto mb-7">
+        Todos os planos incluem trial gratuito. Sem cartão para começar.
+      </p>
+
+      <!-- Billing toggle -->
+      <div
+        class="inline-flex bg-surface border border-border rounded-xl p-1 text-[12px] font-medium"
+      >
+        <button
+          type="button"
+          (click)="billingPeriod.set('monthly')"
+          class="px-5 py-1.5 rounded-lg transition-colors"
+          [class]="
+            billingPeriod() === 'monthly' ? 'bg-bg text-ink shadow-sm' : 'text-ink-3 hover:text-ink'
+          "
+        >
+          Mensal
+        </button>
+        <button
+          type="button"
+          (click)="billingPeriod.set('annual')"
+          class="px-5 py-1.5 rounded-lg transition-colors flex items-center gap-2"
+          [class]="
+            billingPeriod() === 'annual' ? 'bg-bg text-ink shadow-sm' : 'text-ink-3 hover:text-ink'
+          "
+        >
+          Anual
+          @if (maxAnnualDiscount() > 0) {
+            <span class="bg-accent/15 text-accent font-mono text-[10px] px-1.5 py-0.5 rounded-md">
+              -{{ maxAnnualDiscount() }}%
+            </span>
+          }
+        </button>
+      </div>
+    </div>
+
+    @if (plansLoading()) {
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        @for (i of [1, 2, 3]; track i) {
+          <div
+            class="bg-surface border border-border rounded-2xl p-6 animate-pulse flex flex-col gap-5"
+          >
+            <div class="flex flex-col gap-2">
+              <div class="h-3 bg-border rounded w-1/3"></div>
+              <div class="h-4 bg-border rounded w-2/3"></div>
+            </div>
+            <div class="h-9 bg-border rounded w-1/2"></div>
+            <div class="border-t border-border pt-4 flex flex-col gap-2.5">
+              @for (j of [1, 2, 3, 4]; track j) {
+                <div class="h-3 bg-border rounded w-full"></div>
+              }
+            </div>
+            <div class="mt-auto h-10 bg-border rounded-xl w-full"></div>
+          </div>
+        }
+      </div>
+    } @else if (plans().length > 0) {
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        @for (plan of plans(); track plan.id) {
+          <div
+            class="bg-surface rounded-2xl p-6 flex flex-col gap-5 relative transition-shadow"
+            [class]="
+              plan.isDefault
+                ? 'border-2 border-accent shadow-lg shadow-accent/10'
+                : 'border border-border'
+            "
+          >
+            @if (plan.isDefault) {
+              <div class="absolute -top-3.5 left-1/2 -translate-x-1/2">
+                <span
+                  class="bg-accent text-hero font-mono text-[10px] font-medium uppercase tracking-[0.06em] px-3 py-1 rounded-full whitespace-nowrap"
+                >
+                  Mais popular
+                </span>
+              </div>
+            }
+
+            <!-- Name + description -->
+            <div>
+              <p class="font-mono text-[10px] text-ink-3 uppercase tracking-[0.06em] mb-1">
+                {{ plan.name }}
+              </p>
+              @if (plan.description) {
+                <p class="text-[13px] text-ink-3 leading-relaxed">{{ plan.description }}</p>
+              }
+            </div>
+
+            <!-- Price -->
+            <div>
+              @if (billingPeriod() === 'monthly') {
+                @if (plan.priceMonthly === 0) {
+                  <p class="font-tight text-3xl font-bold text-ink">Grátis</p>
+                } @else {
+                  <p class="font-tight text-3xl font-bold text-ink leading-none">
+                    R$ {{ formatPrice(plan.priceMonthly)
+                    }}<span class="text-[14px] font-normal text-ink-3">/mês</span>
+                  </p>
+                }
+                <p class="text-[12px] text-ink-3 mt-1">por profissional ativo</p>
+              } @else {
+                @if (plan.priceAnnual === 0) {
+                  <p class="font-tight text-3xl font-bold text-ink">Grátis</p>
+                } @else {
+                  <p class="font-tight text-3xl font-bold text-ink leading-none">
+                    R$ {{ formatPrice(plan.priceAnnual)
+                    }}<span class="text-[14px] font-normal text-ink-3">/ano</span>
+                  </p>
+                  @if (annualDiscount(plan) > 0) {
+                    <p class="text-[12px] text-accent mt-1">
+                      Economize {{ annualDiscount(plan) }}% em relação ao mensal
+                    </p>
+                  }
+                }
+                <p class="text-[12px] text-ink-3 mt-1">por profissional ativo</p>
+              }
+            </div>
+
+            <!-- Features -->
+            <div class="border-t border-border pt-4 flex flex-col gap-2.5 flex-1">
+              @for (feature of featureList(plan); track feature) {
+                <div class="flex items-center gap-2 text-[13px] text-ink-2">
+                  <app-icon
+                    name="check"
+                    [size]="13"
+                    color="var(--color-accent)"
+                    [strokeWidth]="2.5"
+                    class="shrink-0"
+                  />
+                  {{ feature }}
+                </div>
+              }
+            </div>
+
+            <!-- CTA -->
+            <div class="flex flex-col gap-2">
+              <button
+                type="button"
+                (click)="openWizard(plan.id)"
+                class="w-full font-semibold text-[13px] py-3 rounded-xl transition-opacity cursor-pointer"
+                [class]="
+                  plan.isDefault
+                    ? 'bg-accent text-hero hover:opacity-90'
+                    : 'bg-ink text-bg hover:bg-ink-2'
+                "
+              >
+                Começar grátis
+              </button>
+              @if (plan.trialDays > 0) {
+                <p class="text-center font-mono text-[10px] text-ink-3">
+                  {{ plan.trialDays }} dias grátis · Sem cartão
+                </p>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    }
   </section>
 
   <!-- CTA -->

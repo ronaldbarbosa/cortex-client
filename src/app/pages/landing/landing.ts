@@ -1,13 +1,15 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { IconComponent } from '../../shared/ui/icon/icon';
+import { TrialWizardComponent } from './trial-wizard';
 
 @Component({
   selector: 'app-landing',
-  imports: [IconComponent],
+  imports: [IconComponent, TrialWizardComponent],
   templateUrl: './landing.html',
 })
 export class LandingComponent {
   readonly year = new Date().getFullYear();
+  showWizard = signal(false);
 
   readonly features = [
     {

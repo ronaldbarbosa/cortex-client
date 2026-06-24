@@ -35,10 +35,15 @@ const apiUrl = isCI
   ? get('API_URL') || 'https://cortex-api-2rvh-g.fly.dev'
   : 'http://localhost:5259';
 
+const adminUrl = isCI
+  ? env['ADMIN_URL'] || 'https://cortexstudio-admin.netlify.app'
+  : 'http://localhost:4201';
+
 const googleClientId = get('GOOGLE_CLIENT_ID');
 
 const content = `export const environment = {
   apiUrl: '${apiUrl}',
+  adminUrl: '${adminUrl}',
   googleClientId: '${googleClientId}',
 };
 `;

@@ -17,6 +17,7 @@ export interface PublicProfessional {
   id: string;
   displayName: string;
   bio: string | null;
+  avatarUrl: string | null;
 }
 
 export interface ProfessionalAvailability {

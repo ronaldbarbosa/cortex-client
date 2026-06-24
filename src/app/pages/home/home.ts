@@ -40,6 +40,8 @@ export class HomeComponent implements OnInit {
 
   readonly slug = this.tenantContext.slug;
   readonly unitSlug = this.unitContext.unitSlug;
+  readonly tenantName = this.tenantContext.name;
+  readonly logoUrl = this.tenantContext.logoUrl;
   readonly isAuthenticated = this.auth.isAuthenticated;
 
   readonly nextAppointment: NextAppointment | null = null;

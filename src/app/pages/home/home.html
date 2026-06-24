@@ -4,11 +4,28 @@
     <!-- Mobile: stacked -->
     <div class="pt-10 pb-8 lg:hidden">
       <div class="flex items-center justify-between mb-7">
-        <div>
-          <p class="font-mono text-[10px] text-hero-ink-2 uppercase tracking-[0.06em] mb-1">
-            Bem-vindo ao
-          </p>
-          <h1 class="font-tight text-2xl font-semibold tracking-tight">Vexion Studio</h1>
+        <div class="flex items-center gap-3">
+          @if (logoUrl(); as logo) {
+            <img
+              [src]="logo"
+              [alt]="tenantName()"
+              class="h-10 w-10 rounded-xl object-cover border border-hero-border shrink-0"
+            />
+          } @else {
+            <div
+              class="h-10 w-10 rounded-xl bg-accent/20 flex items-center justify-center shrink-0"
+            >
+              <span class="font-tight text-base font-bold text-accent">{{
+                tenantName().charAt(0)
+              }}</span>
+            </div>
+          }
+          <div>
+            <p class="font-mono text-[10px] text-hero-ink-2 uppercase tracking-[0.06em] mb-0.5">
+              Bem-vindo ao
+            </p>
+            <h1 class="font-tight text-2xl font-semibold tracking-tight">{{ tenantName() }}</h1>
+          </div>
         </div>
       </div>
 
@@ -71,13 +88,28 @@
     <!-- Desktop: fixed height, title left / card right -->
     <div class="hidden lg:flex lg:h-48 lg:gap-12 lg:items-center">
       <!-- Title column -->
-      <div class="shrink-0 w-56">
-        <p class="font-mono text-[10px] text-hero-ink-2 uppercase tracking-[0.06em] mb-1">
-          Bem-vindo ao
-        </p>
-        <h1 class="font-tight text-3xl font-semibold text-hero-ink tracking-tight">
-          Vexion Studio
-        </h1>
+      <div class="shrink-0 w-64 flex items-center gap-4">
+        @if (logoUrl(); as logo) {
+          <img
+            [src]="logo"
+            [alt]="tenantName()"
+            class="h-14 w-14 rounded-2xl object-cover border border-hero-border shrink-0"
+          />
+        } @else {
+          <div class="h-14 w-14 rounded-2xl bg-accent/20 flex items-center justify-center shrink-0">
+            <span class="font-tight text-2xl font-bold text-accent">{{
+              tenantName().charAt(0)
+            }}</span>
+          </div>
+        }
+        <div>
+          <p class="font-mono text-[10px] text-hero-ink-2 uppercase tracking-[0.06em] mb-1">
+            Bem-vindo ao
+          </p>
+          <h1 class="font-tight text-3xl font-semibold text-hero-ink tracking-tight">
+            {{ tenantName() }}
+          </h1>
+        </div>
       </div>
 
       <!-- Content column -->

@@ -9,6 +9,7 @@ export class TenantContextService {
   readonly tenantId = computed(() => this._tenant()?.id ?? '');
   readonly slug = computed(() => this._tenant()?.slug ?? '');
   readonly name = computed(() => this._tenant()?.name ?? '');
+  readonly logoUrl = computed(() => this._tenant()?.logoUrl ?? null);
   readonly units = computed(() => this._tenant()?.units ?? []);
   readonly isMultiUnit = computed(() => this.units().length > 1);
   readonly defaultUnit = computed<PublicUnit | null>(

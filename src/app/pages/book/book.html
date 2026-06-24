@@ -272,11 +272,19 @@
             class="bg-surface border border-border rounded-2xl p-4 flex flex-col items-center gap-2 hover:border-accent/40 transition-colors"
             [class.border-accent]="selectedProfessional()?.id === pro.id"
           >
-            <div
-              class="w-12 h-12 rounded-full bg-accent/15 flex items-center justify-center font-tight font-bold text-[15px] text-accent"
-            >
-              {{ getInitials(pro.displayName) }}
-            </div>
+            @if (pro.avatarUrl) {
+              <img
+                [src]="pro.avatarUrl"
+                [alt]="pro.displayName"
+                class="w-12 h-12 rounded-full object-cover"
+              />
+            } @else {
+              <div
+                class="w-12 h-12 rounded-full bg-accent/15 flex items-center justify-center font-tight font-bold text-[15px] text-accent"
+              >
+                {{ getInitials(pro.displayName) }}
+              </div>
+            }
             <div class="text-center">
               <p class="font-tight text-[13px] font-semibold text-ink leading-tight">
                 {{ pro.displayName }}

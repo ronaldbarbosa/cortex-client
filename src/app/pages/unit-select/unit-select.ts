@@ -14,6 +14,7 @@ export class UnitSelectComponent implements OnInit {
 
   readonly units = this.tenantContext.units;
   readonly tenantName = this.tenantContext.name;
+  readonly logoUrl = this.tenantContext.logoUrl;
 
   ngOnInit(): void {
     const units = this.units();

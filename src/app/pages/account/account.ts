@@ -39,6 +39,18 @@ export class AccountComponent {
     phone: ['', [Validators.required, Validators.maxLength(20)]],
     birthDate: ['' as string],
     acceptsMarketing: [false],
+    cpf: [''],
+    gender: [''],
+    secondaryPhone: [''],
+    address: this.fb.nonNullable.group({
+      street: [''],
+      number: [''],
+      complement: [''],
+      neighborhood: [''],
+      city: [''],
+      state: [''],
+      postalCode: [''],
+    }),
   });
 
   constructor() {
@@ -62,15 +74,7 @@ export class AccountComponent {
 
   cancelEditing(): void {
     const p = this.profile();
-    if (p) {
-      this.form.setValue({
-        firstName: p.firstName,
-        lastName: p.lastName,
-        phone: this.formatPhone(p.phone),
-        birthDate: p.birthDate ? this.isoToPtBr(p.birthDate) : '',
-        acceptsMarketing: p.acceptsMarketing,
-      });
-    }
+    if (p) this.fillForm(p);
     this.editing.set(false);
   }
 
@@ -78,14 +82,19 @@ export class AccountComponent {
     if (this.form.invalid) return;
     this.saving.set(true);
 
-    const { firstName, lastName, phone, birthDate, acceptsMarketing } = this.form.getRawValue();
+    const raw = this.form.getRawValue();
+
     this.auth
       .updateProfile({
-        firstName,
-        lastName,
-        phone,
-        birthDate: birthDate ? this.parsePtBrDate(birthDate) : null,
-        acceptsMarketing,
+        firstName: raw.firstName,
+        lastName: raw.lastName,
+        phone: raw.phone,
+        birthDate: raw.birthDate ? this.parsePtBrDate(raw.birthDate) : null,
+        acceptsMarketing: raw.acceptsMarketing,
+        cpf: raw.cpf.replace(/\D/g, '') || null,
+        gender: raw.gender || null,
+        secondaryPhone: raw.secondaryPhone || null,
+        address: this.buildAddress(raw.address),
       })
       .subscribe({
         next: (updated) => {
@@ -105,19 +114,40 @@ export class AccountComponent {
     return this.isoToPtBr(date);
   }
 
-  private isoToPtBr(iso: string): string {
-    const [y, m, d] = iso.split('-');
-    return `${d}/${m}/${y}`;
+  genderLabel(g: string): string {
+    return (
+      (
+        {
+          Female: 'Feminino',
+          Male: 'Masculino',
+          Other: 'Outro',
+          Undisclosed: 'Prefiro não informar',
+        } as Record<string, string>
+      )[g] ?? g
+    );
   }
 
-  private parsePtBrDate(value: string): string | null {
-    const match = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(value);
-    if (!match) return null;
-    const [, day, month, year] = match;
-    const d = new Date(+year, +month - 1, +day);
-    if (d.getFullYear() !== +year || d.getMonth() !== +month - 1 || d.getDate() !== +day)
-      return null;
-    return `${year}-${month}-${day}`;
+  formatAddressLine(p: ClientProfile): string | null {
+    const a = p.address;
+    if (!a) return null;
+    const parts = [a.street, a.number, a.complement, a.neighborhood, a.city, a.state]
+      .filter(Boolean)
+      .join(', ');
+    return parts || null;
+  }
+
+  maskPhone(event: Event): void {
+    const el = event.target as HTMLInputElement;
+    const v = this.applyPhoneMask(el.value);
+    el.value = v;
+    this.form.controls.phone.setValue(v, { emitEvent: false });
+  }
+
+  maskSecondaryPhone(event: Event): void {
+    const el = event.target as HTMLInputElement;
+    const v = this.applyPhoneMask(el.value);
+    el.value = v;
+    this.form.controls.secondaryPhone.setValue(v, { emitEvent: false });
   }
 
   maskDate(event: Event): void {
@@ -125,29 +155,6 @@ export class AccountComponent {
     const v = this.applyDateMask(el.value);
     el.value = v;
     this.form.controls.birthDate.setValue(v, { emitEvent: false });
-  }
-
-  maskPhone(event: Event): void {
-    const el = event.target as HTMLInputElement;
-    const v = this.formatPhone(el.value);
-    el.value = v;
-    this.form.controls.phone.setValue(v, { emitEvent: false });
-  }
-
-  private formatPhone(raw: string): string {
-    const d = raw.replace(/\D/g, '').substring(0, 11);
-    if (d.length === 0) return '';
-    if (d.length <= 2) return `(${d}`;
-    if (d.length <= 6) return `(${d.substring(0, 2)}) ${d.substring(2)}`;
-    if (d.length <= 10) return `(${d.substring(0, 2)}) ${d.substring(2, 6)}-${d.substring(6)}`;
-    return `(${d.substring(0, 2)}) ${d.substring(2, 7)}-${d.substring(7)}`;
-  }
-
-  private applyDateMask(raw: string): string {
-    let v = raw.replace(/\D/g, '').substring(0, 8);
-    if (v.length > 4) v = `${v.substring(0, 2)}/${v.substring(2, 4)}/${v.substring(4)}`;
-    else if (v.length > 2) v = `${v.substring(0, 2)}/${v.substring(2)}`;
-    return v;
   }
 
   requestEmailChange(): void {
@@ -187,6 +194,28 @@ export class AccountComponent {
     return `${u.firstName[0] ?? ''}${u.lastName[0] ?? ''}`.toUpperCase();
   }
 
+  private fillForm(p: ClientProfile): void {
+    this.form.patchValue({
+      firstName: p.firstName,
+      lastName: p.lastName,
+      phone: this.formatPhone(p.phone),
+      birthDate: p.birthDate ? this.isoToPtBr(p.birthDate) : '',
+      acceptsMarketing: p.acceptsMarketing,
+      cpf: p.cpf ?? '',
+      gender: p.gender ?? '',
+      secondaryPhone: p.secondaryPhone ? this.formatPhone(p.secondaryPhone) : '',
+      address: {
+        street: p.address?.street ?? '',
+        number: p.address?.number ?? '',
+        complement: p.address?.complement ?? '',
+        neighborhood: p.address?.neighborhood ?? '',
+        city: p.address?.city ?? '',
+        state: p.address?.state ?? '',
+        postalCode: p.address?.postalCode ?? '',
+      },
+    });
+  }
+
   private loadProfile(): void {
     this.profileLoading.set(true);
     this.auth
@@ -195,15 +224,72 @@ export class AccountComponent {
       .subscribe((p) => {
         this.profile.set(p);
         this.profileLoading.set(false);
-        if (p) {
-          this.form.setValue({
-            firstName: p.firstName,
-            lastName: p.lastName,
-            phone: this.formatPhone(p.phone),
-            birthDate: p.birthDate ? this.isoToPtBr(p.birthDate) : '',
-            acceptsMarketing: p.acceptsMarketing,
-          });
-        }
+        if (p) this.fillForm(p);
       });
+  }
+
+  private buildAddress(a: {
+    street: string;
+    number: string;
+    complement: string;
+    neighborhood: string;
+    city: string;
+    state: string;
+    postalCode: string;
+  }): {
+    street: string | null;
+    number: string | null;
+    complement: string | null;
+    neighborhood: string | null;
+    city: string | null;
+    state: string | null;
+    postalCode: string | null;
+  } | null {
+    const n = (s: string): string | null => s.trim() || null;
+    const addr = {
+      street: n(a.street),
+      number: n(a.number),
+      complement: n(a.complement),
+      neighborhood: n(a.neighborhood),
+      city: n(a.city),
+      state: n(a.state),
+      postalCode: n(a.postalCode),
+    };
+    return Object.values(addr).some((v) => v !== null) ? addr : null;
+  }
+
+  private isoToPtBr(iso: string): string {
+    const [y, m, d] = iso.split('-');
+    return `${d}/${m}/${y}`;
+  }
+
+  private parsePtBrDate(value: string): string | null {
+    const match = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(value);
+    if (!match) return null;
+    const [, day, month, year] = match;
+    const d = new Date(+year, +month - 1, +day);
+    if (d.getFullYear() !== +year || d.getMonth() !== +month - 1 || d.getDate() !== +day)
+      return null;
+    return `${year}-${month}-${day}`;
+  }
+
+  private formatPhone(raw: string): string {
+    const d = raw.replace(/\D/g, '').substring(0, 11);
+    if (d.length === 0) return '';
+    if (d.length <= 2) return `(${d}`;
+    if (d.length <= 6) return `(${d.substring(0, 2)}) ${d.substring(2)}`;
+    if (d.length <= 10) return `(${d.substring(0, 2)}) ${d.substring(2, 6)}-${d.substring(6)}`;
+    return `(${d.substring(0, 2)}) ${d.substring(2, 7)}-${d.substring(7)}`;
+  }
+
+  private applyPhoneMask(raw: string): string {
+    return this.formatPhone(raw);
+  }
+
+  private applyDateMask(raw: string): string {
+    let v = raw.replace(/\D/g, '').substring(0, 8);
+    if (v.length > 4) v = `${v.substring(0, 2)}/${v.substring(2, 4)}/${v.substring(4)}`;
+    else if (v.length > 2) v = `${v.substring(0, 2)}/${v.substring(2)}`;
+    return v;
   }
 }

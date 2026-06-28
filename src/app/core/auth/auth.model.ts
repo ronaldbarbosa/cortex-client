@@ -14,6 +14,16 @@ export interface ClientUser {
   clientId: string | null;
 }
 
+export interface ClientAddressDto {
+  street: string | null;
+  number: string | null;
+  complement: string | null;
+  neighborhood: string | null;
+  city: string | null;
+  state: string | null;
+  postalCode: string | null;
+}
+
 export interface ClientProfile {
   id: string;
   firstName: string;
@@ -22,6 +32,10 @@ export interface ClientProfile {
   email: string | null;
   birthDate: string | null;
   acceptsMarketing: boolean;
+  cpf: string | null;
+  gender: string | null;
+  secondaryPhone: string | null;
+  address: ClientAddressDto | null;
 }
 
 export interface UpdateProfileRequest {
@@ -30,4 +44,8 @@ export interface UpdateProfileRequest {
   phone: string;
   birthDate: string | null;
   acceptsMarketing: boolean;
+  cpf?: string | null;
+  gender?: string | null;
+  secondaryPhone?: string | null;
+  address?: ClientAddressDto | null;
 }

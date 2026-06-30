@@ -6,8 +6,14 @@ import { FieldErrorComponent } from '../../shared/ui/overlay/field-error';
 import { ToastService } from '../../shared/ui/overlay/toast.service';
 import { AuthService } from '../../core/auth/auth.service';
 import { AuthModalService } from '../../core/auth/auth-modal.service';
-import { ClientProfile } from '../../core/auth/auth.model';
+import {
+  ClientProfile,
+  SetupTotpResponse,
+  TwoFactorStatusResponse,
+} from '../../core/auth/auth.model';
 import { apiErrorMessage } from '../../core/utils/api-error';
+
+type TwoFactorPanel = 'idle' | 'setup-totp' | 'setup-email' | 'done' | 'disable' | 'regen';
 
 @Component({
   selector: 'app-account',
@@ -27,6 +33,17 @@ export class AccountComponent {
   readonly profileLoading = signal(false);
   readonly editing = signal(false);
   readonly saving = signal(false);
+
+  readonly twoFactorStatus = signal<TwoFactorStatusResponse | null>(null);
+  readonly twoFactorPanel = signal<TwoFactorPanel>('idle');
+  readonly twoFactorLoading = signal(false);
+  readonly setupTotpData = signal<SetupTotpResponse | null>(null);
+  readonly totpQrDataUrl = signal<string | null>(null);
+  readonly recoveryCodes = signal<string[]>([]);
+  readonly useRecoveryForDisable = signal(false);
+  readonly twoFactorCodeForm = this.fb.nonNullable.group({
+    code: ['', [Validators.required, Validators.minLength(6), Validators.maxLength(10)]],
+  });
 
   readonly emailForm = this.fb.nonNullable.group({
     newEmail: ['', [Validators.required, Validators.email]],
@@ -57,9 +74,12 @@ export class AccountComponent {
     effect(() => {
       if (this.auth.isAuthenticated()) {
         this.loadProfile();
+        this.loadTwoFactorStatus();
       } else {
         this.profile.set(null);
         this.editing.set(false);
+        this.twoFactorStatus.set(null);
+        this.twoFactorPanel.set('idle');
       }
     });
   }
@@ -186,6 +206,138 @@ export class AccountComponent {
 
   logout(): void {
     this.auth.logout();
+  }
+
+  loadTwoFactorStatus(): void {
+    this.auth
+      .getTwoFactorStatus()
+      .pipe(catchError(() => of(null)))
+      .subscribe((s) => this.twoFactorStatus.set(s));
+  }
+
+  startSetupTotp(): void {
+    this.twoFactorLoading.set(true);
+    this.auth.setupTotp().subscribe({
+      next: (data) => {
+        this.setupTotpData.set(data);
+        this.twoFactorCodeForm.reset();
+        this.twoFactorPanel.set('setup-totp');
+        this.twoFactorLoading.set(false);
+        import('qrcode').then((QRCode) => {
+          QRCode.toDataURL(data.authenticatorUri, { width: 200, margin: 2 }).then((url) =>
+            this.totpQrDataUrl.set(url),
+          );
+        });
+      },
+      error: () => {
+        this.twoFactorLoading.set(false);
+        this.toast.error('Erro', 'Não foi possível iniciar a configuração.');
+      },
+    });
+  }
+
+  confirmTotpSetup(): void {
+    if (this.twoFactorCodeForm.invalid) {
+      this.twoFactorCodeForm.markAllAsTouched();
+      return;
+    }
+    const { code } = this.twoFactorCodeForm.getRawValue();
+    this.twoFactorLoading.set(true);
+    this.auth.confirmTotpSetup(code).subscribe({
+      next: (res) => {
+        this.recoveryCodes.set(res.recoveryCodes);
+        this.twoFactorStatus.update((s) => (s ? { ...s, enabled: true, method: 'totp' } : s));
+        this.twoFactorPanel.set('done');
+        this.twoFactorLoading.set(false);
+      },
+      error: () => {
+        this.twoFactorLoading.set(false);
+        this.toast.error('Código inválido', 'Verifique o código e tente novamente.');
+      },
+    });
+  }
+
+  startSetupEmail(): void {
+    this.twoFactorLoading.set(true);
+    this.auth.enableEmail2Fa().subscribe({
+      next: (res) => {
+        this.recoveryCodes.set(res.recoveryCodes);
+        this.twoFactorStatus.update((s) => (s ? { ...s, enabled: true, method: 'email' } : s));
+        this.twoFactorPanel.set('done');
+        this.twoFactorLoading.set(false);
+      },
+      error: () => {
+        this.twoFactorLoading.set(false);
+        this.toast.error('Erro', 'Não foi possível ativar a verificação por e-mail.');
+      },
+    });
+  }
+
+  startDisable2Fa(): void {
+    this.twoFactorCodeForm.reset();
+    this.useRecoveryForDisable.set(false);
+    this.twoFactorPanel.set('disable');
+  }
+
+  confirm2FaDisable(): void {
+    const method = this.twoFactorStatus()?.method;
+    if (method === 'totp' && this.twoFactorCodeForm.invalid) {
+      this.twoFactorCodeForm.markAllAsTouched();
+      return;
+    }
+    const { code } = this.twoFactorCodeForm.getRawValue();
+    const isRecovery = this.useRecoveryForDisable();
+    this.twoFactorLoading.set(true);
+    this.auth
+      .disable2Fa(
+        method === 'totp' && !isRecovery ? code : undefined,
+        method === 'totp' && isRecovery ? code : undefined,
+      )
+      .subscribe({
+        next: () => {
+          this.twoFactorStatus.update((s) => (s ? { ...s, enabled: false, method: 'none' } : s));
+          this.twoFactorPanel.set('idle');
+          this.twoFactorLoading.set(false);
+          this.toast.success('Verificação em 2 etapas desativada.');
+        },
+        error: () => {
+          this.twoFactorLoading.set(false);
+          this.toast.error('Erro', 'Código inválido ou expirado.');
+        },
+      });
+  }
+
+  startRegen(): void {
+    this.twoFactorCodeForm.reset();
+    this.twoFactorPanel.set('regen');
+  }
+
+  confirmRegen(): void {
+    if (this.twoFactorCodeForm.invalid) {
+      this.twoFactorCodeForm.markAllAsTouched();
+      return;
+    }
+    const { code } = this.twoFactorCodeForm.getRawValue();
+    this.twoFactorLoading.set(true);
+    this.auth.regenerateRecoveryCodes(code).subscribe({
+      next: (res) => {
+        this.recoveryCodes.set(res.recoveryCodes);
+        this.twoFactorPanel.set('done');
+        this.twoFactorLoading.set(false);
+      },
+      error: () => {
+        this.twoFactorLoading.set(false);
+        this.toast.error('Código inválido', 'Verifique o código e tente novamente.');
+      },
+    });
+  }
+
+  cancelTwoFactorPanel(): void {
+    this.twoFactorPanel.set('idle');
+    this.twoFactorCodeForm.reset();
+    this.setupTotpData.set(null);
+    this.totpQrDataUrl.set(null);
+    this.useRecoveryForDisable.set(false);
   }
 
   getInitials(): string {

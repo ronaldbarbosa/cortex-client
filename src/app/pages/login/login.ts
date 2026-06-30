@@ -10,6 +10,7 @@ import {
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../core/auth/auth.service';
+import { TwoFactorChallengeResponse } from '../../core/auth/auth.model';
 import { TenantContextService } from '../../core/tenant/tenant-context.service';
 import { IconComponent } from '../../shared/ui/icon/icon';
 import { AlertComponent } from '../../shared/ui/alert/alert';
@@ -32,7 +33,7 @@ export class LoginComponent implements AfterViewInit, OnDestroy {
 
   @ViewChild('googleBtn') googleBtnRef?: ElementRef<HTMLDivElement>;
 
-  mode = signal<'login' | 'register'>('login');
+  mode = signal<'login' | 'register' | 'two-factor'>('login');
 
   private googleInitialized = false;
 
@@ -52,6 +53,12 @@ export class LoginComponent implements AfterViewInit, OnDestroy {
   loading = signal(false);
   error = signal<string | null>(null);
   showPassword = signal(false);
+  challenge = signal<TwoFactorChallengeResponse | null>(null);
+  useRecovery = signal(false);
+
+  codeForm = this.fb.nonNullable.group({
+    code: ['', [Validators.required, Validators.minLength(6), Validators.maxLength(10)]],
+  });
 
   get loginEmail() {
     return this.loginForm.controls.email;
@@ -108,6 +115,21 @@ export class LoginComponent implements AfterViewInit, OnDestroy {
     }
   }
 
+  backToLogin(): void {
+    this.challenge.set(null);
+    this.useRecovery.set(false);
+    this.codeForm.reset();
+    this.error.set(null);
+    this.mode.set('login');
+    setTimeout(() => this.initGoogleButton());
+  }
+
+  toggleRecovery(): void {
+    this.useRecovery.update((v) => !v);
+    this.codeForm.reset();
+    this.error.set(null);
+  }
+
   submitLogin(): void {
     if (this.loginForm.invalid) {
       this.loginForm.markAllAsTouched();
@@ -120,10 +142,14 @@ export class LoginComponent implements AfterViewInit, OnDestroy {
     const { email, password } = this.loginForm.getRawValue();
 
     this.auth.login(email, password).subscribe({
-      next: () => {
+      next: (result) => {
         this.loading.set(false);
-        const slug = this.tenantContext.slug();
-        this.router.navigate(['/s', slug]);
+        if (result) {
+          this.challenge.set(result);
+          this.mode.set('two-factor');
+        } else {
+          this.router.navigate(['/s', this.tenantContext.slug()]);
+        }
       },
       error: () => {
         this.loading.set(false);
@@ -131,6 +157,39 @@ export class LoginComponent implements AfterViewInit, OnDestroy {
         this.toast.error('Credenciais inválidas', 'E-mail ou senha incorretos.');
       },
     });
+  }
+
+  submitCode(): void {
+    if (this.codeForm.invalid) {
+      this.codeForm.markAllAsTouched();
+      return;
+    }
+    const ch = this.challenge();
+    if (!ch) return;
+
+    this.loading.set(true);
+    this.error.set(null);
+
+    const { code } = this.codeForm.getRawValue();
+    const isRecovery = this.useRecovery();
+
+    this.auth
+      .verifyTwoFactor(
+        ch.challengeToken,
+        isRecovery ? undefined : code,
+        isRecovery ? code : undefined,
+      )
+      .subscribe({
+        next: () => {
+          this.loading.set(false);
+          this.router.navigate(['/s', this.tenantContext.slug()]);
+        },
+        error: () => {
+          this.loading.set(false);
+          this.error.set('Código inválido ou expirado.');
+          this.toast.error('Código inválido', 'Verifique o código e tente novamente.');
+        },
+      });
   }
 
   submitRegister(): void {

@@ -49,3 +49,22 @@ export interface UpdateProfileRequest {
   secondaryPhone?: string | null;
   address?: ClientAddressDto | null;
 }
+
+export interface TwoFactorChallengeResponse {
+  challengeToken: string;
+  method: string;
+}
+
+export interface SetupTotpResponse {
+  sharedKey: string;
+  authenticatorUri: string;
+}
+
+export interface TwoFactorSetupResponse {
+  recoveryCodes: string[];
+}
+
+export interface TwoFactorStatusResponse {
+  enabled: boolean;
+  method: string;
+}

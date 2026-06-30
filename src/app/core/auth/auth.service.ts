@@ -4,7 +4,16 @@ import { Router } from '@angular/router';
 import { catchError, map, Observable, of, tap, throwError } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { TenantContextService } from '../tenant/tenant-context.service';
-import { ClientAuthResponse, ClientProfile, ClientUser, UpdateProfileRequest } from './auth.model';
+import {
+  ClientAuthResponse,
+  ClientProfile,
+  ClientUser,
+  SetupTotpResponse,
+  TwoFactorChallengeResponse,
+  TwoFactorSetupResponse,
+  TwoFactorStatusResponse,
+  UpdateProfileRequest,
+} from './auth.model';
 
 export interface RegisterClientRequest {
   tenantId: string;
@@ -40,14 +49,56 @@ export class AuthService {
     );
   }
 
-  login(email: string, password: string): Observable<void> {
+  login(email: string, password: string): Observable<TwoFactorChallengeResponse | null> {
     const tenantId = this.tenantContext.tenantId();
     return this.http
-      .post<ClientAuthResponse>(`${this.base}/login`, { email, password, tenantId })
+      .post<ClientAuthResponse | TwoFactorChallengeResponse>(`${this.base}/login`, {
+        email,
+        password,
+        tenantId,
+      })
+      .pipe(
+        map((res) => {
+          if ('challengeToken' in res) return res as TwoFactorChallengeResponse;
+          this.applySession(res as ClientAuthResponse);
+          return null;
+        }),
+      );
+  }
+
+  verifyTwoFactor(challengeToken: string, code?: string, recoveryCode?: string): Observable<void> {
+    return this.http
+      .post<ClientAuthResponse>(`${this.base}/2fa/verify`, { challengeToken, code, recoveryCode })
       .pipe(
         tap((res) => this.applySession(res)),
         map(() => void 0),
       );
+  }
+
+  getTwoFactorStatus(): Observable<TwoFactorStatusResponse> {
+    return this.http.get<TwoFactorStatusResponse>(`${this.base}/2fa/status`);
+  }
+
+  setupTotp(): Observable<SetupTotpResponse> {
+    return this.http.post<SetupTotpResponse>(`${this.base}/2fa/setup/totp`, {});
+  }
+
+  confirmTotpSetup(code: string): Observable<TwoFactorSetupResponse> {
+    return this.http.post<TwoFactorSetupResponse>(`${this.base}/2fa/setup/totp/confirm`, { code });
+  }
+
+  enableEmail2Fa(): Observable<TwoFactorSetupResponse> {
+    return this.http.post<TwoFactorSetupResponse>(`${this.base}/2fa/setup/email`, {});
+  }
+
+  disable2Fa(code?: string, recoveryCode?: string): Observable<void> {
+    return this.http.post<void>(`${this.base}/2fa/disable`, { code, recoveryCode });
+  }
+
+  regenerateRecoveryCodes(code: string): Observable<TwoFactorSetupResponse> {
+    return this.http.post<TwoFactorSetupResponse>(`${this.base}/2fa/recovery-codes/regenerate`, {
+      code,
+    });
   }
 
   requestPasswordReset(email: string): Observable<void> {

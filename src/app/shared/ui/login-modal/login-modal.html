@@ -14,12 +14,16 @@
       <div class="flex items-center justify-between mb-5">
         <div>
           <div class="font-mono text-[10px] text-hero-ink-2 uppercase tracking-[0.08em] mb-1">
-            acesso do cliente
+            {{ mode() === 'two-factor' ? 'verificação' : 'acesso do cliente' }}
           </div>
           <h2
             class="font-tight text-[22px] font-semibold text-hero-ink tracking-[-0.02em] leading-none"
           >
-            {{ mode() === 'login' ? 'Entrar na conta' : 'Criar conta' }}
+            @if (mode() === 'two-factor') {
+              {{ useRecovery() ? 'Código de recuperação' : 'Verificação em 2 etapas' }}
+            } @else {
+              {{ mode() === 'login' ? 'Entrar na conta' : 'Criar conta' }}
+            }
           </h2>
         </div>
         <button
@@ -31,8 +35,8 @@
         </button>
       </div>
 
-      <!-- Mode toggle -->
-      <div class="flex gap-1 p-1 bg-hero rounded-xl mb-5">
+      <!-- Mode toggle (hidden during 2FA) -->
+      <div class="flex gap-1 p-1 bg-hero rounded-xl mb-5" [class.hidden]="mode() === 'two-factor'">
         <button
           (click)="switchMode('login')"
           class="flex-1 py-2 rounded-lg font-mono text-[11px] uppercase tracking-[0.06em] transition-colors cursor-pointer"
@@ -142,6 +146,78 @@
             {{ loading() ? 'Entrando…' : 'Entrar' }}
           </button>
         </form>
+      }
+
+      @if (mode() === 'two-factor') {
+        <p class="font-mono text-[11px] text-hero-ink-2 mb-4 leading-relaxed">
+          @if (useRecovery()) {
+            Digite um dos seus códigos de recuperação.
+          } @else if (challenge()?.method === 'email') {
+            Enviamos um código para o seu e-mail. Pode levar alguns segundos.
+          } @else {
+            Abra seu aplicativo autenticador e digite o código de 6 dígitos.
+          }
+        </p>
+
+        <form
+          [formGroup]="codeForm"
+          (ngSubmit)="submitCode()"
+          novalidate
+          class="flex flex-col gap-4"
+        >
+          <div class="flex flex-col gap-1.5">
+            <label class="font-mono text-[10px] text-hero-ink-2 uppercase tracking-[0.06em]">
+              {{ useRecovery() ? 'Código de recuperação' : 'Código' }}
+            </label>
+            <input
+              type="text"
+              formControlName="code"
+              [placeholder]="useRecovery() ? 'xxxx-xxxx' : '000000'"
+              inputmode="numeric"
+              autocomplete="one-time-code"
+              class="w-full bg-hero border border-hero-border rounded-xl px-4 py-3 text-sm text-hero-ink placeholder:text-hero-ink-2 focus:outline-none focus:border-accent transition-colors tracking-widest text-center"
+              [class.border-danger]="
+                codeForm.controls.code.invalid && codeForm.controls.code.touched
+              "
+            />
+            <app-field-error
+              [control]="codeForm.controls.code"
+              [messages]="{ required: 'Código obrigatório', minlength: 'Código muito curto' }"
+            />
+          </div>
+
+          <button
+            type="submit"
+            [disabled]="loading()"
+            class="w-full bg-accent text-hero rounded-xl py-3.5 text-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-50 transition-opacity cursor-pointer"
+          >
+            @if (loading()) {
+              <span
+                class="w-4 h-4 rounded-full border-2 border-hero/30 border-t-hero animate-spin"
+              ></span>
+            } @else {
+              <app-icon name="check" [size]="15" />
+            }
+            {{ loading() ? 'Verificando…' : 'Confirmar' }}
+          </button>
+        </form>
+
+        <div class="flex flex-col gap-2 mt-3">
+          <button
+            type="button"
+            (click)="toggleRecovery()"
+            class="w-full py-2 font-mono text-[10px] text-hero-ink-2 uppercase tracking-[0.06em] hover:text-hero-ink transition-colors cursor-pointer"
+          >
+            {{ useRecovery() ? 'Usar código do aplicativo' : 'Usar código de recuperação' }}
+          </button>
+          <button
+            type="button"
+            (click)="backToLogin()"
+            class="w-full py-2 font-mono text-[10px] text-hero-ink-2 uppercase tracking-[0.06em] hover:text-hero-ink transition-colors cursor-pointer"
+          >
+            ← Voltar ao login
+          </button>
+        </div>
       }
 
       @if (mode() === 'register') {

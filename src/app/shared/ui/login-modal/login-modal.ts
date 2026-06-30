@@ -2,6 +2,7 @@ import { Component, ElementRef, effect, inject, OnDestroy, signal, ViewChild } f
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthModalService } from '../../../core/auth/auth-modal.service';
 import { AuthService } from '../../../core/auth/auth.service';
+import { TwoFactorChallengeResponse } from '../../../core/auth/auth.model';
 import { TenantContextService } from '../../../core/tenant/tenant-context.service';
 import { IconComponent } from '../icon/icon';
 import { FieldErrorComponent } from '../overlay/field-error';
@@ -23,7 +24,7 @@ export class LoginModalComponent implements OnDestroy {
 
   @ViewChild('googleBtn') googleBtnRef?: ElementRef<HTMLDivElement>;
 
-  mode = signal<'login' | 'register'>('login');
+  mode = signal<'login' | 'register' | 'two-factor'>('login');
 
   loginForm = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
@@ -38,8 +39,14 @@ export class LoginModalComponent implements OnDestroy {
     password: ['', [Validators.required, Validators.minLength(8)]],
   });
 
+  codeForm = this.fb.nonNullable.group({
+    code: ['', [Validators.required, Validators.minLength(6), Validators.maxLength(10)]],
+  });
+
   loading = signal(false);
   showPassword = signal(false);
+  challenge = signal<TwoFactorChallengeResponse | null>(null);
+  useRecovery = signal(false);
 
   private googleInitialized = false;
 
@@ -69,6 +76,8 @@ export class LoginModalComponent implements OnDestroy {
     effect(() => {
       if (this.authModal.isOpen()) {
         this.mode.set('login');
+        this.challenge.set(null);
+        this.useRecovery.set(false);
         setTimeout(() => this.initGoogleButton());
       }
     });
@@ -102,6 +111,19 @@ export class LoginModalComponent implements OnDestroy {
     }
   }
 
+  backToLogin(): void {
+    this.challenge.set(null);
+    this.useRecovery.set(false);
+    this.codeForm.reset();
+    this.mode.set('login');
+    setTimeout(() => this.initGoogleButton());
+  }
+
+  toggleRecovery(): void {
+    this.useRecovery.update((v) => !v);
+    this.codeForm.reset();
+  }
+
   submitLogin(): void {
     if (this.loginForm.invalid) {
       this.loginForm.markAllAsTouched();
@@ -112,15 +134,50 @@ export class LoginModalComponent implements OnDestroy {
 
     const { email, password } = this.loginForm.getRawValue();
     this.auth.login(email, password).subscribe({
-      next: () => {
+      next: (result) => {
         this.loading.set(false);
-        this.authModal.notifySuccess();
+        if (result) {
+          this.challenge.set(result);
+          this.mode.set('two-factor');
+        } else {
+          this.authModal.notifySuccess();
+        }
       },
       error: () => {
         this.loading.set(false);
         this.toast.error('Credenciais inválidas', 'E-mail ou senha incorretos.');
       },
     });
+  }
+
+  submitCode(): void {
+    if (this.codeForm.invalid) {
+      this.codeForm.markAllAsTouched();
+      return;
+    }
+    const ch = this.challenge();
+    if (!ch) return;
+
+    this.loading.set(true);
+    const { code } = this.codeForm.getRawValue();
+    const isRecovery = this.useRecovery();
+
+    this.auth
+      .verifyTwoFactor(
+        ch.challengeToken,
+        isRecovery ? undefined : code,
+        isRecovery ? code : undefined,
+      )
+      .subscribe({
+        next: () => {
+          this.loading.set(false);
+          this.authModal.notifySuccess();
+        },
+        error: () => {
+          this.loading.set(false);
+          this.toast.error('Código inválido', 'Verifique o código e tente novamente.');
+        },
+      });
   }
 
   submitRegister(): void {

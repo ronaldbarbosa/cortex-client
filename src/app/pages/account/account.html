@@ -436,6 +436,369 @@
         </form>
       </div>
 
+      <!-- 2FA card -->
+      <div class="bg-surface border border-border rounded-2xl p-5 mb-4">
+        <div class="flex items-center justify-between mb-4">
+          <p class="font-mono text-[10px] text-ink-3 uppercase tracking-[0.06em]">
+            Verificação em 2 etapas
+          </p>
+          @if (twoFactorStatus()?.enabled) {
+            <span class="font-mono text-[10px] px-2 py-0.5 rounded-full bg-accent/10 text-accent">
+              Ativa
+            </span>
+          } @else {
+            <span class="font-mono text-[10px] px-2 py-0.5 rounded-full bg-border text-ink-3">
+              Inativa
+            </span>
+          }
+        </div>
+
+        @if (twoFactorPanel() === 'idle') {
+          @if (!twoFactorStatus()?.enabled) {
+            <p class="font-mono text-[11px] text-ink-3 mb-4 leading-relaxed">
+              Adicione uma camada extra de segurança à sua conta ao entrar.
+            </p>
+            <div class="flex flex-col gap-2">
+              <button
+                (click)="startSetupTotp()"
+                [disabled]="twoFactorLoading()"
+                class="w-full flex items-center justify-between px-4 py-3 border border-border rounded-xl hover:border-accent/50 transition-colors disabled:opacity-40 cursor-pointer"
+              >
+                <span class="font-mono text-[11px] text-ink-2 uppercase tracking-[0.06em]">
+                  Aplicativo autenticador (TOTP)
+                </span>
+                <app-icon name="arrowR" [size]="13" color="var(--color-ink-3)" />
+              </button>
+              <button
+                (click)="startSetupEmail()"
+                [disabled]="twoFactorLoading()"
+                class="w-full flex items-center justify-between px-4 py-3 border border-border rounded-xl hover:border-accent/50 transition-colors disabled:opacity-40 cursor-pointer"
+              >
+                <span class="font-mono text-[11px] text-ink-2 uppercase tracking-[0.06em]">
+                  Código por e-mail
+                </span>
+                @if (twoFactorLoading()) {
+                  <span
+                    class="w-3.5 h-3.5 rounded-full border-2 border-border border-t-accent animate-spin"
+                  ></span>
+                } @else {
+                  <app-icon name="arrowR" [size]="13" color="var(--color-ink-3)" />
+                }
+              </button>
+            </div>
+          } @else {
+            <div class="flex flex-col gap-3">
+              <div>
+                <p class="font-mono text-[10px] text-ink-3 uppercase tracking-[0.06em] mb-0.5">
+                  Método ativo
+                </p>
+                <p class="font-tight text-[15px] text-ink">
+                  {{ twoFactorStatus()?.method === 'totp' ? 'Aplicativo autenticador' : 'E-mail' }}
+                </p>
+              </div>
+              <div class="h-px bg-border"></div>
+              <div class="flex gap-2">
+                @if (twoFactorStatus()?.method === 'totp') {
+                  <button
+                    (click)="startRegen()"
+                    class="flex-1 flex items-center justify-center gap-1.5 py-2.5 border border-border rounded-xl font-mono text-[10px] text-ink-2 uppercase tracking-[0.06em] hover:border-accent/50 transition-colors cursor-pointer"
+                  >
+                    <app-icon name="repeat" [size]="11" [strokeWidth]="1.6" />
+                    Códigos de recuperação
+                  </button>
+                }
+                <button
+                  (click)="startDisable2Fa()"
+                  class="flex-1 flex items-center justify-center gap-1.5 py-2.5 border border-border rounded-xl font-mono text-[10px] text-ink-2 uppercase tracking-[0.06em] hover:border-danger/50 hover:text-danger transition-colors cursor-pointer"
+                >
+                  <app-icon name="x" [size]="11" [strokeWidth]="2" />
+                  Desativar
+                </button>
+              </div>
+            </div>
+          }
+        }
+
+        @if (twoFactorPanel() === 'setup-totp' && setupTotpData()) {
+          <p class="font-mono text-[11px] text-ink-3 mb-4 leading-relaxed">
+            Escaneie o QR code com <strong class="text-ink-2">Google Authenticator</strong>,
+            <strong class="text-ink-2">Authy</strong>,
+            <strong class="text-ink-2">Microsoft Authenticator</strong> ou qualquer app TOTP
+            compatível:
+          </p>
+
+          <div class="flex justify-center mb-4">
+            @if (totpQrDataUrl()) {
+              <img
+                [src]="totpQrDataUrl()!"
+                alt="QR code para autenticador"
+                class="w-48 h-48 rounded-xl border border-border bg-white p-2"
+              />
+            } @else {
+              <div
+                class="w-48 h-48 rounded-xl border border-border bg-bg flex items-center justify-center"
+              >
+                <span
+                  class="w-5 h-5 rounded-full border-2 border-border border-t-accent animate-spin"
+                ></span>
+              </div>
+            }
+          </div>
+
+          <details class="mb-4">
+            <summary
+              class="font-mono text-[10px] text-ink-3 uppercase tracking-[0.06em] cursor-pointer hover:text-ink-2 transition-colors list-none flex items-center gap-1.5"
+            >
+              <app-icon
+                name="chevron"
+                [size]="11"
+                class="transition-transform [details[open]_&]:rotate-90"
+              />
+              Não consegue escanear? Use a chave manual
+            </summary>
+            <div class="mt-2 bg-bg border border-border rounded-xl p-3">
+              <p class="font-mono text-sm text-ink break-all tracking-widest">
+                {{ setupTotpData()!.sharedKey }}
+              </p>
+            </div>
+          </details>
+          <form
+            [formGroup]="twoFactorCodeForm"
+            (ngSubmit)="confirmTotpSetup()"
+            class="flex flex-col gap-3"
+          >
+            <div>
+              <label
+                class="font-mono text-[10px] text-ink-3 uppercase tracking-[0.06em] block mb-1"
+              >
+                Código de verificação
+              </label>
+              <input
+                type="text"
+                formControlName="code"
+                placeholder="000000"
+                inputmode="numeric"
+                autocomplete="one-time-code"
+                class="w-full bg-bg border border-border rounded-xl px-3 py-2.5 text-sm text-ink placeholder-ink-3 focus:outline-none focus:border-accent transition-colors tracking-widest text-center"
+                [class.border-danger]="
+                  twoFactorCodeForm.controls.code.invalid && twoFactorCodeForm.controls.code.touched
+                "
+              />
+              <app-field-error
+                [control]="twoFactorCodeForm.controls.code"
+                [messages]="{ required: 'Código obrigatório', minlength: 'Código inválido' }"
+              />
+            </div>
+            <div class="flex gap-3">
+              <button
+                type="button"
+                (click)="cancelTwoFactorPanel()"
+                class="flex-1 flex items-center justify-center gap-1.5 border border-border rounded-xl py-2.5 font-mono text-[11px] text-ink-2 uppercase tracking-[0.06em] hover:border-accent/40 transition-colors cursor-pointer"
+              >
+                <app-icon name="x" [size]="13" />
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                [disabled]="twoFactorLoading()"
+                class="flex-1 bg-accent text-hero font-semibold text-sm py-2.5 rounded-xl flex items-center justify-center gap-2 disabled:opacity-40 transition-opacity cursor-pointer"
+              >
+                @if (twoFactorLoading()) {
+                  <span
+                    class="w-4 h-4 rounded-full border-2 border-hero/30 border-t-hero animate-spin"
+                  ></span>
+                } @else {
+                  <app-icon name="check" [size]="16" />
+                }
+                {{ twoFactorLoading() ? 'Verificando…' : 'Confirmar' }}
+              </button>
+            </div>
+          </form>
+        }
+
+        @if (twoFactorPanel() === 'setup-email') {
+          <!-- Unreachable panel: email setup is immediate, transitions directly to done -->
+        }
+
+        @if (twoFactorPanel() === 'done') {
+          <p class="font-mono text-[11px] text-ink-3 mb-4 leading-relaxed">
+            Guarde estes códigos em local seguro. Cada código pode ser usado uma vez para recuperar
+            o acesso caso perca seu autenticador.
+          </p>
+          <div class="grid grid-cols-2 gap-2 mb-4">
+            @for (rc of recoveryCodes(); track rc) {
+              <code
+                class="bg-bg border border-border rounded-lg px-3 py-2 font-mono text-[12px] text-ink text-center tracking-widest"
+              >
+                {{ rc }}
+              </code>
+            }
+          </div>
+          <button
+            (click)="cancelTwoFactorPanel()"
+            class="w-full flex items-center justify-center gap-2 bg-accent text-hero font-semibold text-sm py-2.5 rounded-xl cursor-pointer"
+          >
+            <app-icon name="check" [size]="15" />
+            Concluído
+          </button>
+        }
+
+        @if (twoFactorPanel() === 'disable') {
+          <p class="font-mono text-[11px] text-ink-3 mb-4 leading-relaxed">
+            @if (twoFactorStatus()?.method === 'totp') {
+              Para desativar, informe o código do seu aplicativo autenticador.
+            } @else {
+              Tem certeza que deseja desativar a verificação em 2 etapas?
+            }
+          </p>
+
+          @if (twoFactorStatus()?.method === 'totp') {
+            <form
+              [formGroup]="twoFactorCodeForm"
+              (ngSubmit)="confirm2FaDisable()"
+              class="flex flex-col gap-3"
+            >
+              <div>
+                <label
+                  class="font-mono text-[10px] text-ink-3 uppercase tracking-[0.06em] block mb-1"
+                >
+                  {{ useRecoveryForDisable() ? 'Código de recuperação' : 'Código do aplicativo' }}
+                </label>
+                <input
+                  type="text"
+                  formControlName="code"
+                  [placeholder]="useRecoveryForDisable() ? 'xxxx-xxxx' : '000000'"
+                  inputmode="numeric"
+                  class="w-full bg-bg border border-border rounded-xl px-3 py-2.5 text-sm text-ink placeholder-ink-3 focus:outline-none focus:border-accent transition-colors tracking-widest text-center"
+                  [class.border-danger]="
+                    twoFactorCodeForm.controls.code.invalid &&
+                    twoFactorCodeForm.controls.code.touched
+                  "
+                />
+                <app-field-error
+                  [control]="twoFactorCodeForm.controls.code"
+                  [messages]="{ required: 'Código obrigatório' }"
+                />
+              </div>
+              <button
+                type="button"
+                (click)="useRecoveryForDisable.update((v) => !v); twoFactorCodeForm.reset()"
+                class="font-mono text-[10px] text-ink-3 hover:text-ink transition-colors text-left"
+              >
+                {{
+                  useRecoveryForDisable()
+                    ? 'Usar código do aplicativo'
+                    : 'Usar código de recuperação'
+                }}
+              </button>
+              <div class="flex gap-3">
+                <button
+                  type="button"
+                  (click)="cancelTwoFactorPanel()"
+                  class="flex-1 flex items-center justify-center gap-1.5 border border-border rounded-xl py-2.5 font-mono text-[11px] text-ink-2 uppercase tracking-[0.06em] hover:border-accent/40 transition-colors cursor-pointer"
+                >
+                  <app-icon name="x" [size]="13" />
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  [disabled]="twoFactorLoading()"
+                  class="flex-1 border border-danger/50 text-danger font-mono text-[11px] uppercase tracking-[0.06em] py-2.5 rounded-xl flex items-center justify-center gap-2 disabled:opacity-40 transition-opacity cursor-pointer"
+                >
+                  @if (twoFactorLoading()) {
+                    <span
+                      class="w-3.5 h-3.5 rounded-full border-2 border-danger/30 border-t-danger animate-spin"
+                    ></span>
+                  }
+                  {{ twoFactorLoading() ? 'Desativando…' : 'Desativar' }}
+                </button>
+              </div>
+            </form>
+          } @else {
+            <div class="flex gap-3">
+              <button
+                type="button"
+                (click)="cancelTwoFactorPanel()"
+                class="flex-1 flex items-center justify-center gap-1.5 border border-border rounded-xl py-2.5 font-mono text-[11px] text-ink-2 uppercase tracking-[0.06em] hover:border-accent/40 transition-colors cursor-pointer"
+              >
+                <app-icon name="x" [size]="13" />
+                Cancelar
+              </button>
+              <button
+                type="button"
+                (click)="confirm2FaDisable()"
+                [disabled]="twoFactorLoading()"
+                class="flex-1 border border-danger/50 text-danger font-mono text-[11px] uppercase tracking-[0.06em] py-2.5 rounded-xl flex items-center justify-center gap-2 disabled:opacity-40 transition-opacity cursor-pointer"
+              >
+                @if (twoFactorLoading()) {
+                  <span
+                    class="w-3.5 h-3.5 rounded-full border-2 border-danger/30 border-t-danger animate-spin"
+                  ></span>
+                }
+                {{ twoFactorLoading() ? 'Desativando…' : 'Desativar' }}
+              </button>
+            </div>
+          }
+        }
+
+        @if (twoFactorPanel() === 'regen') {
+          <p class="font-mono text-[11px] text-ink-3 mb-4 leading-relaxed">
+            Os códigos atuais serão invalidados. Informe o código do aplicativo para continuar.
+          </p>
+          <form
+            [formGroup]="twoFactorCodeForm"
+            (ngSubmit)="confirmRegen()"
+            class="flex flex-col gap-3"
+          >
+            <div>
+              <label
+                class="font-mono text-[10px] text-ink-3 uppercase tracking-[0.06em] block mb-1"
+              >
+                Código do aplicativo
+              </label>
+              <input
+                type="text"
+                formControlName="code"
+                placeholder="000000"
+                inputmode="numeric"
+                class="w-full bg-bg border border-border rounded-xl px-3 py-2.5 text-sm text-ink placeholder-ink-3 focus:outline-none focus:border-accent transition-colors tracking-widest text-center"
+                [class.border-danger]="
+                  twoFactorCodeForm.controls.code.invalid && twoFactorCodeForm.controls.code.touched
+                "
+              />
+              <app-field-error
+                [control]="twoFactorCodeForm.controls.code"
+                [messages]="{ required: 'Código obrigatório' }"
+              />
+            </div>
+            <div class="flex gap-3">
+              <button
+                type="button"
+                (click)="cancelTwoFactorPanel()"
+                class="flex-1 flex items-center justify-center gap-1.5 border border-border rounded-xl py-2.5 font-mono text-[11px] text-ink-2 uppercase tracking-[0.06em] hover:border-accent/40 transition-colors cursor-pointer"
+              >
+                <app-icon name="x" [size]="13" />
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                [disabled]="twoFactorLoading()"
+                class="flex-1 bg-accent text-hero font-semibold text-sm py-2.5 rounded-xl flex items-center justify-center gap-2 disabled:opacity-40 transition-opacity cursor-pointer"
+              >
+                @if (twoFactorLoading()) {
+                  <span
+                    class="w-4 h-4 rounded-full border-2 border-hero/30 border-t-hero animate-spin"
+                  ></span>
+                } @else {
+                  <app-icon name="repeat" [size]="15" [strokeWidth]="1.6" />
+                }
+                {{ twoFactorLoading() ? 'Gerando…' : 'Gerar novos códigos' }}
+              </button>
+            </div>
+          </form>
+        }
+      </div>
+
       <!-- Sign out -->
       <button
         (click)="logout()"

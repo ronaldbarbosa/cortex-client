@@ -1,4 +1,4 @@
-import { Component, computed, input } from '@angular/core';
+import { Component, computed, input, ChangeDetectionStrategy } from '@angular/core';
 import { AbstractControl } from '@angular/forms';
 
 /**
@@ -13,6 +13,7 @@ import { AbstractControl } from '@angular/forms';
  */
 @Component({
   selector: 'app-field-error',
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     @if (text()) {
       <p class="mt-1 font-mono text-[11px] text-danger leading-snug">{{ text() }}</p>

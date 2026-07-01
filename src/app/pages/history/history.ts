@@ -1,4 +1,11 @@
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import {
+  Component,
+  computed,
+  inject,
+  OnInit,
+  signal,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { NgClass } from '@angular/common';
 import { catchError, of, Subscription } from 'rxjs';
 import { AlertComponent } from '../../shared/ui/alert/alert';
@@ -49,6 +56,7 @@ const STATUS_CLASSES: Record<AppointmentStatus, string> = {
 @Component({
   selector: 'app-history',
   imports: [AlertComponent, IconComponent, NgClass],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './history.html',
 })
 export class HistoryComponent implements OnInit {

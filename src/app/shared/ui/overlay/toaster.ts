@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { IconComponent } from '../icon/icon';
 import { ToastData, ToastService } from './toast.service';
 import { TONE_BADGE, TONE_BAR, TONE_FG, TONE_TRACK, Tone } from './tone';
@@ -10,6 +10,7 @@ import { TONE_BADGE, TONE_BAR, TONE_FG, TONE_TRACK, Tone } from './tone';
 @Component({
   selector: 'app-toaster',
   imports: [IconComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <div
       class="fixed z-[60] flex flex-col gap-2.5 pointer-events-none bottom-4 left-4 right-4 items-stretch sm:top-auto sm:bottom-4 sm:left-auto sm:right-4 sm:items-end"

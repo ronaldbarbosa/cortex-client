@@ -1,4 +1,4 @@
-import { Component, computed, input, output } from '@angular/core';
+import { Component, computed, input, output, ChangeDetectionStrategy } from '@angular/core';
 import { IconComponent } from '../icon/icon';
 import { TONE_BOX, TONE_FG, Tone } from '../overlay/tone';
 
@@ -11,6 +11,7 @@ import { TONE_BOX, TONE_FG, Tone } from '../overlay/tone';
 @Component({
   selector: 'app-alert',
   imports: [IconComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     @if (message() || title()) {
       <div class="flex items-start gap-3 rounded-xl border px-4 py-3" [class]="boxClass()">

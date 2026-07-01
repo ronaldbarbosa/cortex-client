@@ -6,6 +6,7 @@ import {
   OnDestroy,
   signal,
   ViewChild,
+  ChangeDetectionStrategy,
 } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -22,6 +23,7 @@ import { ToastService } from '../../shared/ui/overlay/toast.service';
 @Component({
   selector: 'app-login',
   imports: [ReactiveFormsModule, RouterLink, IconComponent, AlertComponent, FieldErrorComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './login.html',
 })
 export class LoginComponent implements AfterViewInit, OnDestroy {

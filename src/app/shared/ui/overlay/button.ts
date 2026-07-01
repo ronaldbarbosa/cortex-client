@@ -1,4 +1,4 @@
-import { Component, computed, input } from '@angular/core';
+import { Component, computed, input, ChangeDetectionStrategy } from '@angular/core';
 import { IconComponent } from '../icon/icon';
 
 export type ButtonKind = 'primary' | 'secondary' | 'ghost' | 'danger' | 'danger-soft';
@@ -23,6 +23,7 @@ export type ButtonSize = 'sm' | 'md';
     }
     <ng-content />
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   host: {
     '[class]': 'classes()',
     '[disabled]': 'disabled() || loading() ? true : null',

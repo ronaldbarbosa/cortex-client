@@ -1,4 +1,12 @@
-import { Component, inject, input, OnInit, output, signal } from '@angular/core';
+import {
+  Component,
+  inject,
+  input,
+  OnInit,
+  output,
+  signal,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { IconComponent } from '../../shared/ui/icon/icon';
 import { FieldErrorComponent } from '../../shared/ui/overlay/field-error';
@@ -12,6 +20,7 @@ type Step = 'plan' | 'establishment' | 'account' | 'success';
 @Component({
   selector: 'app-trial-wizard',
   imports: [ReactiveFormsModule, IconComponent, FieldErrorComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './trial-wizard.html',
 })
 export class TrialWizardComponent implements OnInit {

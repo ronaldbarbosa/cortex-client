@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { IconComponent } from '../../shared/ui/icon/icon';
 import { LoginModalComponent } from '../../shared/ui/login-modal/login-modal';
@@ -23,6 +23,7 @@ const TAB_DEFS: Tab[] = [
 @Component({
   selector: 'app-shell',
   imports: [RouterOutlet, RouterLink, RouterLinkActive, IconComponent, LoginModalComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './shell.html',
 })
 export class ShellComponent {

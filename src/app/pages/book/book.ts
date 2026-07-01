@@ -1,4 +1,12 @@
-import { Component, computed, inject, OnDestroy, OnInit, signal } from '@angular/core';
+import {
+  Component,
+  computed,
+  inject,
+  OnDestroy,
+  OnInit,
+  signal,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { catchError, of, Subscription } from 'rxjs';
@@ -32,6 +40,7 @@ interface DateOption {
 @Component({
   selector: 'app-book',
   imports: [AlertComponent, IconComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './book.html',
 })
 export class BookComponent implements OnInit, OnDestroy {

@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { catchError, of } from 'rxjs';
 import { IconComponent } from '../../shared/ui/icon/icon';
@@ -30,6 +30,7 @@ function getInitials(name: string): string {
 @Component({
   selector: 'app-home',
   imports: [RouterLink, IconComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './home.html',
 })
 export class HomeComponent implements OnInit {

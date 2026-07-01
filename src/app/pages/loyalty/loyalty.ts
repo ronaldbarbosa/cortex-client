@@ -1,4 +1,12 @@
-import { Component, computed, inject, OnDestroy, OnInit, signal } from '@angular/core';
+import {
+  Component,
+  computed,
+  inject,
+  OnDestroy,
+  OnInit,
+  signal,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { catchError, of, Subscription } from 'rxjs';
 import { IconComponent } from '../../shared/ui/icon/icon';
 import { ToastService } from '../../shared/ui/overlay/toast.service';
@@ -14,6 +22,7 @@ import {
 @Component({
   selector: 'app-loyalty',
   imports: [IconComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './loyalty.html',
 })
 export class LoyaltyComponent implements OnInit, OnDestroy {

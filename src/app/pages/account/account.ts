@@ -1,4 +1,4 @@
-import { Component, effect, inject, signal } from '@angular/core';
+import { Component, effect, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { catchError, of } from 'rxjs';
 import { IconComponent } from '../../shared/ui/icon/icon';
@@ -18,6 +18,7 @@ type TwoFactorPanel = 'idle' | 'setup-totp' | 'setup-email' | 'done' | 'disable'
 @Component({
   selector: 'app-account',
   imports: [IconComponent, ReactiveFormsModule, FieldErrorComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './account.html',
 })
 export class AccountComponent {

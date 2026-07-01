@@ -1,4 +1,4 @@
-import { Component, computed, inject, input } from '@angular/core';
+import { Component, computed, inject, input, ChangeDetectionStrategy } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
 
 const PATHS: Record<string, string> = {
@@ -50,6 +50,7 @@ const PATHS: Record<string, string> = {
       [innerHTML]="safePath()"
     ></svg>
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   host: { class: 'inline-flex items-center justify-center shrink-0' },
 })
 export class IconComponent {

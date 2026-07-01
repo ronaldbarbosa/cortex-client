@@ -1,4 +1,4 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, inject, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { IconComponent } from '../icon/icon';
 import { ModalComponent } from './modal';
@@ -22,6 +22,7 @@ const CONFIRM_ICON: Record<Tone, string> = {
 @Component({
   selector: 'app-confirm-host',
   imports: [ModalComponent, ButtonComponent, IconComponent, FormsModule],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     @if (svc.active(); as c) {
       <app-modal size="sm" (closed)="svc.resolve(false)">

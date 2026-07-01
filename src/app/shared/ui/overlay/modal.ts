@@ -1,4 +1,13 @@
-import { Component, OnDestroy, OnInit, computed, inject, input, output } from '@angular/core';
+import {
+  Component,
+  OnDestroy,
+  OnInit,
+  computed,
+  inject,
+  input,
+  output,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { IconComponent } from '../icon/icon';
 import { TONE_BADGE, Tone } from './tone';
@@ -20,6 +29,7 @@ export type ModalSize = 'sm' | 'md' | 'lg';
 @Component({
   selector: 'app-modal',
   imports: [IconComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <div
       class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/40 backdrop-blur-[2px]"

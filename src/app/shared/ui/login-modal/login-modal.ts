@@ -1,4 +1,13 @@
-import { Component, ElementRef, effect, inject, OnDestroy, signal, ViewChild } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  effect,
+  inject,
+  OnDestroy,
+  signal,
+  ViewChild,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthModalService } from '../../../core/auth/auth-modal.service';
 import { AuthService } from '../../../core/auth/auth.service';
@@ -13,6 +22,7 @@ import { environment } from '../../../../environments/environment';
 @Component({
   selector: 'app-login-modal',
   imports: [ReactiveFormsModule, IconComponent, FieldErrorComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './login-modal.html',
 })
 export class LoginModalComponent implements OnDestroy {

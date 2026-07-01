@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
 import { TenantContextService } from '../../core/tenant/tenant-context.service';
 import { IconComponent } from '../../shared/ui/icon/icon';
@@ -6,6 +6,7 @@ import { IconComponent } from '../../shared/ui/icon/icon';
 @Component({
   selector: 'app-unit-select',
   imports: [IconComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './unit-select.html',
 })
 export class UnitSelectComponent implements OnInit {

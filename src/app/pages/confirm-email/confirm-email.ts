@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
@@ -7,6 +7,7 @@ import { IconComponent } from '../../shared/ui/icon/icon';
 @Component({
   selector: 'app-confirm-email',
   imports: [IconComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './confirm-email.html',
 })
 export class ConfirmEmailComponent implements OnInit {

@@ -1,4 +1,11 @@
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import {
+  Component,
+  computed,
+  inject,
+  OnInit,
+  signal,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { IconComponent } from '../../shared/ui/icon/icon';
 import { TrialWizardComponent } from './trial-wizard';
 import { TrialService, PlanSummary } from './trial.service';
@@ -6,6 +13,7 @@ import { TrialService, PlanSummary } from './trial.service';
 @Component({
   selector: 'app-landing',
   imports: [IconComponent, TrialWizardComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './landing.html',
 })
 export class LandingComponent implements OnInit {

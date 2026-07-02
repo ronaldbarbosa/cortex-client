@@ -8,6 +8,7 @@ import { ToastService } from '../../shared/ui/overlay/toast.service';
 import { AuthService } from '../../core/auth/auth.service';
 import { AuthModalService } from '../../core/auth/auth-modal.service';
 import { ProfileAvatarService } from '../../core/auth/profile-avatar.service';
+import { PushNotificationService } from '../../core/notifications/push-notification.service';
 import {
   ClientProfile,
   SetupTotpResponse,
@@ -30,6 +31,8 @@ export class AccountComponent {
   private toast = inject(ToastService);
   private http = inject(HttpClient);
   readonly profileAvatar = inject(ProfileAvatarService);
+  readonly pushNotifications = inject(PushNotificationService);
+  readonly pushToggling = signal(false);
 
   readonly user = this.auth.user;
   readonly isAuthenticated = this.auth.isAuthenticated;
@@ -240,6 +243,26 @@ export class AccountComponent {
 
   logout(): void {
     this.auth.logout();
+  }
+
+  async togglePush(): Promise<void> {
+    if (this.pushToggling()) return;
+    this.pushToggling.set(true);
+
+    if (this.pushNotifications.optedIn()) {
+      await this.pushNotifications.disable();
+      this.pushToggling.set(false);
+      return;
+    }
+
+    const ok = await this.pushNotifications.enable();
+    this.pushToggling.set(false);
+    if (!ok) {
+      this.toast.error(
+        'Não foi possível ativar as notificações.',
+        'Verifique a permissão de notificações do navegador e tente novamente.',
+      );
+    }
   }
 
   loadTwoFactorStatus(): void {

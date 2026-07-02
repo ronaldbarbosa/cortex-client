@@ -40,11 +40,17 @@ const adminUrl = isCI
   : 'http://localhost:4201';
 
 const googleClientId = get('GOOGLE_CLIENT_ID');
+// Não é secreta (vai pro browser mesmo) — tem fallback como apiUrl/adminUrl, não trava o
+// build de CI se a env var não estiver configurada no Netlify.
+const vapidPublicKey =
+  get('VAPID_PUBLIC_KEY') ||
+  'BCbMuY-2pU8nXhoAFH5xJgcwwLNrGe75UFt2-S8fgY_qcze5JU4z2T46AaUHSsmDlzBp_PQuPEYWFng56W9TQtE';
 
 const content = `export const environment = {
   apiUrl: '${apiUrl}',
   adminUrl: '${adminUrl}',
   googleClientId: '${googleClientId}',
+  vapidPublicKey: '${vapidPublicKey}',
 };
 `;
 

@@ -1,0 +1,48 @@
+{
+  "$schema": "./node_modules/@angular/service-worker/config/schema.json",
+  "index": "/index.html",
+  "assetGroups": [
+    {
+      "name": "app",
+      "installMode": "prefetch",
+      "resources": {
+        "files": ["/index.html", "/manifest.webmanifest", "/*.css", "/*.js"]
+      }
+    },
+    {
+      "name": "assets",
+      "installMode": "lazy",
+      "updateMode": "prefetch",
+      "resources": {
+        "files": [
+          "/icons/**",
+          "/*.(svg|cur|jpg|jpeg|png|apng|webp|avif|gif|otf|ttf|woff|woff2|ico)"
+        ]
+      }
+    }
+  ],
+  "dataGroups": [
+    {
+      "name": "establishment-data",
+      "urls": ["https://cortex-api-2rvh-g.fly.dev/public/establishments/**"],
+      "cacheConfig": {
+        "strategy": "performance",
+        "maxSize": 100,
+        "maxAge": "1h"
+      }
+    },
+    {
+      "name": "client-history",
+      "urls": [
+        "https://cortex-api-2rvh-g.fly.dev/appointments",
+        "https://cortex-api-2rvh-g.fly.dev/appointments/**"
+      ],
+      "cacheConfig": {
+        "strategy": "freshness",
+        "maxSize": 50,
+        "maxAge": "1d",
+        "timeout": "5s"
+      }
+    }
+  ]
+}

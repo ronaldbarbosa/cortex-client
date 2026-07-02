@@ -106,5 +106,19 @@
 - [ ] Programa de fidelidade (`/fidelidade`) — endpoint ainda não existe na API
 - [ ] Tela de avaliação de atendimento ("Avaliar" no histórico)
 - [ ] "Repetir" agendamento (pré-preenche o booking flow)
-- [ ] Push notifications / lembretes via PWA
+- [x] PWA instalável (manifest, service worker, ícones) + push notifications / lembretes — ver `cortex-api/docs/notificacoes.md`
 - [ ] Histórico técnico do cliente (fórmulas, fotos, observações)
+
+## PWA
+
+- **Instalável**: `public/manifest.webmanifest` + `ngsw-config.json` (Angular Service Worker) +
+  ícones em `public/icons/` gerados a partir de `public/02_icone_light.png`.
+- **Offline-first (só leitura)**: `ngsw-config.json` cacheia os GETs de `EstablishmentService`
+  (`establishment-data`, estratégia `performance`) e o histórico do cliente autenticado
+  (`client-history`, estratégia `freshness`). **As URLs dos `dataGroups` estão fixas no domínio de
+  produção da API** (`https://cortex-api-2rvh-g.fly.dev`) — se esse domínio mudar, atualizar
+  `ngsw-config.json` junto (não há como parametrizar por ambiente nesse arquivo).
+  Criação/edição de agendamento (POST/PUT) não é cacheada — service worker do Angular só
+  intercepta GET.
+- **Push notifications**: `core/notifications/push-notification.service.ts` (`SwPush`) + toggle
+  na página Conta. Backend em `cortex-api/docs/notificacoes.md`.

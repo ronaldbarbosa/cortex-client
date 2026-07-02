@@ -538,6 +538,42 @@
         }
       </div>
 
+      <!-- Push notifications card -->
+      @if (pushNotifications.supported) {
+        <div class="bg-surface border border-border rounded-2xl p-5 mb-4">
+          <div class="flex items-center justify-between gap-4">
+            <div>
+              <p class="font-mono text-[10px] text-ink-3 uppercase tracking-[0.06em] mb-0.5">
+                Notificações push
+              </p>
+              <p class="font-mono text-[11px] text-ink-3 leading-relaxed">
+                Receba lembretes e avisos de agendamento direto no navegador.
+              </p>
+            </div>
+            <div class="shrink-0">
+              <label class="relative cursor-pointer select-none">
+                <div class="relative">
+                  <input
+                    type="checkbox"
+                    [checked]="pushNotifications.optedIn()"
+                    [disabled]="pushToggling()"
+                    (change)="togglePush()"
+                    class="sr-only peer"
+                  />
+                  <div
+                    class="w-9 h-5 bg-border rounded-full peer-checked:bg-accent transition-colors"
+                    [class.opacity-50]="pushToggling()"
+                  ></div>
+                  <div
+                    class="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow-sm transition-transform peer-checked:translate-x-4"
+                  ></div>
+                </div>
+              </label>
+            </div>
+          </div>
+        </div>
+      }
+
       <!-- Email change card -->
       <div class="bg-surface border border-border rounded-2xl p-5 mb-4">
         <p class="font-mono text-[10px] text-ink-3 uppercase tracking-[0.06em] mb-4">

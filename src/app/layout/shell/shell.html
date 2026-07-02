@@ -94,22 +94,28 @@
       <a
         [routerLink]="tab.route"
         routerLinkActive="text-accent"
-        class="flex-1 flex flex-col items-center justify-center gap-1 text-ink-3 transition-colors"
+        #rla="routerLinkActive"
+        class="flex-1 flex flex-col items-center justify-center text-ink-3 transition-colors"
       >
-        @if (tab.path === 'conta' && isAuthenticated() && user()) {
-          <div
-            class="w-5 h-5 rounded-full bg-accent/20 flex items-center justify-center font-tight text-[8px] font-bold text-accent overflow-hidden"
-          >
-            @if (profileAvatar.avatar(); as a) {
-              <img [src]="a.thumbUrl" alt="Sua foto" class="w-full h-full object-cover" />
-            } @else {
-              {{ getInitials() }}
-            }
-          </div>
-        } @else {
-          <app-icon [name]="tab.icon" [size]="20" [strokeWidth]="1.6" />
-        }
-        <span class="font-mono text-[9px] uppercase tracking-[0.06em]">{{ tab.label }}</span>
+        <div
+          class="flex flex-col items-center gap-1 px-3 py-1 rounded-xl"
+          [class.bg-accent/10]="rla.isActive"
+        >
+          @if (tab.path === 'conta' && isAuthenticated() && user()) {
+            <div
+              class="w-5 h-5 rounded-full bg-accent/20 flex items-center justify-center font-tight text-[8px] font-bold text-accent overflow-hidden"
+            >
+              @if (profileAvatar.avatar(); as a) {
+                <img [src]="a.thumbUrl" alt="Sua foto" class="w-full h-full object-cover" />
+              } @else {
+                {{ getInitials() }}
+              }
+            </div>
+          } @else {
+            <app-icon [name]="tab.icon" [size]="20" [strokeWidth]="1.6" />
+          }
+          <span class="font-mono text-[9px] uppercase tracking-[0.06em]">{{ tab.label }}</span>
+        </div>
       </a>
     }
   </nav>

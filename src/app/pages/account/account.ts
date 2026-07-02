@@ -1,11 +1,13 @@
 import { Component, effect, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
 import { catchError, of } from 'rxjs';
 import { IconComponent } from '../../shared/ui/icon/icon';
 import { FieldErrorComponent } from '../../shared/ui/overlay/field-error';
 import { ToastService } from '../../shared/ui/overlay/toast.service';
 import { AuthService } from '../../core/auth/auth.service';
 import { AuthModalService } from '../../core/auth/auth-modal.service';
+import { ProfileAvatarService } from '../../core/auth/profile-avatar.service';
 import {
   ClientProfile,
   SetupTotpResponse,
@@ -26,6 +28,8 @@ export class AccountComponent {
   private authModal = inject(AuthModalService);
   private fb = inject(FormBuilder);
   private toast = inject(ToastService);
+  private http = inject(HttpClient);
+  readonly profileAvatar = inject(ProfileAvatarService);
 
   readonly user = this.auth.user;
   readonly isAuthenticated = this.auth.isAuthenticated;
@@ -34,6 +38,10 @@ export class AccountComponent {
   readonly profileLoading = signal(false);
   readonly editing = signal(false);
   readonly saving = signal(false);
+  readonly uploadingAvatar = signal(false);
+  readonly addressExpanded = signal(false);
+  readonly cepLoading = signal(false);
+  readonly cepError = signal<string | null>(null);
 
   readonly twoFactorStatus = signal<TwoFactorStatusResponse | null>(null);
   readonly twoFactorPanel = signal<TwoFactorPanel>('idle');
@@ -41,9 +49,10 @@ export class AccountComponent {
   readonly setupTotpData = signal<SetupTotpResponse | null>(null);
   readonly totpQrDataUrl = signal<string | null>(null);
   readonly recoveryCodes = signal<string[]>([]);
+  readonly copiedCodes = signal(false);
   readonly useRecoveryForDisable = signal(false);
   readonly twoFactorCodeForm = this.fb.nonNullable.group({
-    code: ['', [Validators.required, Validators.minLength(6), Validators.maxLength(10)]],
+    code: ['', [Validators.required, Validators.minLength(6), Validators.maxLength(11)]],
   });
 
   readonly emailForm = this.fb.nonNullable.group({
@@ -76,6 +85,7 @@ export class AccountComponent {
       if (this.auth.isAuthenticated()) {
         this.loadProfile();
         this.loadTwoFactorStatus();
+        this.profileAvatar.sync();
       } else {
         this.profile.set(null);
         this.editing.set(false);
@@ -97,6 +107,7 @@ export class AccountComponent {
     const p = this.profile();
     if (p) this.fillForm(p);
     this.editing.set(false);
+    this.cepError.set(null);
   }
 
   save(): void {
@@ -133,6 +144,10 @@ export class AccountComponent {
 
   formatBirthDate(date: string): string {
     return this.isoToPtBr(date);
+  }
+
+  formatCpf(cpf: string): string {
+    return this.applyCpfMask(cpf);
   }
 
   genderLabel(g: string): string {
@@ -176,6 +191,24 @@ export class AccountComponent {
     const v = this.applyDateMask(el.value);
     el.value = v;
     this.form.controls.birthDate.setValue(v, { emitEvent: false });
+  }
+
+  maskCpf(event: Event): void {
+    const el = event.target as HTMLInputElement;
+    const v = this.applyCpfMask(el.value);
+    el.value = v;
+    this.form.controls.cpf.setValue(v, { emitEvent: false });
+  }
+
+  maskCep(event: Event): void {
+    const el = event.target as HTMLInputElement;
+    const v = this.applyCepMask(el.value);
+    el.value = v;
+    this.form.controls.address.controls.postalCode.setValue(v, { emitEvent: false });
+    this.cepError.set(null);
+
+    const digits = v.replace(/\D/g, '');
+    if (digits.length === 8) this.lookupCep(digits);
   }
 
   requestEmailChange(): void {
@@ -339,6 +372,60 @@ export class AccountComponent {
     this.setupTotpData.set(null);
     this.totpQrDataUrl.set(null);
     this.useRecoveryForDisable.set(false);
+    this.copiedCodes.set(false);
+  }
+
+  copyRecoveryCodes(): void {
+    const codes = this.recoveryCodes();
+    if (!codes.length) return;
+    navigator.clipboard.writeText(codes.join('\n')).then(() => {
+      this.copiedCodes.set(true);
+      setTimeout(() => this.copiedCodes.set(false), 2000);
+    });
+  }
+
+  // ─── Avatar ────────────────────────────────────────────────────────────────
+
+  onAvatarSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    input.value = '';
+    if (!file) return;
+
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+      this.toast.error('Formato não suportado.', 'Use JPEG, PNG ou WebP.');
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      this.toast.error('Imagem muito grande.', 'O tamanho máximo é 10 MB.');
+      return;
+    }
+
+    this.uploadingAvatar.set(true);
+    this.profileAvatar.upload(file).subscribe({
+      next: () => {
+        this.uploadingAvatar.set(false);
+        this.toast.success('Foto atualizada.');
+      },
+      error: (err) => {
+        this.uploadingAvatar.set(false);
+        this.toast.error('Erro ao enviar foto.', apiErrorMessage(err, 'Tente novamente.'));
+      },
+    });
+  }
+
+  removeAvatar(): void {
+    this.uploadingAvatar.set(true);
+    this.profileAvatar.remove().subscribe({
+      next: () => {
+        this.uploadingAvatar.set(false);
+        this.toast.success('Foto removida.');
+      },
+      error: (err) => {
+        this.uploadingAvatar.set(false);
+        this.toast.error('Erro ao remover foto.', apiErrorMessage(err, 'Tente novamente.'));
+      },
+    });
   }
 
   getInitials(): string {
@@ -354,7 +441,7 @@ export class AccountComponent {
       phone: this.formatPhone(p.phone),
       birthDate: p.birthDate ? this.isoToPtBr(p.birthDate) : '',
       acceptsMarketing: p.acceptsMarketing,
-      cpf: p.cpf ?? '',
+      cpf: p.cpf ? this.applyCpfMask(p.cpf) : '',
       gender: p.gender ?? '',
       secondaryPhone: p.secondaryPhone ? this.formatPhone(p.secondaryPhone) : '',
       address: {
@@ -367,6 +454,8 @@ export class AccountComponent {
         postalCode: p.address?.postalCode ?? '',
       },
     });
+    this.addressExpanded.set(!!(p.address?.street || p.address?.city || p.address?.neighborhood));
+    this.cepError.set(null);
   }
 
   private loadProfile(): void {
@@ -444,5 +533,51 @@ export class AccountComponent {
     if (v.length > 4) v = `${v.substring(0, 2)}/${v.substring(2, 4)}/${v.substring(4)}`;
     else if (v.length > 2) v = `${v.substring(0, 2)}/${v.substring(2)}`;
     return v;
+  }
+
+  private applyCpfMask(raw: string): string {
+    const d = raw.replace(/\D/g, '').substring(0, 11);
+    if (d.length > 9)
+      return `${d.substring(0, 3)}.${d.substring(3, 6)}.${d.substring(6, 9)}-${d.substring(9)}`;
+    if (d.length > 6) return `${d.substring(0, 3)}.${d.substring(3, 6)}.${d.substring(6)}`;
+    if (d.length > 3) return `${d.substring(0, 3)}.${d.substring(3)}`;
+    return d;
+  }
+
+  private applyCepMask(raw: string): string {
+    const d = raw.replace(/\D/g, '').substring(0, 8);
+    if (d.length > 5) return `${d.substring(0, 5)}-${d.substring(5)}`;
+    return d;
+  }
+
+  private lookupCep(cep: string): void {
+    this.cepLoading.set(true);
+    this.cepError.set(null);
+
+    this.http
+      .get<{
+        erro?: boolean;
+        logradouro?: string;
+        bairro?: string;
+        localidade?: string;
+        uf?: string;
+      }>(`https://viacep.com.br/ws/${cep}/json/`)
+      .pipe(catchError(() => of(null)))
+      .subscribe((res) => {
+        this.cepLoading.set(false);
+
+        if (!res || res.erro) {
+          this.cepError.set('CEP não encontrado. Verifique o número.');
+          return;
+        }
+
+        this.form.controls.address.patchValue({
+          street: res.logradouro ?? '',
+          neighborhood: res.bairro ?? '',
+          city: res.localidade ?? '',
+          state: res.uf ?? '',
+        });
+        this.addressExpanded.set(true);
+      });
   }
 }

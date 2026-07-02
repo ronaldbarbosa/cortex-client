@@ -59,7 +59,7 @@ export class LoginComponent implements AfterViewInit, OnDestroy {
   useRecovery = signal(false);
 
   codeForm = this.fb.nonNullable.group({
-    code: ['', [Validators.required, Validators.minLength(6), Validators.maxLength(10)]],
+    code: ['', [Validators.required, Validators.minLength(6), Validators.maxLength(11)]],
   });
 
   get loginEmail() {

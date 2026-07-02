@@ -50,7 +50,7 @@ export class LoginModalComponent implements OnDestroy {
   });
 
   codeForm = this.fb.nonNullable.group({
-    code: ['', [Validators.required, Validators.minLength(6), Validators.maxLength(10)]],
+    code: ['', [Validators.required, Validators.minLength(6), Validators.maxLength(11)]],
   });
 
   loading = signal(false);

@@ -28,9 +28,13 @@
         @if (isAuthenticated() && user()) {
           <button
             (click)="toggleDropdown()"
-            class="w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center font-tight text-[12px] font-bold text-accent hover:bg-accent/30 transition-colors cursor-pointer"
+            class="w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center font-tight text-[12px] font-bold text-accent hover:bg-accent/30 transition-colors cursor-pointer overflow-hidden"
           >
-            {{ getInitials() }}
+            @if (profileAvatar.avatar(); as a) {
+              <img [src]="a.thumbUrl" alt="Sua foto" class="w-full h-full object-cover" />
+            } @else {
+              {{ getInitials() }}
+            }
           </button>
 
           @if (dropdownOpen()) {
@@ -94,9 +98,13 @@
       >
         @if (tab.path === 'conta' && isAuthenticated() && user()) {
           <div
-            class="w-5 h-5 rounded-full bg-accent/20 flex items-center justify-center font-tight text-[8px] font-bold text-accent"
+            class="w-5 h-5 rounded-full bg-accent/20 flex items-center justify-center font-tight text-[8px] font-bold text-accent overflow-hidden"
           >
-            {{ getInitials() }}
+            @if (profileAvatar.avatar(); as a) {
+              <img [src]="a.thumbUrl" alt="Sua foto" class="w-full h-full object-cover" />
+            } @else {
+              {{ getInitials() }}
+            }
           </div>
         } @else {
           <app-icon [name]="tab.icon" [size]="20" [strokeWidth]="1.6" />

@@ -12,6 +12,9 @@ export interface ClientUser {
   firstName: string;
   lastName: string;
   clientId: string | null;
+  // Tenant (salão) ao qual esta conta pertence — vem da claim tenant_id do JWT,
+  // a mesma que o backend usa no filtro de tenant. Um cliente pertence a um único salão.
+  tenantId: string | null;
 }
 
 export interface ClientAddressDto {

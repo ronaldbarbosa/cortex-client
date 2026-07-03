@@ -90,6 +90,13 @@ export class BookComponent implements OnInit, OnDestroy {
   readonly bookingError = signal<string | null>(null);
   readonly confirmedAppointment = signal<AppointmentSummary | null>(null);
 
+  // A sessão sempre segue a slug (tenantGuard). Uma sessão "convidada" (cliente autenticado sem ficha
+  // neste salão) não tem clientId — o 1º agendamento provisiona a ficha via enroll antes de agendar.
+  // Ver docs/multitenancy.md.
+  readonly needsEnrollment = computed(
+    () => this.auth.isAuthenticated() && !this.auth.user()?.clientId,
+  );
+
   readonly totalPrice = computed(() =>
     this.selectedServices().reduce((sum, s) => sum + s.price, 0),
   );
@@ -169,7 +176,30 @@ export class BookComponent implements OnInit, OnDestroy {
     if (!this.auth.isAuthenticated()) {
       this.authModal.open();
       this.loginSuccessSub?.unsubscribe();
-      this.loginSuccessSub = this.authModal.loginSuccess$.subscribe(() => this.submitAppointment());
+      this.loginSuccessSub = this.authModal.loginSuccess$.subscribe(() => this.proceedBooking());
+      return;
+    }
+    this.proceedBooking();
+  }
+
+  private proceedBooking(): void {
+    // Sessão convidada (sem ficha neste salão): provisiona via enroll antes de agendar. É o 1º
+    // agendamento do cliente no salão da slug (login global + Client por salão). Ver multitenancy.md.
+    if (this.needsEnrollment()) {
+      this.confirming.set(true);
+      this.bookingError.set(null);
+      this.auth.enroll().subscribe({
+        next: () => this.submitAppointment(),
+        error: (err) => {
+          this.confirming.set(false);
+          this.bookingError.set(
+            apiErrorMessage(
+              err,
+              'Não foi possível concluir seu cadastro neste salão. Tente novamente.',
+            ),
+          );
+        },
+      });
       return;
     }
     this.submitAppointment();

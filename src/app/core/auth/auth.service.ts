@@ -56,6 +56,8 @@ export class AuthService {
         email,
         password,
         tenantId,
+        // Login-convidado: se ainda não for cliente deste salão, entra sem ficha (criada no 1º agendamento).
+        clientContext: true,
       })
       .pipe(
         map((res) => {
@@ -128,14 +130,21 @@ export class AuthService {
 
   refresh(): Observable<void> {
     const refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY);
-    const tenantId = this.tenantContext.tenantId() || localStorage.getItem(TENANT_ID_KEY);
+    // Mira o tenant da SESSÃO ativa (persistido), não a slug que está sendo visualizada. Um cliente
+    // logado no salão A pode navegar na página do salão B (onde ainda não tem vínculo); refrescar
+    // contra B deslogaria. A troca de salão ativo acontece via enroll (primeiro agendamento).
+    const tenantId = localStorage.getItem(TENANT_ID_KEY) || this.tenantContext.tenantId();
 
     if (!refreshToken || !tenantId) {
       return throwError(() => new Error('No session to refresh'));
     }
 
     return this.http
-      .post<ClientAuthResponse>(`${this.base}/refresh`, { refreshToken, tenantId })
+      .post<ClientAuthResponse>(`${this.base}/refresh`, {
+        refreshToken,
+        tenantId,
+        clientContext: true,
+      })
       .pipe(
         tap((res) => this.applySession(res)),
         map(() => void 0),
@@ -143,6 +152,45 @@ export class AuthService {
           this.clearSession();
           return throwError(() => err);
         }),
+      );
+  }
+
+  // Troca a sessão ativa para o salão informado (usado quando a slug muda, para a tela seguir o link).
+  // Cliente do salão → sessão completa; não-cliente → sessão "convidada" (sem clientId), que ainda
+  // permite agendar (o agendamento cria a ficha via enroll). Ver docs/multitenancy.md.
+  switchToSalon(tenantId: string): Observable<void> {
+    const refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY);
+    if (!refreshToken) {
+      return throwError(() => new Error('No session to switch'));
+    }
+    return this.http
+      .post<ClientAuthResponse>(`${this.base}/refresh`, {
+        refreshToken,
+        tenantId,
+        clientContext: true,
+      })
+      .pipe(
+        tap((res) => this.applySession(res)),
+        map(() => void 0),
+      );
+  }
+
+  // Provisiona a ficha do cliente no salão em contexto (slug atual) e troca a sessão ativa para ele.
+  // Usado no primeiro agendamento num salão onde o cliente ainda não tem vínculo (login global +
+  // Client por salão). O backend cria/vincula o Client a partir do refresh token. Ver multitenancy.md.
+  enroll(): Observable<void> {
+    const refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY);
+    const tenantId = this.tenantContext.tenantId();
+
+    if (!refreshToken || !tenantId) {
+      return throwError(() => new Error('No session or salon to enroll'));
+    }
+
+    return this.http
+      .post<ClientAuthResponse>(`${this.base}/enroll`, { refreshToken, tenantId })
+      .pipe(
+        tap((res) => this.applySession(res)),
+        map(() => void 0),
       );
   }
 
@@ -201,6 +249,7 @@ export class AuthService {
         firstName,
         lastName: rest.join(' '),
         clientId: claims['client_id'] ?? null,
+        tenantId: claims['tenant_id'] ?? null,
       };
     } catch {
       return null;

@@ -12,7 +12,13 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     return next(req);
   }
 
-  const publicPaths = ['/auth/login', '/auth/register', '/auth/refresh', '/public/'];
+  const publicPaths = [
+    '/auth/login',
+    '/auth/register',
+    '/auth/refresh',
+    '/auth/enroll',
+    '/public/',
+  ];
   if (publicPaths.some((p) => req.url.includes(p))) {
     return next(req);
   }

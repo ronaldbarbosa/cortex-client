@@ -286,6 +286,17 @@ export class BookComponent implements OnInit, OnDestroy {
     }).format(new Date(localIso));
   }
 
+  // Canal de contato direto do sinal (docs/sinal.md §7) — abre o WhatsApp do salão com o
+  // contato já cadastrado na unidade; zero backend novo. null quando a unidade não tem telefone.
+  readonly whatsappDepositLink = computed(() => {
+    const digits = this.unitContext.unit()?.phone?.replace(/\D/g, '');
+    if (!digits) return null;
+    const message = encodeURIComponent(
+      'Olá! Preciso negociar o sinal do meu agendamento na ' + this.tenantContext.name() + '.',
+    );
+    return `https://wa.me/55${digits}?text=${message}`;
+  });
+
   navigateToHome(): void {
     const slug = this.tenantContext.slug();
     const unitSlug = this.unitContext.unitSlug();

@@ -436,14 +436,27 @@
     class="min-h-[60vh] flex flex-col items-center justify-center px-5 py-12 text-center max-w-md mx-auto"
   >
     <!-- Success icon -->
-    <div class="w-16 h-16 rounded-full bg-accent/15 flex items-center justify-center mb-6">
-      <app-icon name="check" [size]="28" color="var(--color-accent)" [strokeWidth]="2.5" />
-    </div>
+    @if (confirmedAppointment()!.status === 'AwaitingProof') {
+      <div class="w-16 h-16 rounded-full bg-warning/15 flex items-center justify-center mb-6">
+        <app-icon name="clock" [size]="28" color="var(--color-warning)" [strokeWidth]="2.5" />
+      </div>
 
-    <div class="font-mono text-[10px] text-ink-3 uppercase tracking-[0.08em] mb-2">
-      Agendamento confirmado
-    </div>
-    <h2 class="font-tight text-2xl font-semibold text-ink tracking-tight mb-8">Tudo certo!</h2>
+      <div class="font-mono text-[10px] text-ink-3 uppercase tracking-[0.08em] mb-2">
+        Aguardando confirmação do sinal
+      </div>
+      <h2 class="font-tight text-2xl font-semibold text-ink tracking-tight mb-8">
+        Falta pouco! Envie o comprovante do sinal ao salão para confirmar seu horário.
+      </h2>
+    } @else {
+      <div class="w-16 h-16 rounded-full bg-accent/15 flex items-center justify-center mb-6">
+        <app-icon name="check" [size]="28" color="var(--color-accent)" [strokeWidth]="2.5" />
+      </div>
+
+      <div class="font-mono text-[10px] text-ink-3 uppercase tracking-[0.08em] mb-2">
+        Agendamento confirmado
+      </div>
+      <h2 class="font-tight text-2xl font-semibold text-ink tracking-tight mb-8">Tudo certo!</h2>
+    }
 
     <!-- Appointment details card -->
     <div class="w-full bg-surface border border-border rounded-2xl p-5 text-left mb-6">

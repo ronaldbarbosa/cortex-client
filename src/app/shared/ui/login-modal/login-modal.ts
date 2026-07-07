@@ -153,9 +153,9 @@ export class LoginModalComponent implements OnDestroy {
           this.authModal.notifySuccess();
         }
       },
-      error: () => {
+      error: (err) => {
         this.loading.set(false);
-        this.toast.error('Credenciais inválidas', 'E-mail ou senha incorretos.');
+        this.toast.error('Erro ao entrar', apiErrorMessage(err, 'E-mail ou senha incorretos.'));
       },
     });
   }
@@ -183,9 +183,12 @@ export class LoginModalComponent implements OnDestroy {
           this.loading.set(false);
           this.authModal.notifySuccess();
         },
-        error: () => {
+        error: (err) => {
           this.loading.set(false);
-          this.toast.error('Código inválido', 'Verifique o código e tente novamente.');
+          this.toast.error(
+            'Erro ao verificar código',
+            apiErrorMessage(err, 'Código inválido ou expirado.'),
+          );
         },
       });
   }
@@ -259,9 +262,12 @@ export class LoginModalComponent implements OnDestroy {
         this.loading.set(false);
         this.authModal.notifySuccess();
       },
-      error: () => {
+      error: (err) => {
         this.loading.set(false);
-        this.toast.error('Erro de autenticação', 'Não foi possível autenticar com o Google.');
+        this.toast.error(
+          'Erro de autenticação',
+          apiErrorMessage(err, 'Não foi possível autenticar com o Google.'),
+        );
       },
     });
   }

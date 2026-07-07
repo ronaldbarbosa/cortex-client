@@ -153,10 +153,11 @@ export class LoginComponent implements AfterViewInit, OnDestroy {
           this.router.navigate(['/s', this.tenantContext.slug()]);
         }
       },
-      error: () => {
+      error: (err) => {
         this.loading.set(false);
-        this.error.set('E-mail ou senha incorretos.');
-        this.toast.error('Credenciais inválidas', 'E-mail ou senha incorretos.');
+        const msg = apiErrorMessage(err, 'E-mail ou senha incorretos.');
+        this.error.set(msg);
+        this.toast.error('Erro ao entrar', msg);
       },
     });
   }
@@ -186,10 +187,11 @@ export class LoginComponent implements AfterViewInit, OnDestroy {
           this.loading.set(false);
           this.router.navigate(['/s', this.tenantContext.slug()]);
         },
-        error: () => {
+        error: (err) => {
           this.loading.set(false);
-          this.error.set('Código inválido ou expirado.');
-          this.toast.error('Código inválido', 'Verifique o código e tente novamente.');
+          const msg = apiErrorMessage(err, 'Código inválido ou expirado.');
+          this.error.set(msg);
+          this.toast.error('Erro ao verificar código', msg);
         },
       });
   }
@@ -262,10 +264,11 @@ export class LoginComponent implements AfterViewInit, OnDestroy {
         const slug = this.tenantContext.slug();
         this.router.navigate(['/s', slug]);
       },
-      error: () => {
+      error: (err) => {
         this.loading.set(false);
-        this.error.set('Não foi possível autenticar com o Google.');
-        this.toast.error('Erro de autenticação', 'Não foi possível autenticar com o Google.');
+        const msg = apiErrorMessage(err, 'Não foi possível autenticar com o Google.');
+        this.error.set(msg);
+        this.toast.error('Erro de autenticação', msg);
       },
     });
   }

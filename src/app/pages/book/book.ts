@@ -18,8 +18,12 @@ import { AuthService } from '../../core/auth/auth.service';
 import { EstablishmentService } from '../../core/establishment/establishment.service';
 import { TenantContextService } from '../../core/tenant/tenant-context.service';
 import { UnitContextService } from '../../core/unit/unit-context.service';
+import { ToastService } from '../../shared/ui/overlay/toast.service';
+import { ProofViewerModalComponent } from '../../shared/ui/proof-viewer-modal/proof-viewer-modal';
 import {
+  AppointmentDepositPreview,
   AppointmentSummary,
+  DepositProofDto,
   ProfessionalAvailability,
   PublicProfessional,
   PublicServiceItem,
@@ -39,7 +43,7 @@ interface DateOption {
 
 @Component({
   selector: 'app-book',
-  imports: [AlertComponent, IconComponent],
+  imports: [AlertComponent, IconComponent, ProofViewerModalComponent],
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './book.html',
 })
@@ -50,6 +54,7 @@ export class BookComponent implements OnInit, OnDestroy {
   private authModal = inject(AuthModalService);
   private tenantContext = inject(TenantContextService);
   private unitContext = inject(UnitContextService);
+  private toast = inject(ToastService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
 
@@ -89,6 +94,15 @@ export class BookComponent implements OnInit, OnDestroy {
   readonly confirming = signal(false);
   readonly bookingError = signal<string | null>(null);
   readonly confirmedAppointment = signal<AppointmentSummary | null>(null);
+
+  // Prévia do sinal (docs/sinal.md) — mostrada ANTES de concluir a solicitação. Quando exigido,
+  // a confirmação vira uma segunda etapa explícita (acknowledgeDeposit) em vez de criar direto.
+  readonly depositPreview = signal<AppointmentDepositPreview | null>(null);
+
+  // Comprovante do sinal, enviado pelo próprio cliente na tela de "aguardando sinal" (step 4).
+  readonly depositProof = signal<DepositProofDto | null>(null);
+  readonly uploadingProof = signal(false);
+  readonly viewingProof = signal<DepositProofDto | null>(null);
 
   // A sessão sempre segue a slug (tenantGuard). Uma sessão "convidada" (cliente autenticado sem ficha
   // neste salão) não tem clientId — o 1º agendamento provisiona a ficha via enroll antes de agendar.
@@ -189,7 +203,7 @@ export class BookComponent implements OnInit, OnDestroy {
       this.confirming.set(true);
       this.bookingError.set(null);
       this.auth.enroll().subscribe({
-        next: () => this.submitAppointment(),
+        next: () => this.checkDeposit(),
         error: (err) => {
           this.confirming.set(false);
           this.bookingError.set(
@@ -202,12 +216,64 @@ export class BookComponent implements OnInit, OnDestroy {
       });
       return;
     }
+    this.checkDeposit();
+  }
+
+  // Consulta a política de sinal (docs/sinal.md) ANTES de criar o agendamento. Sem sinal exigido,
+  // segue direto; exigido, mostra a explicação e espera confirmação explícita (acknowledgeDeposit).
+  private checkDeposit(): void {
+    const clientId = this.auth.user()?.clientId;
+    const slot = this.selectedSlot();
+    if (!clientId || !slot) return;
+
+    this.confirming.set(true);
+    this.bookingError.set(null);
+
+    const startLocal = `${this.selectedDate()}T${slot}:00`;
+
+    this.establishmentService
+      .previewDeposit(clientId, this.buildServiceIds(), startLocal)
+      .subscribe({
+        next: (preview) => {
+          this.confirming.set(false);
+          if (preview.required) {
+            this.depositPreview.set(preview);
+          } else {
+            this.submitAppointment();
+          }
+        },
+        error: (err) => {
+          this.confirming.set(false);
+          this.bookingError.set(
+            apiErrorMessage(
+              err,
+              'Não foi possível verificar as condições do agendamento. Tente novamente.',
+            ),
+          );
+        },
+      });
+  }
+
+  acknowledgeDeposit(): void {
     this.submitAppointment();
+  }
+
+  cancelDepositAck(): void {
+    this.depositPreview.set(null);
+  }
+
+  private buildServiceIds(): string[] {
+    const serviceIds = this.selectedServices().map((s) => s.id);
+    if (this.includeRewardService() && this.rewardServiceItem()) {
+      serviceIds.push(this.rewardServiceItem()!.id);
+    }
+    return serviceIds;
   }
 
   toggleRewardService(): void {
     this.includeRewardService.update((v) => !v);
     this.selectedSlot.set(null);
+    this.depositPreview.set(null);
     this.fetchAvailability(this.selectedDate());
   }
 
@@ -248,6 +314,7 @@ export class BookComponent implements OnInit, OnDestroy {
     this.selectedProfessional.set(professional);
     this.selectedSlot.set(null);
     this.includeRewardService.set(false);
+    this.depositPreview.set(null);
     this.step.set(3);
     this.fetchAvailability(this.selectedDate());
   }
@@ -255,11 +322,13 @@ export class BookComponent implements OnInit, OnDestroy {
   selectDate(date: string): void {
     this.selectedDate.set(date);
     this.selectedSlot.set(null);
+    this.depositPreview.set(null);
     this.fetchAvailability(date);
   }
 
   selectSlot(slot: string): void {
     this.selectedSlot.set(slot);
+    this.depositPreview.set(null);
   }
 
   goBack(): void {
@@ -270,6 +339,7 @@ export class BookComponent implements OnInit, OnDestroy {
         this.availability.set(null);
         this.selectedSlot.set(null);
         this.includeRewardService.set(false);
+        this.depositPreview.set(null);
       }
     }
   }
@@ -297,6 +367,40 @@ export class BookComponent implements OnInit, OnDestroy {
     return `https://wa.me/55${digits}?text=${message}`;
   });
 
+  // Comprovante do sinal (docs/sinal.md) — o cliente anexa o próprio; a conferência continua
+  // exclusiva do salão. Aceita PDF além de imagem (docs/midia.md §2.2).
+  onProofSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    input.value = '';
+    if (!file) return;
+
+    if (!['image/jpeg', 'image/png', 'image/webp', 'application/pdf'].includes(file.type)) {
+      this.toast.error('Formato não suportado.', 'Use JPEG, PNG, WebP ou PDF.');
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      this.toast.error('Arquivo muito grande.', 'O tamanho máximo é 10 MB.');
+      return;
+    }
+
+    const appointment = this.confirmedAppointment();
+    if (!appointment) return;
+
+    this.uploadingProof.set(true);
+    this.establishmentService.uploadDepositProof(appointment.id, file).subscribe({
+      next: (proof) => {
+        this.uploadingProof.set(false);
+        this.depositProof.set(proof);
+        this.toast.success('Comprovante enviado.', 'O salão vai conferir e confirmar seu horário.');
+      },
+      error: (err) => {
+        this.uploadingProof.set(false);
+        this.toast.error('Erro ao enviar comprovante.', apiErrorMessage(err, 'Tente novamente.'));
+      },
+    });
+  }
+
   navigateToHome(): void {
     const slug = this.tenantContext.slug();
     const unitSlug = this.unitContext.unitSlug();
@@ -318,10 +422,7 @@ export class BookComponent implements OnInit, OnDestroy {
 
     if (!services.length || !professional || !slot || !clientId) return;
 
-    const serviceIds = services.map((s) => s.id);
-    if (this.includeRewardService() && this.rewardServiceItem()) {
-      serviceIds.push(this.rewardServiceItem()!.id);
-    }
+    const serviceIds = this.buildServiceIds();
 
     this.confirming.set(true);
     this.bookingError.set(null);
@@ -344,6 +445,8 @@ export class BookComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (appointment) => {
           this.confirming.set(false);
+          this.depositPreview.set(null);
+          this.depositProof.set(null);
           this.confirmedAppointment.set(appointment);
           this.step.set(4);
         },

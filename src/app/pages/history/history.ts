@@ -7,16 +7,21 @@ import {
   ChangeDetectionStrategy,
 } from '@angular/core';
 import { NgClass } from '@angular/common';
-import { catchError, of, Subscription } from 'rxjs';
+import { catchError, firstValueFrom, of, Subscription } from 'rxjs';
 import { AlertComponent } from '../../shared/ui/alert/alert';
 import { IconComponent } from '../../shared/ui/icon/icon';
 import { apiErrorMessage } from '../../core/utils/api-error';
 import { ConfirmDialogService } from '../../shared/ui/overlay/confirm-dialog.service';
 import { ToastService } from '../../shared/ui/overlay/toast.service';
+import { ProofViewerModalComponent } from '../../shared/ui/proof-viewer-modal/proof-viewer-modal';
 import { AuthService } from '../../core/auth/auth.service';
 import { EstablishmentService } from '../../core/establishment/establishment.service';
+import { TenantContextService } from '../../core/tenant/tenant-context.service';
+import { UnitContextService } from '../../core/unit/unit-context.service';
 import {
+  AppointmentDepositSummary,
   AppointmentSummary,
+  DepositProofDto,
   ProfessionalAvailability,
 } from '../../core/establishment/establishment.model';
 
@@ -59,7 +64,7 @@ const STATUS_CLASSES: Record<AppointmentStatus, string> = {
 
 @Component({
   selector: 'app-history',
-  imports: [AlertComponent, IconComponent, NgClass],
+  imports: [AlertComponent, IconComponent, NgClass, ProofViewerModalComponent],
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './history.html',
 })
@@ -68,12 +73,25 @@ export class HistoryComponent implements OnInit {
   private establishmentService = inject(EstablishmentService);
   private confirmDialog = inject(ConfirmDialogService);
   private toast = inject(ToastService);
+  private tenantContext = inject(TenantContextService);
+  private unitContext = inject(UnitContextService);
 
   private clientId = this.auth.user()?.clientId ?? '';
 
   // null = loading; [] = empty/error; [...] = loaded
   readonly appointments = signal<AppointmentSummary[] | null>(null);
   readonly cancelling = signal<string | null>(null);
+
+  // Comprovante do sinal (docs/sinal.md) — por agendamento (AwaitingProof pode ocorrer em mais
+  // de um ao mesmo tempo). Chave = appointment id; ausente = ainda não verificado/sem comprovante.
+  readonly depositProofs = signal<Record<string, DepositProofDto | null>>({});
+  readonly uploadingProofFor = signal<string | null>(null);
+  readonly viewingProof = signal<DepositProofDto | null>(null);
+
+  // Devolução do sinal (docs/sinal.md §8) — nota + comprovante, só quando o sinal foi
+  // efetivamente devolvido (Refunded). Anexado pelo salão; o cliente só consulta.
+  readonly refundInfo = signal<Record<string, AppointmentDepositSummary | null>>({});
+  readonly refundProofs = signal<Record<string, DepositProofDto | null>>({});
 
   // Reschedule modal state
   readonly reschedulingAppt = signal<AppointmentSummary | null>(null);
@@ -109,7 +127,78 @@ export class HistoryComponent implements OnInit {
     this.establishmentService
       .getMyAppointments(this.clientId)
       .pipe(catchError(() => of([] as AppointmentSummary[])))
-      .subscribe((list) => this.appointments.set(list));
+      .subscribe((list) => {
+        this.appointments.set(list);
+        this.loadDepositProofs(list);
+      });
+  }
+
+  private loadDepositProofs(list: AppointmentSummary[]): void {
+    for (const appt of list) {
+      if (appt.status === 'AwaitingProof') {
+        this.establishmentService
+          .getDepositProof(appt.id)
+          .pipe(catchError(() => of(null)))
+          .subscribe((proof) => {
+            this.depositProofs.update((m) => ({ ...m, [appt.id]: proof }));
+          });
+      } else if (appt.status === 'Cancelled') {
+        this.establishmentService
+          .getDeposit(appt.id)
+          .pipe(catchError(() => of(null)))
+          .subscribe((info) => {
+            this.refundInfo.update((m) => ({ ...m, [appt.id]: info }));
+            if (info?.status !== 'Refunded') return;
+            this.establishmentService
+              .getDepositRefundProof(appt.id)
+              .pipe(catchError(() => of(null)))
+              .subscribe((proof) => {
+                this.refundProofs.update((m) => ({ ...m, [appt.id]: proof }));
+              });
+          });
+      }
+    }
+  }
+
+  // Canal de contato direto do sinal (docs/sinal.md §7) — mesmo padrão de book.ts.
+  whatsappDepositLink(): string | null {
+    const digits = this.unitContext.unit()?.phone?.replace(/\D/g, '');
+    if (!digits) return null;
+    const message = encodeURIComponent(
+      'Olá! Preciso negociar o sinal do meu agendamento na ' + this.tenantContext.name() + '.',
+    );
+    return `https://wa.me/55${digits}?text=${message}`;
+  }
+
+  // Comprovante do sinal — o cliente anexa o próprio; a conferência continua exclusiva do
+  // salão. Aceita PDF além de imagem (docs/midia.md §2.2).
+  onProofSelected(event: Event, appt: AppointmentSummary): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    input.value = '';
+    if (!file) return;
+
+    if (!['image/jpeg', 'image/png', 'image/webp', 'application/pdf'].includes(file.type)) {
+      this.toast.error('Formato não suportado.', 'Use JPEG, PNG, WebP ou PDF.');
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      this.toast.error('Arquivo muito grande.', 'O tamanho máximo é 10 MB.');
+      return;
+    }
+
+    this.uploadingProofFor.set(appt.id);
+    this.establishmentService.uploadDepositProof(appt.id, file).subscribe({
+      next: (proof) => {
+        this.uploadingProofFor.set(null);
+        this.depositProofs.update((m) => ({ ...m, [appt.id]: proof }));
+        this.toast.success('Comprovante enviado.', 'O salão vai conferir e confirmar seu horário.');
+      },
+      error: (err) => {
+        this.uploadingProofFor.set(null);
+        this.toast.error('Erro ao enviar comprovante.', apiErrorMessage(err, 'Tente novamente.'));
+      },
+    });
   }
 
   get totalVisits(): number {
@@ -144,9 +233,22 @@ export class HistoryComponent implements OnInit {
   }
 
   async cancel(appt: AppointmentSummary): Promise<void> {
+    // Sinal pago (Confirmed) — avisa ANTES de confirmar se o cancelamento agora devolve ou não
+    // (docs/sinal.md §8). isWithinRefundWindow vem pronto do backend (fuso do salão).
+    const deposit = await firstValueFrom(
+      this.establishmentService.getDeposit(appt.id).pipe(catchError(() => of(null))),
+    );
+
+    let message = 'Tem certeza de que deseja cancelar este horário?';
+    if (deposit?.status === 'Confirmed') {
+      message = deposit.isWithinRefundWindow
+        ? 'Tem certeza? Você pagou um sinal para este horário — ele será devolvido, conforme a política do salão.'
+        : 'Tem certeza? Você pagou um sinal para este horário — esse cancelamento está fora do prazo de devolução e o valor não será devolvido.';
+    }
+
     const ok = await this.confirmDialog.confirm({
       title: 'Cancelar agendamento?',
-      message: 'Tem certeza de que deseja cancelar este horário?',
+      message,
       tone: 'danger',
       icon: 'x',
       confirmLabel: 'Cancelar agendamento',

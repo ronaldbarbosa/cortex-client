@@ -156,6 +156,74 @@
             </span>
           </div>
 
+          <!-- Sinal: comprovante pendente (docs/sinal.md) -->
+          @if (appt.status === 'AwaitingProof') {
+            <div class="flex flex-col gap-2 mb-3">
+              @if (depositProofs()[appt.id]; as proof) {
+                <button
+                  type="button"
+                  (click)="viewingProof.set(proof)"
+                  class="flex items-center justify-center gap-1.5 bg-accent/10 text-accent border border-accent/30 rounded-xl py-2.5 font-mono text-[10px] uppercase tracking-[0.06em] cursor-pointer"
+                >
+                  <app-icon name="check" [size]="12" [strokeWidth]="1.6" />
+                  Comprovante enviado — ver
+                </button>
+              } @else {
+                <label
+                  class="flex items-center justify-center gap-1.5 bg-accent text-hero rounded-xl py-2.5 font-mono text-[10px] uppercase tracking-[0.06em] cursor-pointer"
+                >
+                  @if (uploadingProofFor() === appt.id) {
+                    <span
+                      class="w-3 h-3 rounded-full border border-current/30 border-t-current animate-spin"
+                    ></span>
+                  } @else {
+                    <app-icon name="image" [size]="12" [strokeWidth]="1.6" />
+                  }
+                  {{
+                    uploadingProofFor() === appt.id ? 'Enviando…' : 'Enviar comprovante do sinal'
+                  }}
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp,application/pdf"
+                    class="hidden"
+                    [disabled]="uploadingProofFor() === appt.id"
+                    (change)="onProofSelected($event, appt)"
+                  />
+                </label>
+              }
+              @if (whatsappDepositLink(); as link) {
+                <a
+                  [href]="link"
+                  target="_blank"
+                  rel="noopener"
+                  class="flex items-center justify-center gap-1.5 border border-border text-ink-2 rounded-xl py-2.5 font-mono text-[10px] uppercase tracking-[0.06em] hover:border-accent/50 hover:text-accent transition-colors cursor-pointer"
+                >
+                  <app-icon name="message" [size]="12" [strokeWidth]="1.6" />
+                  Falar com o salão pelo WhatsApp
+                </a>
+              }
+            </div>
+          }
+
+          <!-- Sinal: devolução (docs/sinal.md §8) -->
+          @if (appt.status === 'Cancelled' && refundInfo()[appt.id]?.status === 'Refunded') {
+            <div class="flex flex-col gap-2 mb-3">
+              @if (refundInfo()[appt.id]?.refundNote; as note) {
+                <p class="font-mono text-[10px] text-ink-3">Obs. devolução: {{ note }}</p>
+              }
+              @if (refundProofs()[appt.id]; as proof) {
+                <button
+                  type="button"
+                  (click)="viewingProof.set(proof)"
+                  class="mt-2 flex items-center justify-center gap-1.5 bg-accent/10 text-accent border border-accent/30 rounded-xl py-2.5 font-mono text-[10px] uppercase tracking-[0.06em] cursor-pointer"
+                >
+                  <app-icon name="check" [size]="12" [strokeWidth]="1.6" />
+                  Ver comprovante de devolução
+                </button>
+              }
+            </div>
+          }
+
           <!-- Actions -->
           @if (isUpcoming(appt)) {
             <div class="flex gap-2">
@@ -315,4 +383,8 @@
       </div>
     </div>
   </div>
+}
+
+@if (viewingProof(); as proof) {
+  <app-proof-viewer-modal [proof]="proof" (closed)="viewingProof.set(null)" />
 }

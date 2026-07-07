@@ -5,8 +5,11 @@ import { environment } from '../../../environments/environment';
 import { TenantContextService } from '../tenant/tenant-context.service';
 import { UnitContextService } from '../unit/unit-context.service';
 import {
+  AppointmentDepositPreview,
+  AppointmentDepositSummary,
   AppointmentSummary,
   CreateAppointmentRequest,
+  DepositProofDto,
   ProfessionalAvailability,
   PublicProfessional,
   PublicServiceCategory,
@@ -58,6 +61,22 @@ export class EstablishmentService {
     return this.http.post<AppointmentSummary>(`${environment.apiUrl}/appointments`, req);
   }
 
+  // Prévia do sinal (docs/sinal.md) — chamado antes de criar o agendamento, para informar o
+  // cliente do valor/prazo ANTES de concluir a solicitação.
+  previewDeposit(
+    clientId: string,
+    serviceIds: string[],
+    startLocal: string,
+  ): Observable<AppointmentDepositPreview> {
+    const unitId = this.unitContext.unitId();
+    const params: Record<string, string | string[]> = { clientId, startLocal, serviceIds };
+    if (unitId) params['unitId'] = unitId;
+    return this.http.get<AppointmentDepositPreview>(
+      `${environment.apiUrl}/appointments/deposit-preview`,
+      { params },
+    );
+  }
+
   getAppointment(id: string): Observable<AppointmentSummary> {
     return this.http.get<AppointmentSummary>(`${environment.apiUrl}/appointments/${id}`);
   }
@@ -79,5 +98,35 @@ export class EstablishmentService {
     req: RescheduleAppointmentRequest,
   ): Observable<AppointmentSummary> {
     return this.http.put<AppointmentSummary>(`${environment.apiUrl}/appointments/${id}`, req);
+  }
+
+  // Comprovante do sinal (docs/sinal.md) — o cliente anexa o próprio; a conferência continua
+  // exclusiva do salão (ConfirmDepositCommand, no cortex-admin).
+  getDepositProof(appointmentId: string): Observable<DepositProofDto | null> {
+    return this.http.get<DepositProofDto | null>(
+      `${environment.apiUrl}/appointments/${appointmentId}/deposit/proof`,
+    );
+  }
+
+  uploadDepositProof(appointmentId: string, file: File): Observable<DepositProofDto> {
+    const form = new FormData();
+    form.append('file', file);
+    return this.http.post<DepositProofDto>(
+      `${environment.apiUrl}/appointments/${appointmentId}/deposit/proof`,
+      form,
+    );
+  }
+
+  getDeposit(appointmentId: string): Observable<AppointmentDepositSummary | null> {
+    return this.http.get<AppointmentDepositSummary | null>(
+      `${environment.apiUrl}/appointments/${appointmentId}/deposit`,
+    );
+  }
+
+  // Comprovante de devolução (docs/sinal.md §8) — anexado pelo salão; o cliente só consulta.
+  getDepositRefundProof(appointmentId: string): Observable<DepositProofDto | null> {
+    return this.http.get<DepositProofDto | null>(
+      `${environment.apiUrl}/appointments/${appointmentId}/deposit/refund-proof`,
+    );
   }
 }

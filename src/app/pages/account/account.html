@@ -297,6 +297,13 @@
                   formControlName="firstName"
                   type="text"
                   class="w-full bg-bg border border-border rounded-xl px-3 py-2.5 text-sm text-ink placeholder-ink-3 focus:outline-none focus:border-accent transition-colors"
+                  [class.border-danger]="
+                    form.controls.firstName.invalid && form.controls.firstName.touched
+                  "
+                />
+                <app-field-error
+                  [control]="form.controls.firstName"
+                  [messages]="{ required: 'Nome obrigatório.' }"
                 />
               </div>
               <div>
@@ -308,6 +315,13 @@
                   formControlName="lastName"
                   type="text"
                   class="w-full bg-bg border border-border rounded-xl px-3 py-2.5 text-sm text-ink placeholder-ink-3 focus:outline-none focus:border-accent transition-colors"
+                  [class.border-danger]="
+                    form.controls.lastName.invalid && form.controls.lastName.touched
+                  "
+                />
+                <app-field-error
+                  [control]="form.controls.lastName"
+                  [messages]="{ required: 'Sobrenome obrigatório.' }"
                 />
               </div>
             </div>
@@ -326,6 +340,11 @@
                   placeholder="(11) 99999-9999"
                   (input)="maskPhone($event)"
                   class="w-full bg-bg border border-border rounded-xl px-3 py-2.5 text-sm text-ink placeholder-ink-3 focus:outline-none focus:border-accent transition-colors"
+                  [class.border-danger]="form.controls.phone.invalid && form.controls.phone.touched"
+                />
+                <app-field-error
+                  [control]="form.controls.phone"
+                  [messages]="{ required: 'Telefone obrigatório.' }"
                 />
               </div>
 

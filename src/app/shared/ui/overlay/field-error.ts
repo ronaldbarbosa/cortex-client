@@ -1,4 +1,4 @@
-import { Component, computed, input, ChangeDetectionStrategy } from '@angular/core';
+import { Component, input, ChangeDetectionStrategy } from '@angular/core';
 import { AbstractControl } from '@angular/forms';
 
 /**
@@ -15,8 +15,8 @@ import { AbstractControl } from '@angular/forms';
   selector: 'app-field-error',
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
-    @if (text()) {
-      <p class="mt-1 font-mono text-[11px] text-danger leading-snug">{{ text() }}</p>
+    @if (text) {
+      <p class="mt-1 font-mono text-[11px] text-danger leading-snug">{{ text }}</p>
     }
   `,
 })
@@ -36,7 +36,11 @@ export class FieldErrorComponent {
     pattern: 'Formato inválido.',
   };
 
-  text = computed<string | null>(() => {
+  // Getter, não computed(): `touched`/`dirty`/`errors` do AbstractControl são estado mutável
+  // do Reactive Forms, não signals — markAsTouched()/blur não invalidariam um computed(),
+  // que ficaria com o valor (geralmente null) da primeira leitura para sempre. Como o
+  // componente é ChangeDetectionStrategy.Eager, o getter é reavaliado a cada ciclo de CD.
+  get text(): string | null {
     const explicit = this.message();
     if (explicit) return explicit;
 
@@ -46,5 +50,5 @@ export class FieldErrorComponent {
 
     const key = Object.keys(c.errors)[0];
     return this.messages()[key] ?? this.defaults[key] ?? 'Valor inválido.';
-  });
+  }
 }

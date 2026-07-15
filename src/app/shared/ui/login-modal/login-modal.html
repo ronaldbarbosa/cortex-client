@@ -230,7 +230,7 @@
           <div class="grid grid-cols-2 gap-3">
             <div class="flex flex-col gap-1.5">
               <label class="font-mono text-[10px] text-hero-ink-2 uppercase tracking-[0.06em]">
-                Nome
+                Nome <span class="text-danger">*</span>
               </label>
               <input
                 type="text"
@@ -240,10 +240,14 @@
                 class="w-full bg-hero border border-hero-border rounded-xl px-3 py-3 text-sm text-hero-ink placeholder:text-hero-ink-2 focus:outline-none focus:border-accent transition-colors"
                 [class.border-danger]="regFirstName.invalid && regFirstName.touched"
               />
+              <app-field-error
+                [control]="regFirstName"
+                [messages]="{ required: 'Nome obrigatório' }"
+              />
             </div>
             <div class="flex flex-col gap-1.5">
               <label class="font-mono text-[10px] text-hero-ink-2 uppercase tracking-[0.06em]">
-                Sobrenome
+                Sobrenome <span class="text-danger">*</span>
               </label>
               <input
                 type="text"
@@ -253,12 +257,16 @@
                 class="w-full bg-hero border border-hero-border rounded-xl px-3 py-3 text-sm text-hero-ink placeholder:text-hero-ink-2 focus:outline-none focus:border-accent transition-colors"
                 [class.border-danger]="regLastName.invalid && regLastName.touched"
               />
+              <app-field-error
+                [control]="regLastName"
+                [messages]="{ required: 'Sobrenome obrigatório' }"
+              />
             </div>
           </div>
 
           <div class="flex flex-col gap-1.5">
             <label class="font-mono text-[10px] text-hero-ink-2 uppercase tracking-[0.06em]">
-              E-mail
+              E-mail <span class="text-danger">*</span>
             </label>
             <input
               type="email"
@@ -276,7 +284,7 @@
 
           <div class="flex flex-col gap-1.5">
             <label class="font-mono text-[10px] text-hero-ink-2 uppercase tracking-[0.06em]">
-              Celular
+              Celular <span class="text-danger">*</span>
             </label>
             <input
               type="tel"
@@ -297,7 +305,7 @@
 
           <div class="flex flex-col gap-1.5">
             <label class="font-mono text-[10px] text-hero-ink-2 uppercase tracking-[0.06em]">
-              Senha
+              Senha <span class="text-danger">*</span>
             </label>
             <div class="relative">
               <input
